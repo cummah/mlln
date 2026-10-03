@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm run *)",
+      "Bash(time curl -s -o /tmp/daily_page3.html -w \"HTTP %{http_code}, size %{size_download} bytes\\\\n\" http://localhost:3001/asset/daily)",
+      "Read(//tmp/**)"
+    ]
+  }
+}

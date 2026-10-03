@@ -1,0 +1,3587 @@
+[
+  {
+    "ticker": "AMTX",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "AMH",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "AM",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "HCA",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "AN",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "APG",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "AP",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "AMX",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "ARKX",
+    "asset_type": "etf",
+    "yahoo_type": "ETF"
+  },
+  {
+    "ticker": "AR",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "ARRY",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "ARTW",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "ARR",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "ASIA",
+    "asset_type": "etf",
+    "yahoo_type": "ETF"
+  },
+  {
+    "ticker": "ASX",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "ATS",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "AU",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "AOS",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "ATI",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "ABBV",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "A",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "AME",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "AKAM",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "LNT",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "APA",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "ADM",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "ACGL",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "APO",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "T",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "ARES",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "ATO",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "TECH",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "BRK-B",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "BKR",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "BX",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "BIIB",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "AXON",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "AUR",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "MSFT",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "AAPL",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "GOOGL",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "GOOG",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "AMZN",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "NVDA",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "XYZ",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "TSLA",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "META",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "WMT",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "JNJ",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "XOM",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "PG",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "MO",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "JPM",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "BRO",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "KO",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "BF-B",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "CPB",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "CPT",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "COF",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "CAH",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "COR",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "CBRE",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "CVNA",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "CNC",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "CF",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "CARR",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "CNP",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "SCHW",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "CRL",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "CHTR",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "CHD",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "CB",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "CVX",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "CINF",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "CI",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "CIEN",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "CTAS",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "CME",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "CLX",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "CFG",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "CMCSA",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "COHR",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "CMS",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "CTSH",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "FIX",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "COP",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "ED",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "COO",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "GLW",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "CPAY",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "CTVA",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "STZ",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "CSGP",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "CRH",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "CMI",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "CTRA",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "CSX",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "DHR",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "DRI",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "DVA",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "DECK",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "DELL",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "DVN",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "DAL",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "DXCM",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "DLTR",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "DG",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "DLR",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "D",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "DPZ",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "DHI",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "DOV",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "DOW",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "DTE",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "ETN",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "EBAY",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "DD",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "FANG",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "ECL",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "SATS",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "EA",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "ELV",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "EW",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "EME",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "ETR",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "EMR",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "EFX",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "EOG",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "EPAM",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "ERIE",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "EIX",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "EQIX",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "EQR",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "EL",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "EG",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "ESS",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "EVRG",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "ES",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "EXPE",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "EXE",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "EXR",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "FFIV",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "EXPD",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "FDS",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "FAST",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "FRT",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "FICO",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "FDX",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "FSLR",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "FITB",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "FISV",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "FE",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "F",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "FIS",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "FOXA",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "FTV",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "GRMN",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "FOX",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "FCX",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "IT",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "GD",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "GEN",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "GEV",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "GEHC",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "GM",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "GPC",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "GPN",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "GL",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "GS",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "HAS",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "HAL",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "HIG",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "DOC",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "HSY",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "HSIC",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "HPE",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "HWM",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "HON",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "HST",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "HRL",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "HII",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "HPQ",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "HUBB",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "IDXX",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "IEX",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "HBAN",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "INCY",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "ITW",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "IR",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "PODD",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "IBKR",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "ICE",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "IFF",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "IP",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "INVH",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "IVZ",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "IQV",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "JBL",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "IRM",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "JBHT",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "JKHY",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "KVUE",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "JCI",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "J",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "KEY",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "KEYS",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "KDP",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "KMB",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "KMI",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "KKR",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "KIM",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "KHC",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "KR",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "LH",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "LVS",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "LHX",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "LDOS",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "LII",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "LIN",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "LEN",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "LMT",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "LYV",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "L",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "LULU",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "LITE",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "LOW",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "LYB",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "MTB",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "MRSH",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "MPC",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "MLM",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "MKC",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "MAS",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "MRK",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "MCK",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "MDT",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "MGM",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "MCHP",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "MTD",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "MET",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "MRNA",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "TAP",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "MDLZ",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "MAA",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "MPWR",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "MCO",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "MS",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "MOS",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "MSCI",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "MNST",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "MSI",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "NEM",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "NDAQ",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "NTAP",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "NWS",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "NWSA",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "NKE",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "NI",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "NDSN",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "NSC",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "NRG",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "NCLH",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "NOC",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "NUE",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "NTRS",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "ORLY",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "OXY",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "NXPI",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "OMC",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "ON",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "OKE",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "ODFL",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "PCAR",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "PKG",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "OTIS",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "PAYX",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "PH",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "PSKY",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "PYPL",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "PLTR",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "PM",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "PCG",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "PFE",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "PNW",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "PNR",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "PNC",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "PSX",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "PPG",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "PFG",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "POOL",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "PPL",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "PLD",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "PGR",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "PRU",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "PEG",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "PSA",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "PTC",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "PHM",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "PWR",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "DGX",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "RL",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "Q",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "RJF",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "O",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "RTX",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "REGN",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "REG",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "RMD",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "RSG",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "RF",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "RVTY",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "ROK",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "ROL",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "RCL",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "ROST",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "HOOD",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "SNDK",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "SPGI",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "SLB",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "SBAC",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "SRE",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "SHW",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "SPG",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "NOW",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "STX",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "SWKS",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "SW",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "SNA",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "SJM",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "SOLV",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "SBUX",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "SWK",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "LUV",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "STE",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "STT",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "STLD",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "SYK",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "SMCI",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "SYF",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "SNPS",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "TROW",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "TMUS",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "SYY",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "TTWO",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "TGT",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "TRGP",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "TEL",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "TER",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "TXN",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "TPL",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "TJX",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "TXT",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "TDY",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "TT",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "TDG",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "TSCO",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "TKO",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "TRV",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "TFC",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "TRMB",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "USB",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "TSN",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "TYL",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "UBER",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "UDR",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "UNP",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "ULTA",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "UAL",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "URI",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "UPS",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "UHS",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "VLO",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "VTR",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "VRSN",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "VLTO",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "VTRS",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "VRT",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "VICI",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "VST",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "VMC",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "WRB",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "WAB",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "GWW",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "WAT",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "WBD",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "WM",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "WEC",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "WELL",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "WY",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "WST",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "WDC",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "WTW",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "WMB",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "WYNN",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "XEL",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "WDAY",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "WSM",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "XYL",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "BWA",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "BW",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "BWXT",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "YUM",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "BWG",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "ZBRA",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "BXP",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "ZBH",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "BYND",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "C",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "ZTS",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "CACI",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "BY",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "CAG",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "CAPL",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "CARE",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "CARY",
+    "asset_type": "etf",
+    "yahoo_type": "ETF"
+  },
+  {
+    "ticker": "CAS",
+    "asset_type": "etf",
+    "yahoo_type": "ETF"
+  },
+  {
+    "ticker": "CERX",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "CAR",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "CAN",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "CERY",
+    "asset_type": "etf",
+    "yahoo_type": "ETF"
+  },
+  {
+    "ticker": "LLY",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "WFC",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "V",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "MA",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "HD",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "AVGO",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "CRM",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "AXP",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "COST",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "MCD",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "ACN",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "ABT",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "BAC",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "CSCO",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "DIS",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "PEP",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "IBM",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "VZ",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "INTC",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "NVR",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "TMO",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "ASML",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "QCOM",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "AMGN",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "SY",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "GILD",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "CMG",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "ADBE",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "AMD",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "CAT",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "GIS",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "BA",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "ROP",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "DE",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "MMM",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "ISRG",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "BKNG",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "GE",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "VRTX",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "MAR",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "NEE",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "CCL",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "HLT",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "EXC",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "DUK",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "EQT",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "SO",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "AMAT",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "LRCX",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "KLAC",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "PANW",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "CRWD",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "FTNT",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "MU",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "DDOG",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "SNOW",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "TTD",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "NFLX",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "UPST",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "RBLX",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "TEAM",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "APP",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "PINS",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "SNAP",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "AZO",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "INTU",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "CL",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "VRSK",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "HUM",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "UNH",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "CVS",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "TPR",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "DASH",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "ORCL",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "ACI",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "IOT",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "AEE",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "AEP",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "ADI",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "ADP",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "AES",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "AFL",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "AIG",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "AIV",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "AIZ",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "ALB",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "AJG",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "ALK",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "ALL",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "ALLE",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "AMP",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "AMCR",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "AMT",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "ANET",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "ANF",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "APH",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "APD",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "APTV",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "AON",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "ARE",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "ARM",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "ARW",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "ASB",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "ASC",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "ASR",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "ASTE",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "ATOS",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "ATR",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "AUB",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "ATLC",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "ATRO",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "AVD",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "AVY",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "AWK",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "AVB",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "AWI",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "AXTA",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "B",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "AYI",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "BALL",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "BAX",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "BBY",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "BC",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "BAP",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "BG",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "BDX",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "BEN",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "BFAM",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "BHE",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "BILI",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "BIV",
+    "asset_type": "etf",
+    "yahoo_type": "ETF"
+  },
+  {
+    "ticker": "BIOX",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "BIO",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "BJ",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "BK",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "BKH",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "BKCH",
+    "asset_type": "etf",
+    "yahoo_type": "ETF"
+  },
+  {
+    "ticker": "BLDR",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "BLK",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "BLKB",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "BMO",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "BMRN",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "BMI",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "BOE",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "BMY",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "BOX",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "BMA",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "BP",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "BRC",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "BR",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "BRID",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "BSM",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "BRN",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "BSL",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "BSX",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "BTU",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "BTG",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "BTC",
+    "asset_type": "etf",
+    "yahoo_type": "ETF"
+  },
+  {
+    "ticker": "BV",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "CASY",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "CAVA",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "CBAN",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "CATH",
+    "asset_type": "etf",
+    "yahoo_type": "ETF"
+  },
+  {
+    "ticker": "CBIO",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "CBOE",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "CBNT",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "CBRL",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "CBOL",
+    "asset_type": "etf",
+    "yahoo_type": "ETF"
+  },
+  {
+    "ticker": "CCHI",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "CBSH",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "CCBG",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "CC",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "CCSI",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "CCIH",
+    "asset_type": "etf",
+    "yahoo_type": "MUTUALFUND"
+  },
+  {
+    "ticker": "CCOI",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "CCXI",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "CCSO",
+    "asset_type": "etf",
+    "yahoo_type": "ETF"
+  },
+  {
+    "ticker": "CCK",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "CCI",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "CCNE",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "CDRE",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "CDNS",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "CDNA",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "CD",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "CE",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "CDW",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "CDXS",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "CECO",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "CEG",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "CEGX",
+    "asset_type": "etf",
+    "yahoo_type": "ETF"
+  },
+  {
+    "ticker": "CENT",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "CELU",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "CEOS",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "CEPI",
+    "asset_type": "etf",
+    "yahoo_type": "ETF"
+  },
+  {
+    "ticker": "CESX",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "CERT",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "CEPU",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "CETF",
+    "asset_type": "etf",
+    "yahoo_type": "ETF"
+  },
+  {
+    "ticker": "CERS",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "CET",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "CETX",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "CETH",
+    "asset_type": "etf",
+    "yahoo_type": "ETF"
+  },
+  {
+    "ticker": "CETI",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "CEV",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "CEVE",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "CETY",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "CEVA",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "CHGG",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "ADSK",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "CHRW",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "ALGN",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "COIN",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "ABNB",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "DOCU",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "DKNG",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "CVLT",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "CPRT",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "ETSY",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "ENPH",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "FIVN",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "FSLY",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "GDDY",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "GDOT",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "GNRC",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "HODL",
+    "asset_type": "etf",
+    "yahoo_type": "ETF"
+  },
+  {
+    "ticker": "FTCI",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "KNSL",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "KD",
+    "asset_type": "stock",
+    "yahoo_type": "EQUITY"
+  },
+  {
+    "ticker": "SPY",
+    "asset_type": "etf",
+    "yahoo_type": "ETF"
+  },
+  {
+    "ticker": "QQQ",
+    "asset_type": "etf",
+    "yahoo_type": "ETF"
+  },
+  {
+    "ticker": "IWM",
+    "asset_type": "etf",
+    "yahoo_type": "ETF"
+  },
+  {
+    "ticker": "DIA",
+    "asset_type": "etf",
+    "yahoo_type": "ETF"
+  },
+  {
+    "ticker": "TLT",
+    "asset_type": "etf",
+    "yahoo_type": "ETF"
+  },
+  {
+    "ticker": "EEM",
+    "asset_type": "etf",
+    "yahoo_type": "ETF"
+  },
+  {
+    "ticker": "EWJ",
+    "asset_type": "etf",
+    "yahoo_type": "ETF"
+  },
+  {
+    "ticker": "GLD",
+    "asset_type": "etf",
+    "yahoo_type": "ETF"
+  },
+  {
+    "ticker": "VOO",
+    "asset_type": "etf",
+    "yahoo_type": "ETF"
+  },
+  {
+    "ticker": "VTV",
+    "asset_type": "etf",
+    "yahoo_type": "ETF"
+  },
+  {
+    "ticker": "VTI",
+    "asset_type": "etf",
+    "yahoo_type": "ETF"
+  },
+  {
+    "ticker": "IVV",
+    "asset_type": "etf",
+    "yahoo_type": "ETF"
+  },
+  {
+    "ticker": "VGT",
+    "asset_type": "etf",
+    "yahoo_type": "ETF"
+  },
+  {
+    "ticker": "VIS",
+    "asset_type": "etf",
+    "yahoo_type": "ETF"
+  },
+  {
+    "ticker": "VUG",
+    "asset_type": "etf",
+    "yahoo_type": "ETF"
+  },
+  {
+    "ticker": "VHT",
+    "asset_type": "etf",
+    "yahoo_type": "ETF"
+  },
+  {
+    "ticker": "BND",
+    "asset_type": "etf",
+    "yahoo_type": "ETF"
+  },
+  {
+    "ticker": "VCR",
+    "asset_type": "etf",
+    "yahoo_type": "ETF"
+  },
+  {
+    "ticker": "VDC",
+    "asset_type": "etf",
+    "yahoo_type": "ETF"
+  },
+  {
+    "ticker": "VXUS",
+    "asset_type": "etf",
+    "yahoo_type": "ETF"
+  },
+  {
+    "ticker": "AGG",
+    "asset_type": "etf",
+    "yahoo_type": "ETF"
+  },
+  {
+    "ticker": "EMB",
+    "asset_type": "etf",
+    "yahoo_type": "ETF"
+  },
+  {
+    "ticker": "HYG",
+    "asset_type": "etf",
+    "yahoo_type": "ETF"
+  },
+  {
+    "ticker": "SCHE",
+    "asset_type": "etf",
+    "yahoo_type": "ETF"
+  },
+  {
+    "ticker": "LQD",
+    "asset_type": "etf",
+    "yahoo_type": "ETF"
+  },
+  {
+    "ticker": "RSP",
+    "asset_type": "etf",
+    "yahoo_type": "ETF"
+  },
+  {
+    "ticker": "IEMG",
+    "asset_type": "etf",
+    "yahoo_type": "ETF"
+  },
+  {
+    "ticker": "VYMI",
+    "asset_type": "etf",
+    "yahoo_type": "ETF"
+  },
+  {
+    "ticker": "VEA",
+    "asset_type": "etf",
+    "yahoo_type": "ETF"
+  },
+  {
+    "ticker": "DGRO",
+    "asset_type": "etf",
+    "yahoo_type": "ETF"
+  },
+  {
+    "ticker": "SCHD",
+    "asset_type": "etf",
+    "yahoo_type": "ETF"
+  },
+  {
+    "ticker": "VWO",
+    "asset_type": "etf",
+    "yahoo_type": "ETF"
+  },
+  {
+    "ticker": "EWQ",
+    "asset_type": "etf",
+    "yahoo_type": "ETF"
+  },
+  {
+    "ticker": "EWU",
+    "asset_type": "etf",
+    "yahoo_type": "ETF"
+  },
+  {
+    "ticker": "EWL",
+    "asset_type": "etf",
+    "yahoo_type": "ETF"
+  },
+  {
+    "ticker": "EWG",
+    "asset_type": "etf",
+    "yahoo_type": "ETF"
+  },
+  {
+    "ticker": "EWH",
+    "asset_type": "etf",
+    "yahoo_type": "ETF"
+  },
+  {
+    "ticker": "EWT",
+    "asset_type": "etf",
+    "yahoo_type": "ETF"
+  },
+  {
+    "ticker": "SCHP",
+    "asset_type": "etf",
+    "yahoo_type": "ETF"
+  },
+  {
+    "ticker": "FXI",
+    "asset_type": "etf",
+    "yahoo_type": "ETF"
+  },
+  {
+    "ticker": "SPLG",
+    "asset_type": "etf",
+    "yahoo_type": "ETF"
+  },
+  {
+    "ticker": "SHV",
+    "asset_type": "etf",
+    "yahoo_type": "ETF"
+  },
+  {
+    "ticker": "SCHF",
+    "asset_type": "etf",
+    "yahoo_type": "ETF"
+  },
+  {
+    "ticker": "SWISX",
+    "asset_type": "etf",
+    "yahoo_type": "MUTUALFUND"
+  },
+  {
+    "ticker": "SCHX",
+    "asset_type": "etf",
+    "yahoo_type": "ETF"
+  },
+  {
+    "ticker": " FAGIX",
+    "asset_type": "etf",
+    "yahoo_type": "MUTUALFUND"
+  },
+  {
+    "ticker": "SCHM",
+    "asset_type": "etf",
+    "yahoo_type": "ETF"
+  },
+  {
+    "ticker": "FBGRX",
+    "asset_type": "etf",
+    "yahoo_type": "MUTUALFUND"
+  },
+  {
+    "ticker": "SCHA",
+    "asset_type": "etf",
+    "yahoo_type": "ETF"
+  },
+  {
+    "ticker": "PRWCX",
+    "asset_type": "etf",
+    "yahoo_type": "MUTUALFUND"
+  },
+  {
+    "ticker": "VFIAX",
+    "asset_type": "etf",
+    "yahoo_type": "MUTUALFUND"
+  },
+  {
+    "ticker": "VSMAX",
+    "asset_type": "etf",
+    "yahoo_type": "MUTUALFUND"
+  },
+  {
+    "ticker": "BIL",
+    "asset_type": "etf",
+    "yahoo_type": "ETF"
+  },
+  {
+    "ticker": "VCSH",
+    "asset_type": "etf",
+    "yahoo_type": "ETF"
+  },
+  {
+    "ticker": "VCIT",
+    "asset_type": "etf",
+    "yahoo_type": "ETF"
+  },
+  {
+    "ticker": "VGSH",
+    "asset_type": "etf",
+    "yahoo_type": "ETF"
+  },
+  {
+    "ticker": "SHY",
+    "asset_type": "etf",
+    "yahoo_type": "ETF"
+  },
+  {
+    "ticker": "VGIT",
+    "asset_type": "etf",
+    "yahoo_type": "ETF"
+  },
+  {
+    "ticker": "VCEB",
+    "asset_type": "etf",
+    "yahoo_type": "ETF"
+  },
+  {
+    "ticker": "IEF",
+    "asset_type": "etf",
+    "yahoo_type": "ETF"
+  },
+  {
+    "ticker": "TLH",
+    "asset_type": "etf",
+    "yahoo_type": "ETF"
+  },
+  {
+    "ticker": "SCHB",
+    "asset_type": "etf",
+    "yahoo_type": "ETF"
+  },
+  {
+    "ticker": "BNDX",
+    "asset_type": "etf",
+    "yahoo_type": "ETF"
+  },
+  {
+    "ticker": "VWOB",
+    "asset_type": "etf",
+    "yahoo_type": "ETF"
+  },
+  {
+    "ticker": "SPHD",
+    "asset_type": "etf",
+    "yahoo_type": "ETF"
+  },
+  {
+    "ticker": "NOBL",
+    "asset_type": "etf",
+    "yahoo_type": "ETF"
+  },
+  {
+    "ticker": "^VIX",
+    "asset_type": "index",
+    "yahoo_type": "INDEX"
+  },
+  {
+    "ticker": "XMPT",
+    "asset_type": "etf",
+    "yahoo_type": "ETF"
+  },
+  {
+    "ticker": "VIG",
+    "asset_type": "etf",
+    "yahoo_type": "ETF"
+  }
+]

@@ -1,0 +1,614 @@
+[
+  {
+    "ticker": "NVDA",
+    "name": "NVIDIA Corporation",
+    "marketCap": 5320000000000,
+    "revenue": 253490000000
+  },
+  {
+    "ticker": "AAPL",
+    "name": "Apple Inc.",
+    "marketCap": 4520000000000,
+    "revenue": 466820000000
+  },
+  {
+    "ticker": "GOOGL",
+    "name": "Alphabet Inc.",
+    "marketCap": 4210000000000,
+    "revenue": 445870000000
+  },
+  {
+    "ticker": "GOOG",
+    "name": "Alphabet Inc.",
+    "marketCap": 4190000000000.0005,
+    "revenue": 445870000000
+  },
+  {
+    "ticker": "MSFT",
+    "name": "Microsoft Corporation",
+    "marketCap": 3580000000000,
+    "revenue": 331840000000
+  },
+  {
+    "ticker": "AMZN",
+    "name": "Amazon.com, Inc.",
+    "marketCap": 2800000000000,
+    "revenue": 775680000000
+  },
+  {
+    "ticker": "SPCX",
+    "name": "Space Exploration Technologies Corp.",
+    "marketCap": 1890000000000,
+    "revenue": 23040000000
+  },
+  {
+    "ticker": "AVGO",
+    "name": "Broadcom Inc.",
+    "marketCap": 1810000000000,
+    "revenue": 75470000000
+  },
+  {
+    "ticker": "META",
+    "name": "Meta Platforms, Inc.",
+    "marketCap": 1390000000000,
+    "revenue": 228250000000
+  },
+  {
+    "ticker": "TSLA",
+    "name": "Tesla, Inc.",
+    "marketCap": 1330000000000,
+    "revenue": 103620000000
+  },
+  {
+    "ticker": "MU",
+    "name": "Micron Technology, Inc.",
+    "marketCap": 1060000000000,
+    "revenue": 90270000000
+  },
+  {
+    "ticker": "WMT",
+    "name": "Walmart Inc.",
+    "marketCap": 916770000000,
+    "revenue": 725310000000
+  },
+  {
+    "ticker": "AMD",
+    "name": "Advanced Micro Devices, Inc.",
+    "marketCap": 790750000000,
+    "revenue": 41310000000
+  },
+  {
+    "ticker": "ASML",
+    "name": "ASML Holding N.V.",
+    "marketCap": 685570000000,
+    "revenue": 40290000000
+  },
+  {
+    "ticker": "INTC",
+    "name": "Intel Corporation",
+    "marketCap": 508030000000,
+    "revenue": 57030000000
+  },
+  {
+    "ticker": "CSCO",
+    "name": "Cisco Systems, Inc.",
+    "marketCap": 439900000000,
+    "revenue": 63330000000
+  },
+  {
+    "ticker": "COST",
+    "name": "Costco Wholesale Corporation",
+    "marketCap": 426340000000,
+    "revenue": 293590000000
+  },
+  {
+    "ticker": "PLTR",
+    "name": "Palantir Technologies Inc.",
+    "marketCap": 412220000000,
+    "revenue": 6160000000
+  },
+  {
+    "ticker": "LRCX",
+    "name": "Lam Research Corporation",
+    "marketCap": 410330000000,
+    "revenue": 23230000000
+  },
+  {
+    "ticker": "AMAT",
+    "name": "Applied Materials, Inc.",
+    "marketCap": 408360000000,
+    "revenue": 30840000000
+  },
+  {
+    "ticker": "NFLX",
+    "name": "Netflix, Inc.",
+    "marketCap": 323830000000,
+    "revenue": 48370000000
+  },
+  {
+    "ticker": "PANW",
+    "name": "Palo Alto Networks, Inc.",
+    "marketCap": 304920000000,
+    "revenue": 10610000000
+  },
+  {
+    "ticker": "ARM",
+    "name": "Arm Holdings plc",
+    "marketCap": 270570000000,
+    "revenue": 5160000000
+  },
+  {
+    "ticker": "KLAC",
+    "name": "KLA Corporation",
+    "marketCap": 254500000000,
+    "revenue": 13580000000
+  },
+  {
+    "ticker": "TXN",
+    "name": "Texas Instruments Incorporated",
+    "marketCap": 248620000000,
+    "revenue": 19450000000
+  },
+  {
+    "ticker": "SNDK",
+    "name": "Sandisk Corporation",
+    "marketCap": 238050000000,
+    "revenue": 20250000000
+  },
+  {
+    "ticker": "AMGN",
+    "name": "Amgen Inc.",
+    "marketCap": 229920000000,
+    "revenue": 38100000000
+  },
+  {
+    "ticker": "LIN",
+    "name": "Linde plc",
+    "marketCap": 220670000000,
+    "revenue": 35450000000
+  },
+  {
+    "ticker": "CRWD",
+    "name": "CrowdStrike Holdings, Inc.",
+    "marketCap": 216810000000,
+    "revenue": 5090000000
+  },
+  {
+    "ticker": "STX",
+    "name": "Seagate Technology Holdings plc",
+    "marketCap": 204810000000,
+    "revenue": 12200000000
+  },
+  {
+    "ticker": "TMUS",
+    "name": "T-Mobile US, Inc.",
+    "marketCap": 196030000000,
+    "revenue": 92190000000
+  },
+  {
+    "ticker": "PEP",
+    "name": "PepsiCo, Inc.",
+    "marketCap": 191260000000,
+    "revenue": 96900000000
+  },
+  {
+    "ticker": "MRVL",
+    "name": "Marvell Technology, Inc.",
+    "marketCap": 189170000000,
+    "revenue": 8720000000
+  },
+  {
+    "ticker": "SHOP",
+    "name": "Shopify Inc.",
+    "marketCap": 188600000000,
+    "revenue": 13270000000
+  },
+  {
+    "ticker": "ADI",
+    "name": "Analog Devices, Inc.",
+    "marketCap": 183450000000,
+    "revenue": 12740000000
+  },
+  {
+    "ticker": "WDC",
+    "name": "Western Digital Corporation",
+    "marketCap": 178890000000,
+    "revenue": 12920000000
+  },
+  {
+    "ticker": "GILD",
+    "name": "Gilead Sciences, Inc.",
+    "marketCap": 177860000000,
+    "revenue": 30460000000
+  },
+  {
+    "ticker": "QCOM",
+    "name": "QUALCOMM Incorporated",
+    "marketCap": 171090000000,
+    "revenue": 44070000000
+  },
+  {
+    "ticker": "BKNG",
+    "name": "Booking Holdings Inc.",
+    "marketCap": 156470000000,
+    "revenue": 28240000000
+  },
+  {
+    "ticker": "ISRG",
+    "name": "Intuitive Surgical, Inc.",
+    "marketCap": 138200000000,
+    "revenue": 11030000000
+  },
+  {
+    "ticker": "VRTX",
+    "name": "Vertex Pharmaceuticals Incorporated",
+    "marketCap": 133880000000,
+    "revenue": 12590000000
+  },
+  {
+    "ticker": "PDD",
+    "name": "PDD Holdings Inc.",
+    "marketCap": 124220000000,
+    "revenue": 64140000000
+  },
+  {
+    "ticker": "SBUX",
+    "name": "Starbucks Corporation",
+    "marketCap": 120830000000,
+    "revenue": 38340000000
+  },
+  {
+    "ticker": "FTNT",
+    "name": "Fortinet, Inc.",
+    "marketCap": 115930000000,
+    "revenue": 7530000000
+  },
+  {
+    "ticker": "ABNB",
+    "name": "Airbnb, Inc.",
+    "marketCap": 108040000000,
+    "revenue": 13160000000
+  },
+  {
+    "ticker": "ADP",
+    "name": "Automatic Data Processing, Inc.",
+    "marketCap": 106990000000,
+    "revenue": 21950000000
+  },
+  {
+    "ticker": "ADBE",
+    "name": "Adobe Inc.",
+    "marketCap": 104600000000,
+    "revenue": 25200000000
+  },
+  {
+    "ticker": "APP",
+    "name": "AppLovin Corporation",
+    "marketCap": 102820000000,
+    "revenue": 6830000000
+  },
+  {
+    "ticker": "INTU",
+    "name": "Intuit Inc.",
+    "marketCap": 95850000000,
+    "revenue": 20930000000
+  },
+  {
+    "ticker": "CEG",
+    "name": "Constellation Energy Corporation",
+    "marketCap": 94540000000,
+    "revenue": 31270000000
+  },
+  {
+    "ticker": "DASH",
+    "name": "DoorDash, Inc.",
+    "marketCap": 93740000000,
+    "revenue": 15890000000
+  },
+  {
+    "ticker": "MAR",
+    "name": "Marriott International, Inc.",
+    "marketCap": 93180000000,
+    "revenue": 7390000000
+  },
+  {
+    "ticker": "CSX",
+    "name": "CSX Corporation",
+    "marketCap": 93060000000,
+    "revenue": 14510000000
+  },
+  {
+    "ticker": "CMCSA",
+    "name": "Comcast Corporation",
+    "marketCap": 92970000000,
+    "revenue": 124900000000
+  },
+  {
+    "ticker": "MNST",
+    "name": "Monster Beverage Corporation",
+    "marketCap": 92820000000,
+    "revenue": 9220000000
+  },
+  {
+    "ticker": "MELI",
+    "name": "MercadoLibre, Inc.",
+    "marketCap": 90200000000,
+    "revenue": 35180000000
+  },
+  {
+    "ticker": "DDOG",
+    "name": "Datadog, Inc.",
+    "marketCap": 88330000000,
+    "revenue": 3970000000
+  },
+  {
+    "ticker": "CDNS",
+    "name": "Cadence Design Systems, Inc.",
+    "marketCap": 87170000000,
+    "revenue": 5840000000
+  },
+  {
+    "ticker": "REGN",
+    "name": "Regeneron Pharmaceuticals, Inc.",
+    "marketCap": 80910000000,
+    "revenue": 15530000000
+  },
+  {
+    "ticker": "MDLZ",
+    "name": "Mondelez International, Inc.",
+    "marketCap": 79970000000,
+    "revenue": 39680000000
+  },
+  {
+    "ticker": "CTAS",
+    "name": "Cintas Corporation",
+    "marketCap": 79810000000,
+    "revenue": 11260000000
+  },
+  {
+    "ticker": "SNPS",
+    "name": "Synopsys, Inc.",
+    "marketCap": 77440000000,
+    "revenue": 8680000000
+  },
+  {
+    "ticker": "LITE",
+    "name": "Lumentum Holdings Inc.",
+    "marketCap": 77380000000,
+    "revenue": 3010000000
+  },
+  {
+    "ticker": "ROST",
+    "name": "Ross Stores, Inc.",
+    "marketCap": 75830000000,
+    "revenue": 23780000000
+  },
+  {
+    "ticker": "ORLY",
+    "name": "O'Reilly Automotive, Inc.",
+    "marketCap": 73420000000,
+    "revenue": 18570000000
+  },
+  {
+    "ticker": "HON",
+    "name": "Honeywell International Inc.",
+    "marketCap": 72170000000,
+    "revenue": 38060000000
+  },
+  {
+    "ticker": "WBD",
+    "name": "Warner Bros. Discovery, Inc.",
+    "marketCap": 71500000000,
+    "revenue": 36120000000
+  },
+  {
+    "ticker": "AEP",
+    "name": "American Electric Power Company, Inc.",
+    "marketCap": 68780000000,
+    "revenue": 22790000000
+  },
+  {
+    "ticker": "NBIS",
+    "name": "Nebius Group N.V.",
+    "marketCap": 68090000000,
+    "revenue": 1360000000
+  },
+  {
+    "ticker": "PCAR",
+    "name": "PACCAR Inc",
+    "marketCap": 67390000000,
+    "revenue": 27820000000
+  },
+  {
+    "ticker": "MPWR",
+    "name": "Monolithic Power Systems, Inc.",
+    "marketCap": 65519999999.99999,
+    "revenue": 3270000000
+  },
+  {
+    "ticker": "BKR",
+    "name": "Baker Hughes Company",
+    "marketCap": 63970000000,
+    "revenue": 27730000000
+  },
+  {
+    "ticker": "TER",
+    "name": "Teradyne, Inc.",
+    "marketCap": 63210000000,
+    "revenue": 4460000000
+  },
+  {
+    "ticker": "FAST",
+    "name": "Fastenal Company",
+    "marketCap": 58830000000,
+    "revenue": 8750000000
+  },
+  {
+    "ticker": "FANG",
+    "name": "Diamondback Energy, Inc.",
+    "marketCap": 58810000000,
+    "revenue": 16250000000
+  },
+  {
+    "ticker": "NXPI",
+    "name": "NXP Semiconductors N.V.",
+    "marketCap": 57630000000,
+    "revenue": 13190000000
+  },
+  {
+    "ticker": "ALAB",
+    "name": "Astera Labs, Inc.",
+    "marketCap": 52640000000,
+    "revenue": 1200000000
+  },
+  {
+    "ticker": "ADSK",
+    "name": "Autodesk, Inc.",
+    "marketCap": 52110000000,
+    "revenue": 7510000000
+  },
+  {
+    "ticker": "PYPL",
+    "name": "PayPal Holdings, Inc.",
+    "marketCap": 51700000000,
+    "revenue": 34130000000.000004
+  },
+  {
+    "ticker": "CRWV",
+    "name": "CoreWeave, Inc.",
+    "marketCap": 51390000000,
+    "revenue": 7590000000
+  },
+  {
+    "ticker": "HONA",
+    "name": "Honeywell Aerospace Inc.",
+    "marketCap": 50950000000,
+    "revenue": 17920000000
+  },
+  {
+    "ticker": "AXON",
+    "name": "Axon Enterprise, Inc.",
+    "marketCap": 50360000000,
+    "revenue": 3220000000
+  },
+  {
+    "ticker": "XEL",
+    "name": "Xcel Energy Inc.",
+    "marketCap": 49450000000,
+    "revenue": 14620000000
+  },
+  {
+    "ticker": "CCEP",
+    "name": "Coca-Cola Europacific Partners PLC",
+    "marketCap": 47430000000,
+    "revenue": 24420000000
+  },
+  {
+    "ticker": "RKLB",
+    "name": "Rocket Lab Corporation",
+    "marketCap": 47370000000,
+    "revenue": 769150000
+  },
+  {
+    "ticker": "WDAY",
+    "name": "Workday, Inc.",
+    "marketCap": 47080000000,
+    "revenue": 9850000000
+  },
+  {
+    "ticker": "EXC",
+    "name": "Exelon Corporation",
+    "marketCap": 46770000000,
+    "revenue": 25330000000
+  },
+  {
+    "ticker": "FER",
+    "name": "Ferrovial N.V.",
+    "marketCap": 45700000000,
+    "revenue": 11260000000
+  },
+  {
+    "ticker": "TTWO",
+    "name": "Take-Two Interactive Software, Inc.",
+    "marketCap": 45320000000,
+    "revenue": 6690000000
+  },
+  {
+    "ticker": "IDXX",
+    "name": "IDEXX Laboratories, Inc.",
+    "marketCap": 43590000000,
+    "revenue": 4550000000
+  },
+  {
+    "ticker": "ODFL",
+    "name": "Old Dominion Freight Line, Inc.",
+    "marketCap": 43130000000,
+    "revenue": 5600000000
+  },
+  {
+    "ticker": "TRI",
+    "name": "Thomson Reuters Corporation",
+    "marketCap": 42920000000,
+    "revenue": 7830000000
+  },
+  {
+    "ticker": "PAYX",
+    "name": "Paychex, Inc.",
+    "marketCap": 42660000000,
+    "revenue": 6510000000
+  },
+  {
+    "ticker": "MCHP",
+    "name": "Microchip Technology Incorporated",
+    "marketCap": 42460000000,
+    "revenue": 5120000000
+  },
+  {
+    "ticker": "KDP",
+    "name": "Keurig Dr Pepper Inc.",
+    "marketCap": 41900000000,
+    "revenue": 20090000000
+  },
+  {
+    "ticker": "ROP",
+    "name": "Roper Technologies, Inc.",
+    "marketCap": 38980000000,
+    "revenue": 8279999999.999999
+  },
+  {
+    "ticker": "MSTR",
+    "name": "Strategy Inc",
+    "marketCap": 35550000000,
+    "revenue": 498350000
+  },
+  {
+    "ticker": "DXCM",
+    "name": "DexCom, Inc.",
+    "marketCap": 33810000000.000004,
+    "revenue": 4970000000
+  },
+  {
+    "ticker": "GEHC",
+    "name": "GE HealthCare Technologies Inc.",
+    "marketCap": 32810000000.000004,
+    "revenue": 21270000000
+  },
+  {
+    "ticker": "ALNY",
+    "name": "Alnylam Pharmaceuticals, Inc.",
+    "marketCap": 30590000000,
+    "revenue": 4800000000
+  },
+  {
+    "ticker": "KHC",
+    "name": "The Kraft Heinz Company",
+    "marketCap": 29430000000,
+    "revenue": 24900000000
+  },
+  {
+    "ticker": "CPRT",
+    "name": "Copart, Inc.",
+    "marketCap": 29170000000,
+    "revenue": 4640000000
+  }
+]

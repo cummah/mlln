@@ -1,0 +1,226 @@
+@import "tailwindcss";
+
+:root {
+  /* Design system from mlln backtest */
+  --bg: #060f1a;
+  --surface: #0c1d2e;
+  --surface2: #112236;
+  --border: rgba(255,255,255,0.07);
+  --teal: #00c4a7;
+  --teal-dim: rgba(0,196,167,0.12);
+  --teal-mid: rgba(0,196,167,0.25);
+  --cyan: #06768d;
+  --green: #28d97e;
+  --green-dim: rgba(40,217,126,0.12);
+  --red: #f05c6e;
+  --red-dim: rgba(240,92,110,0.12);
+  --amber: #f0a128;
+  --text: #e8f1fa;
+  --text-2: #7e9ab5;
+  --text-3: #3d5a73;
+
+  /* Legacy support */
+  --bg-primary: #060f1a;
+  --bg-secondary: #0c1d2e;
+  --bg-tertiary: #112236;
+  --text-primary: #e8f1fa;
+  --text-secondary: #7e9ab5;
+  --text-tertiary: #3d5a73;
+  --border-subtle: rgba(255,255,255,0.07);
+  --border-medium: rgba(255,255,255,0.12);
+
+  /* Semantic */
+  --green-fill: #1a3a2a;
+  --green-text: #4ade80;
+  --green-mid: #22c55e;
+  --green-strong: #16a34a;
+
+  --blue-fill: #1e3a8a;
+  --blue-text: #60a5fa;
+  --blue-mid: #3b82f6;
+
+  --amber-fill: #3f2f1f;
+  --amber-text: #fbbf24;
+  --amber-mid: #f59e0b;
+
+  --red-fill: #3f1f1f;
+  --red-text: #ef4444;
+  --red-mid: #dc2626;
+
+  --teal-light: #5eead4;
+  --teal-strong: #14b8a6;
+  --teal-dark: #0d9488;
+
+  /* Radius */
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+
+  /* Elevation — raised surfaces get a soft ambient shadow + a 1px inner
+     highlight along the top edge to fake a light source; recessed surfaces
+     (inputs) get an inset shadow so the two read as opposite depths. */
+  --shadow-xs: 0 1px 2px rgba(0,0,0,0.3);
+  --shadow-sm: 0 3px 10px rgba(0,0,0,0.28), 0 1px 2px rgba(0,0,0,0.24);
+  --shadow-md: 0 10px 28px rgba(0,0,0,0.4), 0 2px 8px rgba(0,0,0,0.26);
+  --shadow-lg: 0 22px 50px rgba(0,0,0,0.48), 0 4px 14px rgba(0,0,0,0.3);
+  --shadow-glow-teal: 0 4px 20px rgba(0,196,167,0.22);
+  --inset-top: inset 0 1px 0 rgba(255,255,255,0.05);
+  --inset-recess: inset 0 1px 4px rgba(0,0,0,0.35);
+
+  --surface-elevated: linear-gradient(160deg, #112637 0%, #0c1d2e 55%, #091625 100%);
+  --surface2-elevated: linear-gradient(160deg, #172b40 0%, #112236 55%, #0d1f31 100%);
+  --border-elevated: rgba(255,255,255,0.08);
+}
+
+[data-theme="light"] {
+  /* Light theme override */
+  --bg-primary: #ffffff;
+  --bg-secondary: #f8f8f6;
+  --bg-tertiary: #f1f0eb;
+  --text-primary: #1a1a18;
+  --text-secondary: #6b6b67;
+  --text-tertiary: #9c9a92;
+  --border-subtle: rgba(0,0,0,0.08);
+  --border-medium: rgba(0,0,0,0.15);
+}
+
+html,
+body {
+  max-width: 100vw;
+  overflow-x: hidden;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  color: var(--text-primary);
+  background: var(--bg-primary);
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.6;
+  font-family: var(--font-dm-sans, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif);
+}
+
+h1 {
+  font-size: 28px;
+  font-weight: 500;
+  font-family: var(--font-geist, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif);
+}
+
+h2 {
+  font-size: 20px;
+  font-weight: 500;
+  font-family: var(--font-geist, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif);
+}
+
+h3 {
+  font-size: 16px;
+  font-weight: 500;
+  font-family: var(--font-geist, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif);
+}
+
+.label-xs {
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-tertiary);
+}
+
+.label-sm {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.val-lg {
+  font-size: 24px;
+  font-weight: 500;
+}
+
+.val-xl {
+  font-size: 32px;
+  font-weight: 500;
+}
+
+* {
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+@keyframes mllnShimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  @keyframes mllnShimmer {
+    0%, 100% { background-position: 0 0; }
+  }
+}
+
+/* Hover styling on the portfolio builder used to be applied via JS mouse
+   handlers, so keyboard focus produced no visual change at all. */
+.mlln-focusable:focus-visible,
+.mlln-row:focus-visible {
+  outline: 2px solid var(--teal);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+.mlln-row:hover,
+.mlln-row[aria-selected='true'] {
+  background: var(--surface2) !important;
+}
+
+.mlln-cta,
+.mlln-pill {
+  transition: transform 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease;
+}
+
+.mlln-cta:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-glow-teal), var(--shadow-sm);
+}
+
+.mlln-pill:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-xs);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mlln-cta:hover,
+  .mlln-pill:hover {
+    transform: none;
+  }
+}
+
+/* Elevation on row-shaped cards (allocation rows, search results) — scoped
+   off <tr> since box-shadow/transform on table rows renders inconsistently
+   across browsers. */
+.mlln-row:not(tr) {
+  transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+  box-shadow: var(--shadow-xs);
+}
+
+.mlln-row:not(tr):hover,
+.mlln-row:not(tr)[aria-selected='true'] {
+  box-shadow: var(--shadow-sm);
+  transform: translateY(-1px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mlln-row:not(tr):hover,
+  .mlln-row:not(tr)[aria-selected='true'] {
+    transform: none;
+  }
+}
