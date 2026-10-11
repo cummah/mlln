@@ -1,6 +1,5 @@
-// The summary table the rank page reads. It is a staging table while the rebuilt summary is checked against
-// the old one. Switching to 'backtest_summary' is a one line change made when the numbers are approved.
-export const SUMMARY_TABLE = 'backtest_summary_v2'
+// The table the nightly summary job rebuilds, read by the rank page, the asset page and the portfolio page.
+export const SUMMARY_TABLE = 'backtest_summary'
 
 export type RankWindow = '1y' | '3y' | '5y'
 export type RankFreq = 'weekly' | 'monthly'

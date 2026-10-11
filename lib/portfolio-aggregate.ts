@@ -27,7 +27,10 @@ const MS_PER_YEAR = 365.25 * 24 * 60 * 60 * 1000
 // Recently-listed tickers don't have real 3Y/5Y history — same fallback check
 // CustomBacktestTiles uses (components/ticker/CustomBacktestTiles.tsx) to avoid
 // silently mixing in 1Y-equivalent data as if it were a longer window.
-function hasHistoryForPeriod(summary: BacktestSummary, period: Period): boolean {
+function hasHistoryForPeriod(summary: BacktestSummary, period: Period, frequency: Frequency): boolean {
+  // The rebuilt summary says exactly which windows exist. Use that when it is there.
+  const available = (summary as { available?: Record<Frequency, Record<Period, boolean>> }).available
+  if (available) return available[frequency][period]
   const yearsRequired = YEARS_REQUIRED[period]
   if (yearsRequired <= 1 || !summary.backtest_start_date) return true
   const yearsOfHistory = (Date.now() - new Date(summary.backtest_start_date).getTime()) / MS_PER_YEAR
@@ -96,7 +99,7 @@ export function aggregatePortfolio(
   const excluded: Array<{ ticker: string; reason: string }> = []
 
   for (const { summary, pct } of entries) {
-    if (!hasHistoryForPeriod(summary, period)) {
+    if (!hasHistoryForPeriod(summary, period, frequency)) {
       excluded.push({ ticker: summary.ticker, reason: `no ${period.toUpperCase()} history yet` })
       continue
     }

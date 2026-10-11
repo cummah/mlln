@@ -176,7 +176,7 @@ export function PortfolioRecommendations({
                     <div style={{ fontSize: '10px', color: 'var(--text-3)' }}>{asset.name}</div>
                   </div>
                   <div style={{ fontFamily: MONO, fontWeight: 600, color: 'var(--green)', textAlign: 'right' }}>
-                    {(asset.enhReturn5y * 100).toFixed(1)}%
+                    {asset.enhReturn5y.toFixed(1)}%
                   </div>
                 </div>
               ))}

@@ -37,6 +37,14 @@ jobs:
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
 
+      # Rebuilds the per-ticker backtest summary and DCA score from the same engine and prices. It reads the full history,
+      # so it takes a couple of minutes, and it only writes if its own checks pass.
+      - name: Rebuild backtest summary
+        run: npx ts-node --project tsconfig.scripts.json scripts/summary.ts --target backtest_summary
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+
       # Tells the site to drop its cached pages so the new day appears. Skipped until the
       # SITE_URL and REVALIDATE_SECRET secrets are set.
       - name: Refresh site cache

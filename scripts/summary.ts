@@ -2,12 +2,11 @@
  * summary.ts: rebuilds the per-ticker backtest summary and DCA suitability score from the engine.
  *
  *   npx ts-node --project tsconfig.scripts.json scripts/summary.ts --dry-run
- *   npx ts-node --project tsconfig.scripts.json scripts/summary.ts                       (writes backtest_summary_v2)
- *   npx ts-node --project tsconfig.scripts.json scripts/summary.ts --target backtest_summary
+ *   npx ts-node --project tsconfig.scripts.json scripts/summary.ts                       (writes backtest_summary)
  *
  * Uses the full price history, the same engine and the same fill prices as the signal pages. Nothing is
- * written unless the checks pass. By default it writes to a staging table so the portfolio page, which reads
- * backtest_summary, only changes when you decide to switch with --target backtest_summary.
+ * written unless the checks pass. The rank, asset and portfolio pages all read backtest_summary. Rows for assets
+ * without a valid summary are removed, so no row computed by the old engine survives.
  */
 import { activeTickers, loadAllBars, loadMany } from '../lib/pipeline/bars'
 import { getDb, loadEnv, pagedSelect, recordRun, upsertChunks } from '../lib/pipeline/db'
@@ -20,7 +19,7 @@ const args = process.argv.slice(2)
 const t0 = Date.now()
 const lap = (m: string) => console.log(`[${((Date.now() - t0) / 1000).toFixed(0).padStart(4)}s] ${m}`)
 const targetIdx = args.indexOf('--target')
-const TARGET = targetIdx >= 0 ? args[targetIdx + 1] : 'backtest_summary_v2'
+const TARGET = targetIdx >= 0 ? args[targetIdx + 1] : 'backtest_summary'
 
 async function main() {
   const started = new Date()
@@ -60,6 +59,9 @@ async function main() {
   const allowed = new Set(Object.keys(ref[0]))
   const unknown = Object.keys(rows[0]).filter(k => !allowed.has(k))
   if (unknown.length) console.log(`   columns not in the table, skipped: ${unknown.join(', ')}`)
+  // The real table still carries the retired macro columns. Clear them so no stale macro value survives on a refreshed row.
+  const MACRO_COLUMNS = ['macro_adjusted_score', 'deployment_multiplier', 'deployment_status', 'monthly_macro_adjusted_score', 'monthly_deployment_multiplier', 'monthly_deployment_status']
+  if (TARGET === 'backtest_summary') for (const r of rows) for (const c of MACRO_COLUMNS) if (allowed.has(c)) r[c] = null
   const out = rows.map(r => Object.fromEntries(Object.entries(r).filter(([k]) => allowed.has(k))))
 
   // ── Integrity checks ──
@@ -89,7 +91,21 @@ async function main() {
   if (dry) { lap('dry run complete, nothing written'); process.exit(ok ? 0 : 2) }
   if (!ok) { await recordRun('summary', latest, 'failed', { checks: checks.filter(c => !c.ok) }, started); console.error('Checks failed, nothing written.'); process.exit(2) }
 
+  const runStart = new Date(started.getTime() - 60000).toISOString()
   await upsertChunks(TARGET, out, 'ticker', 100)
+
+  // Assets without a valid summary now (too little history, delisted) must not keep an old row computed by the old engine
+  if (TARGET === 'backtest_summary') {
+    const { count: stale, error: cErr } = await db.from(TARGET).select('*', { count: 'exact', head: true }).lt('updated_at', runStart)
+    if (cErr) throw new Error(cErr.message)
+    const { count: total } = await db.from(TARGET).select('*', { count: 'exact', head: true })
+    if ((stale ?? 0) > (total ?? 0) * 0.25) throw new Error(`refusing to remove ${stale} of ${total} rows, that is more than a quarter of the table`)
+    if (stale) {
+      const { error: dErr } = await db.from(TARGET).delete().lt('updated_at', runStart)
+      if (dErr) throw new Error(dErr.message)
+    }
+    lap(`removed ${stale ?? 0} rows that were not rebuilt (old engine, no valid summary)`)
+  }
   await recordRun('summary', latest, 'ok', { table: TARGET, tickers: out.length }, started)
   lap(`wrote ${out.length} rows to ${TARGET}`)
 }
