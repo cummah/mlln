@@ -7,7 +7,8 @@ import { NA, pct, tone } from '@/lib/signals/format'
 import { Card, Chip, Label, Segmented, sliderCss } from '@/components/signals/ui'
 
 const TOP_OPTIONS = [10, 25, 50, 100, 250, 500]
-const WINDOW_LABEL: Record<RankWindow, string> = { '1y': '1 Year', '3y': '3 Years', '5y': '5 Years' }
+const WINDOW_LABEL: Record<RankWindow, string> = { '1y': '1Y', '3y': '3Y', '5y': '5Y' }
+const WINDOW_WORDS: Record<RankWindow, string> = { '1y': '1 year', '3y': '3 year', '5y': '5 year' }
 
 type SortKey = 'rank' | 'ticker' | 'sector' | 'dca' | 'std' | 'enh' | 'alpha'
 
@@ -147,7 +148,7 @@ export function RankTable({ data }: { data: RankData }) {
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))', gap: '12px', marginBottom: '12px' }}>
         <Card><div style={{ fontSize: '11px', color: 'var(--text-3)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Assets shown</div><div style={{ fontSize: '24px', fontWeight: 700, color: 'var(--text)' }}>{shown.length.toLocaleString()}</div><div style={{ fontSize: '11px', color: 'var(--text-3)' }}>average DCA score {stats.avgScore === null ? NA : stats.avgScore.toFixed(0)}</div></Card>
         <Card><div style={{ fontSize: '11px', color: 'var(--text-3)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Average alpha</div><div style={{ fontSize: '24px', fontWeight: 700, color: tone(stats.avgAlpha) }}>{pct(stats.avgAlpha)}</div><div style={{ fontSize: '11px', color: 'var(--text-3)' }}>enhanced minus standard, in points</div></Card>
-        <Card><div style={{ fontSize: '11px', color: 'var(--text-3)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Beat standard DCA</div><div style={{ fontSize: '24px', fontWeight: 700, color: 'var(--text)' }}>{stats.beats.toLocaleString()} <span style={{ fontSize: '14px', color: 'var(--text-2)', fontWeight: 500 }}>of {stats.withAlpha.toLocaleString()}</span></div><div style={{ fontSize: '11px', color: 'var(--text-3)' }}>{stats.withAlpha ? ((stats.beats / stats.withAlpha) * 100).toFixed(0) : 0}% of assets with a {WINDOW_LABEL[win].toLowerCase()} result</div></Card>
+        <Card><div style={{ fontSize: '11px', color: 'var(--text-3)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Beat standard DCA</div><div style={{ fontSize: '24px', fontWeight: 700, color: 'var(--text)' }}>{stats.beats.toLocaleString()} <span style={{ fontSize: '14px', color: 'var(--text-2)', fontWeight: 500 }}>of {stats.withAlpha.toLocaleString()}</span></div><div style={{ fontSize: '11px', color: 'var(--text-3)' }}>{stats.withAlpha ? ((stats.beats / stats.withAlpha) * 100).toFixed(0) : 0}% of assets with a {WINDOW_WORDS[win]} result</div></Card>
       </div>
 
       <Card pad={0} style={{ overflow: 'hidden' }}>
@@ -158,8 +159,8 @@ export function RankTable({ data }: { data: RankData }) {
               {head('ticker', 'Asset', 'left')}
               {head('sector', 'Sector', 'left')}
               {head('dca', 'DCA score', 'right', 'Enhanced DCA suitability, 1 to 100')}
-              {head('std', 'Standard', 'right', `Standard DCA return over ${WINDOW_LABEL[win].toLowerCase()}`)}
-              {head('enh', 'Enhanced', 'right', `Enhanced DCA return over ${WINDOW_LABEL[win].toLowerCase()}`)}
+              {head('std', 'Standard', 'right', `Standard DCA return over ${WINDOW_WORDS[win]}`)}
+              {head('enh', 'Enhanced', 'right', `Enhanced DCA return over ${WINDOW_WORDS[win]}`)}
               {head('alpha', 'Alpha', 'right', 'Enhanced minus standard, in points')}
             </tr>
           </thead>
