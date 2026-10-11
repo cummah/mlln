@@ -4,6 +4,7 @@ const nextConfig = {
   // The old /dashboard section was removed. Old links, bookmarks and search results still land somewhere useful.
   async redirects() {
     return [
+      { source: '/asset/compare', destination: '/rank', permanent: true },
       { source: '/dashboard', destination: '/sectors', permanent: true },
       { source: '/dashboard/daily', destination: '/asset/daily', permanent: true },
       { source: '/dashboard/weekly', destination: '/asset/weekly', permanent: true },

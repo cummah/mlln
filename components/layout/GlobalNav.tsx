@@ -82,12 +82,6 @@ export function GlobalNav() {
           icon={<MonthlyIcon />}
         />
         <NavItem
-          href="/asset/compare"
-          label="Compare"
-          active={isActive('/asset/compare')}
-          icon={<RankIcon />}
-        />
-        <NavItem
           href="/sectors"
           label="Sector"
           active={isActive('/sectors')}

@@ -9,5 +9,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'unauthorised' }, { status: 401 })
   }
   revalidatePath('/asset', 'layout')
+  revalidatePath('/rank')
   return NextResponse.json({ revalidated: true, at: new Date().toISOString() })
 }

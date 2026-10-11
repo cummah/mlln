@@ -11,7 +11,7 @@
 import { createYahooFinanceClient, fetchHistoricalSafe } from '../yahoo-prices'
 import { getDb, pagedSelect, pool, upsertChunks, withRetry } from './db'
 
-export const PRICE_START = '2021-01-01'
+export const PRICE_START = '2020-01-01'
 const RESTATE_TOLERANCE = 0.005
 const OVERLAP_DAYS = 5
 
