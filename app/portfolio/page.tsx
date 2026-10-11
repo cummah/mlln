@@ -14,6 +14,10 @@ export const revalidate = 3600
 // teaser shows a mix of alpha profiles, not five correlated tech names.
 const DEFAULT_TICKERS = ['SPY', 'NVDA', 'AAPL', 'GLD', 'TSLA']
 
+// Reads the database with uncached requests, which would otherwise make Next render this page on every visit.
+// Rendering once a day instead is enough, because the data only changes after the nightly job, which refreshes it.
+export const dynamic = 'force-static'
+
 export default async function PortfolioPage() {
   const summaries = await Promise.all(DEFAULT_TICKERS.map((ticker) => getBacktestSummary(ticker)))
   const initialSummaries = summaries.filter((s): s is NonNullable<typeof s> => s !== null)

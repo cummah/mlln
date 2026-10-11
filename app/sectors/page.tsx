@@ -8,6 +8,11 @@ export const metadata: Metadata = {
   description: 'Explore all stock sectors with Smart DCA insights, performance data, and analysis.',
 }
 
+// Reads the database with uncached requests, which would otherwise make Next render this page on every visit.
+// Rendering once a day instead is enough, because the data only changes after the nightly job, which refreshes it.
+export const revalidate = 86400
+export const dynamic = 'force-static'
+
 export default async function SectorsPage() {
   const sectors = await getAllSectors()
 

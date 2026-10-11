@@ -1,19 +1,20 @@
 import { notFound } from 'next/navigation'
 import { Metadata } from 'next'
-import dynamic from 'next/dynamic'
+import nextDynamic from 'next/dynamic'
 import { getAllSectors, sectorToSlug, slugToSector } from '@/lib/sectors'
 import { getSectorStats, getSectorAssets } from '@/lib/sector-queries'
 import { SectorInsightText } from '@/components/sectors/SectorInsightText'
 import { getRelatedSectorsCount, getPeriodsToShow } from '@/lib/ui-settings'
 import { colors, spacing, typography, componentStyles } from '@/lib/designSystem'
 
-const SectorBreadcrumb = dynamic(() => import('@/components/sectors/SectorBreadcrumb').then(m => ({ default: m.SectorBreadcrumb })))
-const SectorPerformers = dynamic(() => import('@/components/sectors/SectorPerformers').then(m => ({ default: m.SectorPerformers })))
-const SectorAssetsTable = dynamic(() => import('@/components/sectors/SectorAssetsTable').then(m => ({ default: m.SectorAssetsTable })))
-const RelatedSectorsList = dynamic(() => import('@/components/sectors/RelatedSectorsList').then(m => ({ default: m.RelatedSectorsList })))
+const SectorBreadcrumb = nextDynamic(() => import('@/components/sectors/SectorBreadcrumb').then(m => ({ default: m.SectorBreadcrumb })))
+const SectorPerformers = nextDynamic(() => import('@/components/sectors/SectorPerformers').then(m => ({ default: m.SectorPerformers })))
+const SectorAssetsTable = nextDynamic(() => import('@/components/sectors/SectorAssetsTable').then(m => ({ default: m.SectorAssetsTable })))
+const RelatedSectorsList = nextDynamic(() => import('@/components/sectors/RelatedSectorsList').then(m => ({ default: m.RelatedSectorsList })))
 
 // Built once a day and refreshed by the nightly job (/api/revalidate).
 export const revalidate = 86400
+export const dynamic = 'force-static'
 
 interface PageProps {
   params: {
