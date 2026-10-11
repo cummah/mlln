@@ -28,7 +28,8 @@ export interface TopPerformer {
   ticker: string
   name: string
   dcaReturnPct: number
-  signalMult: number
+  signalMult: number | null // most recent weekly buy signal, null if none in the last 26 weeks
+  signalDate: string | null
   signalStrength: string
   dcaSuitabilityScore: number | null
 }
@@ -37,6 +38,7 @@ export interface OversoldAsset {
   ticker: string
   name: string
   signalMult: number
+  signalDate: string
   signalStrength: string
   signalReasoning: string
   dcaSuitabilityScore: number | null
@@ -54,7 +56,8 @@ export interface SectorAsset {
   ticker: string
   name: string
   currentPrice: number | null
-  signalMult: number | null
+  signalMult: number | null // most recent weekly buy signal, null if none in the last 26 weeks
+  signalDate: string | null
   signalStrength: string
   dcaReturn: number | null
   dcaSuitabilityScore: number | null
@@ -84,6 +87,31 @@ async function perChunk<T>(tickers: string[], run: (chunk: string[]) => PromiseL
 }
 
 const round2 = (v: number) => Math.round(v * 100) / 100
+
+const SIGNAL_LOOKBACK_DAYS = 182
+
+async function latestPriceDate(): Promise<string | null> {
+  const { data, error } = await getSupabaseClient().from('latest_prices').select('price_date').eq('ticker', 'SPY').limit(1)
+  if (error) throw new Error(error.message)
+  return (data as any)?.[0]?.price_date ?? null
+}
+
+/**
+ * Each asset's most recent weekly buy signal of any size, with its date. A signal below 1x is still a buy, just a
+ * smaller one than the standard amount, and a week the model skips is not stored at all. So an asset with no entry
+ * here has had no buy in the last 26 weeks.
+ */
+async function latestWeeklySignals(sectorName: string): Promise<Map<string, { date: string; mult: number }>> {
+  const asOf = await latestPriceDate()
+  const out = new Map<string, { date: string; mult: number }>()
+  if (!asOf) return out
+  const rows = await fetchAllPages<any>((a, b) =>
+    getSupabaseClient().from('signal_feed').select('ticker, signal_date, mult')
+      .eq('sector', sectorName).eq('freq', 'weekly').gte('signal_date', shiftDate(asOf, -SIGNAL_LOOKBACK_DAYS))
+      .order('signal_date', { ascending: false }).order('ticker').range(a, b))
+  for (const r of rows) if (!out.has(r.ticker)) out.set(r.ticker, { date: r.signal_date, mult: Number(r.mult) })
+  return out
+}
 
 /** Today's weekly reading for each ticker: the multiplier the engine gives on the latest close, and its inputs. */
 async function weeklyReadings(tickers: string[]) {
@@ -156,19 +184,21 @@ async function getTopPerformersUncached(sector: string, period: '1M' | '3M'): Pr
   const mem = await members(slugToSector(sector))
   if (mem.length === 0) return []
   const tickers = mem.map(m => m.ticker)
-  const [sums, readings] = await Promise.all([summaries(tickers, column), weeklyReadings(tickers)])
+  const sectorName = slugToSector(sector)
+  const [sums, latest] = await Promise.all([summaries(tickers, column), latestWeeklySignals(sectorName)])
 
   const out: TopPerformer[] = []
   for (const m of mem) {
     const ret = num(sums.get(m.ticker)?.[column])
     if (ret === null) continue // no result for this window, so it is left out, never shown as zero
-    const mult = readings.get(m.ticker)?.mult ?? 0
+    const sig = latest.get(m.ticker)
     out.push({
       ticker: m.ticker,
       name: m.name,
       dcaReturnPct: round2(ret),
-      signalMult: round2(mult),
-      signalStrength: getSignalStrength(mult),
+      signalMult: sig ? round2(sig.mult) : null,
+      signalDate: sig ? sig.date : null,
+      signalStrength: sig ? getSignalStrength(sig.mult) : 'neutral',
       dcaSuitabilityScore: num(sums.get(m.ticker)?.dca_suitability_score),
     })
   }
@@ -211,6 +241,7 @@ async function getBuyOpportunitiesUncached(sector: string): Promise<OversoldAsse
       ticker: r.ticker,
       name: names.get(r.ticker) ?? r.ticker,
       signalMult: round2(mult),
+      signalDate: r.signal_date,
       signalStrength: getSignalStrength(mult),
       signalReasoning: parts.length ? parts.join(' + ') : 'enhanced signal',
       dcaSuitabilityScore: num(sums.get(r.ticker)?.dca_suitability_score),
@@ -262,23 +293,24 @@ async function getSectorAssetsUncached(sector: string): Promise<SectorAsset[]> {
   const mem = await members(slugToSector(sector))
   if (mem.length === 0) return []
   const tickers = mem.map(m => m.ticker)
-  const [sums, readings, prices] = await Promise.all([
+  const [sums, latest, prices] = await Promise.all([
     summaries(tickers, 'enh_return_1y'),
-    weeklyReadings(tickers),
+    latestWeeklySignals(slugToSector(sector)),
     perChunk<any>(tickers, c => getSupabaseClient().from('latest_prices').select('ticker, close').in('ticker', c)),
   ])
   const priceBy = new Map<string, number>(prices.map(p => [p.ticker, Number(p.close)]))
 
   const out: SectorAsset[] = mem.map(m => {
-    const reading = readings.get(m.ticker)
+    const sig = latest.get(m.ticker)
     const ret = num(sums.get(m.ticker)?.enh_return_1y)
     const price = priceBy.get(m.ticker)
     return {
       ticker: m.ticker,
       name: m.name,
       currentPrice: price === undefined ? null : round2(price),
-      signalMult: reading ? round2(reading.mult) : null,
-      signalStrength: reading ? getSignalStrength(reading.mult) : 'neutral',
+      signalMult: sig ? round2(sig.mult) : null,
+      signalDate: sig ? sig.date : null,
+      signalStrength: sig ? getSignalStrength(sig.mult) : 'neutral',
       dcaReturn: ret === null ? null : round2(ret),
       dcaSuitabilityScore: num(sums.get(m.ticker)?.dca_suitability_score),
     }
