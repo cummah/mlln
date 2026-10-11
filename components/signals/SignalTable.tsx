@@ -1,0 +1,180 @@
+'use client'
+
+import Link from 'next/link'
+import { useMemo, useState } from 'react'
+import { exportTableToCSV } from '@/lib/csv-export'
+import { effective } from '@/lib/signals/model'
+import { dateShort, fracPct, mult, NA, num, money, pct, tone } from '@/lib/signals/format'
+import type { Effective, Freq, SigRow, Strategy, TickerInfo } from '@/lib/signals/types'
+import { Card } from './ui'
+
+export interface TRow {
+  r: SigRow
+  t: TickerInfo
+  eff: Effective
+  invested: number
+  ret: number | null
+  pnl: number | null
+}
+
+interface Col {
+  key: string
+  label: string
+  align: 'left' | 'right'
+  sort: (x: TRow) => string | number | null
+  cell: (x: TRow) => React.ReactNode
+  csv: (x: TRow) => string | number | null
+  only?: 'sell' | 'daily'
+  hint?: string
+}
+
+const COLS: Col[] = [
+  {
+    key: 'ticker', label: 'Asset', align: 'left', sort: x => x.t.ticker, csv: x => x.t.ticker,
+    cell: x => (
+      <>
+        <Link href={`/asset/${x.t.ticker.toLowerCase()}`} onClick={e => e.stopPropagation()} style={{ color: 'var(--teal)', textDecoration: 'none', fontWeight: 600 }} className="hover:underline">{x.t.ticker}</Link>
+        <div style={{ fontSize: '11px', color: 'var(--text-2)', marginTop: '2px', maxWidth: '190px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{x.t.name}</div>
+      </>
+    ),
+  },
+  { key: 'sector', label: 'Sector', align: 'left', sort: x => x.t.sector, csv: x => x.t.sector, cell: x => x.t.sector },
+  { key: 'date', label: 'Signal date', align: 'left', sort: x => x.r.d, csv: x => x.r.d, cell: x => dateShort(x.r.d) },
+  { key: 'mult', label: 'Multiplier', align: 'right', sort: x => x.r.m, csv: x => x.r.m, cell: x => mult(x.r.m) },
+  { key: 'invested', label: 'Invested', align: 'right', sort: x => x.invested, csv: x => Math.round(x.invested), cell: x => money(x.invested) },
+  { key: 'pnl', label: 'P&L', align: 'right', sort: x => x.pnl, csv: x => x.pnl === null ? null : Math.round(x.pnl), cell: x => <span style={{ color: tone(x.pnl), fontWeight: 600 }}>{money(x.pnl)}</span> },
+  { key: 'ret', label: 'Return', align: 'right', sort: x => x.ret, csv: x => x.ret, cell: x => <span style={{ color: tone(x.ret), fontWeight: 600 }}>{pct(x.ret)}</span>, hint: 'To the latest close, or to the sale if sold' },
+  {
+    key: 'status', label: 'Status', align: 'left', only: 'sell', sort: x => (x.eff.closed ? 1 : 0), csv: x => (x.eff.closed ? `Sold ${x.eff.date}` : 'Held'),
+    cell: x => x.eff.closed
+      ? <span style={{ color: 'var(--text-2)' }}>Sold {dateShort(x.eff.date)}{x.eff.reason === 'atr' ? ' (stop)' : ''}</span>
+      : <span style={{ color: 'var(--green)', fontWeight: 600 }}>Held</span>,
+  },
+  { key: 'exitScore', label: 'Exit score', align: 'right', only: 'sell', sort: x => x.r.xs, csv: x => x.r.xs, cell: x => num(x.r.xs) },
+  { key: 'dca', label: 'DCA score', align: 'right', sort: x => x.t.dca, csv: x => x.t.dca, cell: x => (x.t.dca === null ? NA : Math.round(x.t.dca)) },
+  { key: 'factor', label: 'Factor regime', align: 'right', sort: x => x.r.f, csv: x => x.r.f, cell: x => <span style={{ color: tone(x.r.f) }}>{fracPct(x.r.f)}</span> },
+  { key: 'vol', label: 'Vol timing', align: 'right', sort: x => x.r.v, csv: x => x.r.v, cell: x => <span style={{ color: tone(x.r.v) }}>{fracPct(x.r.v)}</span> },
+  { key: 'mr', label: 'Mean reversion', align: 'right', sort: x => x.r.r, csv: x => x.r.r, cell: x => <span style={{ color: tone(x.r.r) }}>{fracPct(x.r.r)}</span> },
+  { key: 'atr', label: 'Volatility', align: 'right', sort: x => x.r.a, csv: x => x.r.a, cell: x => (x.r.a === null ? NA : `${x.r.a.toFixed(1)}%`), hint: 'ATR(14) as a percent of price' },
+  { key: 'wa', label: 'Weekly buy', align: 'right', only: 'daily', sort: x => x.r.wa, csv: x => x.r.wa, cell: x => (x.r.wa === null ? '-' : `${x.r.wa} d ago`) },
+  { key: 'ma', label: 'Monthly buy', align: 'right', only: 'daily', sort: x => x.r.ma, csv: x => x.r.ma, cell: x => (x.r.ma === null ? '-' : `${x.r.ma} d ago`) },
+]
+
+const DEFAULT_VISIBLE = ['ticker', 'date', 'mult', 'invested', 'pnl', 'ret', 'status', 'dca', 'factor', 'vol', 'mr', 'atr', 'wa', 'ma']
+
+interface Props {
+  rows: SigRow[]
+  tickers: TickerInfo[]
+  strategy: Strategy
+  base: number
+  freq: Freq
+  onSelect: (r: SigRow) => void
+}
+
+export function SignalTable({ rows, tickers, strategy, base, freq, onSelect }: Props) {
+  const [sortKey, setSortKey] = useState('date')
+  const [desc, setDesc] = useState(true)
+  const [page, setPage] = useState(0)
+  const [pageSize, setPageSize] = useState(100)
+  const [visible, setVisible] = useState<Set<string>>(new Set(DEFAULT_VISIBLE))
+  const [pickerOpen, setPickerOpen] = useState(false)
+
+  const cols = COLS.filter(c => visible.has(c.key) && (c.only !== 'sell' || strategy.mode === 'sell') && (c.only !== 'daily' || freq === 'daily'))
+
+  const trows = useMemo<TRow[]>(() => rows.map(r => {
+    const eff = effective(r, strategy)
+    const invested = base * r.m
+    const ret = eff.closed ? eff.retPct : r.p
+    const pnl = ret === null ? null : invested * (ret / 100) - (eff.closed ? strategy.fee : 0)
+    return { r, t: tickers[r.i], eff, invested, ret, pnl }
+  }), [rows, tickers, strategy, base])
+
+  const sorted = useMemo(() => {
+    const col = COLS.find(c => c.key === sortKey) ?? COLS[2]
+    const dir = desc ? -1 : 1
+    return [...trows].sort((a, b) => {
+      const x = col.sort(a), y = col.sort(b)
+      if (x === null && y === null) return 0
+      if (x === null) return 1 // missing values always last
+      if (y === null) return -1
+      return (x < y ? -1 : x > y ? 1 : 0) * dir
+    })
+  }, [trows, sortKey, desc])
+
+  const pages = Math.max(1, Math.ceil(sorted.length / pageSize))
+  const cur = Math.min(page, pages - 1)
+  const slice = sorted.slice(cur * pageSize, (cur + 1) * pageSize)
+
+  const header = (c: Col) => {
+    const active = sortKey === c.key
+    return (
+      <th key={c.key} title={c.hint} onClick={() => { if (active) setDesc(!desc); else { setSortKey(c.key); setDesc(true) } setPage(0) }}
+        style={{ padding: '12px 14px', textAlign: c.align, fontWeight: 600, color: active ? 'var(--text)' : 'var(--text-2)', whiteSpace: 'nowrap', cursor: 'pointer', userSelect: 'none', position: 'sticky', top: 0, background: 'var(--surface2)' }}>
+        {c.label}{active ? (desc ? ' ↓' : ' ↑') : ''}
+      </th>
+    )
+  }
+
+  const btn = { padding: '8px 12px', background: 'var(--surface)', border: '1px solid var(--border-elevated)', borderRadius: '8px', fontSize: '12px', fontWeight: 600, color: 'var(--text)', cursor: 'pointer' } as const
+
+  return (
+    <div>
+      <div style={{ display: 'flex', gap: '10px', marginBottom: '12px', alignItems: 'center' }}>
+        <div style={{ position: 'relative' }}>
+          <button style={btn} onClick={() => setPickerOpen(!pickerOpen)}>Columns</button>
+          {pickerOpen && (
+            <div style={{ position: 'absolute', top: '100%', left: 0, marginTop: '8px', background: 'var(--surface2-elevated, var(--surface-elevated))', border: '1px solid var(--border-elevated)', borderRadius: '8px', padding: '10px 12px', minWidth: '190px', maxHeight: '320px', overflowY: 'auto', zIndex: 50, boxShadow: 'var(--shadow-lg)' }}>
+              {COLS.filter(c => (c.only !== 'sell' || strategy.mode === 'sell') && (c.only !== 'daily' || freq === 'daily')).map(c => (
+                <label key={c.key} style={{ display: 'flex', gap: '8px', alignItems: 'center', padding: '6px 0', fontSize: '12px', cursor: 'pointer' }}>
+                  <input type="checkbox" checked={visible.has(c.key)} onChange={() => { const n = new Set(visible); if (n.has(c.key)) n.delete(c.key); else n.add(c.key); setVisible(n) }} />
+                  {c.label}
+                </label>
+              ))}
+            </div>
+          )}
+        </div>
+        <button style={btn} onClick={() => exportTableToCSV(sorted.map(x => Object.fromEntries(cols.map(c => [c.key, c.csv(x)]))), cols.map(c => ({ key: c.key, label: c.label })), `${freq}-signals.csv`)}>
+          Export CSV
+        </button>
+        <div style={{ fontSize: '12px', color: 'var(--text-3)', marginLeft: 'auto' }}>Click a row for the indicators behind it</div>
+      </div>
+
+      <Card pad={0} style={{ overflow: 'hidden' }}>
+        <div style={{ overflowX: 'auto', maxHeight: '75vh', overflowY: 'auto' }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
+            <thead><tr style={{ borderBottom: '1px solid var(--border)' }}>{cols.map(header)}</tr></thead>
+            <tbody>
+              {slice.map((x, i) => (
+                <tr key={`${x.t.ticker}-${x.r.d}`} onClick={() => onSelect(x.r)}
+                  style={{ borderBottom: '1px solid var(--border)', background: i % 2 ? 'rgba(255,255,255,0.02)' : 'transparent', cursor: 'pointer' }}
+                  onMouseEnter={e => (e.currentTarget.style.background = 'var(--surface2)')}
+                  onMouseLeave={e => (e.currentTarget.style.background = i % 2 ? 'rgba(255,255,255,0.02)' : 'transparent')}>
+                  {cols.map(c => (
+                    <td key={c.key} style={{ padding: '11px 14px', textAlign: c.align, whiteSpace: 'nowrap', color: 'var(--text-2)', fontFamily: c.align === 'right' ? 'DM Mono, monospace' : undefined }}>{c.cell(x)}</td>
+                  ))}
+                </tr>
+              ))}
+              {slice.length === 0 && (
+                <tr><td colSpan={cols.length} style={{ padding: '40px', textAlign: 'center', color: 'var(--text-2)' }}>No signals match these filters.</td></tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '14px 16px', borderTop: '1px solid var(--border)', flexWrap: 'wrap', gap: '8px' }}>
+          <div style={{ fontSize: '12px', color: 'var(--text-2)' }}>
+            {sorted.length === 0 ? 0 : cur * pageSize + 1}-{Math.min((cur + 1) * pageSize, sorted.length)} of {sorted.length.toLocaleString()} signals
+          </div>
+          <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+            <select value={pageSize} onChange={e => { setPageSize(Number(e.target.value)); setPage(0) }} style={{ padding: '6px 8px', background: 'var(--surface)', border: '1px solid var(--border-elevated)', borderRadius: '6px', color: 'var(--text)', fontSize: '12px' }}>
+              {[50, 100, 250, 500].map(n => <option key={n} value={n}>{n} per page</option>)}
+            </select>
+            <button style={btn} disabled={cur === 0} onClick={() => setPage(cur - 1)}>Prev</button>
+            <span style={{ fontSize: '12px', color: 'var(--text-2)' }}>Page {cur + 1} of {pages}</span>
+            <button style={btn} disabled={cur >= pages - 1} onClick={() => setPage(cur + 1)}>Next</button>
+          </div>
+        </div>
+      </Card>
+    </div>
+  )
+}

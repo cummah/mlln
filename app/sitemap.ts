@@ -37,7 +37,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     }
 
     const assetPages = assets.map((asset) => ({
-      url: `https://mlln.ai/dashboard/${asset.ticker.toLowerCase()}`,
+      url: `https://mlln.ai/asset/${asset.ticker.toLowerCase()}`,
       lastModified: asset.created_at ? new Date(asset.created_at) : new Date(),
       changeFrequency: 'weekly' as const,
       priority: asset.ticker === 'SPY' ? 1.0 : 0.8,

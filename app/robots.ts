@@ -4,7 +4,7 @@ export default function robots(): MetadataRoute.Robots {
   return {
     rules: {
       userAgent: '*',
-      allow: ['/dashboard/', '/api/og/'],
+      allow: ['/asset/', '/api/og/'],
       disallow: ['/api/', '/_next/'],
     },
     sitemap: 'https://mlln.ai/sitemap.xml',
