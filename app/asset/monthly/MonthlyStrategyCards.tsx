@@ -67,8 +67,8 @@ function aggregateStats(rows: SignalRow[], mode: 'buyhold' | 'sold'): StrategySt
   const perfOf = (r: SignalRow) => (mode === 'buyhold' ? r.performance : r.displayPerformance ?? r.performance);
   const valueOf = (r: SignalRow) => (mode === 'buyhold' ? r.currentValue : r.displayCurrentValue ?? r.currentValue);
 
-  const totalInvested = rows.reduce((sum, r) => sum + (r.invested || 0), 0);
-  const totalValue = rows.reduce((sum, r) => sum + (valueOf(r) || 0), 0);
+  const totalInvested = rows.reduce((sum, r) => sum + (r.invested ?? 0), 0);
+  const totalValue = rows.reduce((sum, r) => sum + (valueOf(r) ?? 0), 0);
   const perfs = rows.map(perfOf).filter((p): p is number => p !== null && p !== undefined);
   const sortedPerfs = [...perfs].sort((a, b) => a - b);
   const mid = Math.floor(sortedPerfs.length / 2);
@@ -108,7 +108,7 @@ function computeMinStartingCapital(rows: SignalRow[]): { minCapital: number; end
     if (balance < minBalance) minBalance = balance;
   }
 
-  const openValue = rows.filter(r => r.exitOpen).reduce((sum, r) => sum + (r.currentValue || 0), 0);
+  const openValue = rows.filter(r => r.exitOpen).reduce((sum, r) => sum + (r.currentValue ?? 0), 0);
   const minCapital = Math.max(0, -minBalance);
   return { minCapital, endingValue: minCapital + balance + openValue };
 }
@@ -151,7 +151,11 @@ export function MonthlyStrategyCards({
       return perfs.length ? perfs.reduce((a, b) => a + b, 0) / perfs.length : null;
     };
     const profitOf = (rows: SignalRow[]) =>
-      rows.reduce((sum, r) => sum + ((r.displayCurrentValue ?? r.currentValue ?? 0) - (r.invested ?? 0)), 0);
+      rows.reduce((sum, r) => {
+        const val = r.displayCurrentValue ?? r.currentValue;
+        const inv = r.invested ?? 0;
+        return sum + ((val ?? 0) - inv);
+      }, 0);
     return {
       openCount: open.length,
       closedCount: closed.length,

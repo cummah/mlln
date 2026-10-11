@@ -60,14 +60,14 @@ function toEnhancedSignal(sig: SignalRow): SignalRowEnhanced {
   return {
     ticker: sig.ticker,
     signalDate: sig.signalDate || new Date().toISOString().split('T')[0],
-    invested: sig.invested || 0,
+    invested: sig.invested ?? 0,
     performance: sig.performance,
-    currentValue: sig.currentValue || 0,
+    currentValue: sig.currentValue ?? 0,
     exitOpen: sig.exitOpen,
-    exitAdjustedValue: sig.exitAdjustedValue || sig.currentValue || 0,
+    exitAdjustedValue: sig.exitAdjustedValue ?? sig.currentValue ?? 0,
     exitDate: sig.exitDate,
     displayPerformance: sig.performance,
-    displayValue: sig.currentValue || 0,
+    displayValue: sig.currentValue ?? 0,
     cohortPeriod: sig.cohortPeriod,
     isClosedProfit: !sig.exitOpen && (sig.performance ?? 0) >= 0,
     isClosedLoss: !sig.exitOpen && (sig.performance ?? 0) < 0,
@@ -157,9 +157,9 @@ export function MonthlyContent({ data }: { data: SignalRow[] }) {
   const allEnhancedSignals = useMemo(() => data.map(toEnhancedSignal), [data]);
 
   const fullStats = useMemo(() => {
-    const totalInvested = allEnhancedSignals.reduce((sum, s) => sum + s.invested, 0);
-    const totalValue = allEnhancedSignals.reduce((sum, s) => sum + s.displayValue, 0);
-    const perfs = allEnhancedSignals.map(s => s.displayPerformance).filter((p): p is number => p !== null);
+    const totalInvested = allEnhancedSignals.reduce((sum, s) => sum + (s.invested ?? 0), 0);
+    const totalValue = allEnhancedSignals.reduce((sum, s) => sum + (s.displayValue ?? 0), 0);
+    const perfs = allEnhancedSignals.map(s => s.displayPerformance).filter((p): p is number => p !== null && p !== undefined);
     const sortedPerfs = [...perfs].sort((a, b) => a - b);
     const mid = Math.floor(sortedPerfs.length / 2);
     const medianReturn = sortedPerfs.length ? (sortedPerfs.length % 2 ? sortedPerfs[mid] : (sortedPerfs[mid - 1] + sortedPerfs[mid]) / 2) : null;
@@ -177,8 +177,9 @@ export function MonthlyContent({ data }: { data: SignalRow[] }) {
       const newInvested = baseAmount * row.signalMult;
       const scale = (val: number | null | undefined) => {
         if (val == null) return null;
-        if (row.invested === null || row.invested === undefined || row.invested === 0) return val;
-        return newInvested * (val / row.invested);
+        const origInvested = row.invested ?? 0;
+        if (origInvested <= 0) return val;
+        return newInvested * (val / origInvested);
       };
       const newCurrentValue = scale(row.currentValue);
       const newExitAdjustedValue = scale(row.exitAdjustedValue);
