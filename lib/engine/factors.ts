@@ -177,6 +177,13 @@ function rawReturn(c: Float64Array, i: number): number | undefined {
   return Number.isNaN(a) || Number.isNaN(b) || a <= 0 ? undefined : b / a - 1
 }
 
+/** Factor scores for calendar days from..to inclusive under a given fit. */
+export function scoresUnderFit(fit: FactorFit, closes: CloseMatrix, from: number, to: number): number[][] {
+  const out: number[][] = []
+  for (let i = from; i <= to; i++) out.push(dayScore(fit, t => rawReturn(closes.get(t)!, i)))
+  return out
+}
+
 /**
  * Refit on the first trading day of every month and apply each fit to the days of that month.
  * The factor score history needed for momentum is rebuilt under each new fit, using only days
@@ -205,10 +212,7 @@ export function walkForward(calendar: string[], closes: CloseMatrix, onFit?: (f:
 
     // Scores for every day of the fit window and the days this fit will be used for
     const first = F - FIT_RETURNS
-    const series: number[][] = []
-    for (let i = first; i < G; i++) {
-      series.push(dayScore(fit, t => rawReturn(closes.get(t)!, i)))
-    }
+    const series = scoresUnderFit(fit, closes, first, G - 1)
     for (let i = F; i < G; i++) {
       const upto = i - first + 1
       fitOfDay[i] = fitIdx
@@ -224,4 +228,29 @@ export function regimeAt(wf: WalkForward, ticker: string, idx: number): number |
   const f = wf.fitOfDay[idx]
   if (f < 0) return null
   return regimeScore(wf.fits[f].loadings.get(ticker), wf.z[idx])
+}
+
+// ─── Rows for storage, shared by the backfill and the nightly refit ──────────────────────────
+
+export interface FactorSeriesRow {
+  date: string
+  fit_date: string
+  score: number[]
+  z: number[] | null
+}
+
+/** factor_series rows for the fit window and every day after it up to the last calendar day. */
+export function seriesRows(fit: FactorFit, calendar: string[], closes: CloseMatrix, F: number): FactorSeriesRow[] {
+  const first = F - FIT_RETURNS
+  const scores = scoresUnderFit(fit, closes, first, calendar.length - 1)
+  return scores.map((s, k) => {
+    const idx = first + k
+    return { date: calendar[idx], fit_date: fit.fitDate, score: s, z: idx >= F ? momentumZ(scores.slice(0, k + 1), fit.K) : null }
+  })
+}
+
+export function loadingRows(fit: FactorFit) {
+  const rows: { ticker: string; fit_date: string; loadings: number[]; mean_ret: number; std_ret: number }[] = []
+  fit.loadings.forEach((l, ticker) => rows.push({ ticker, fit_date: fit.fitDate, loadings: l, mean_ret: fit.mean.get(ticker)!, std_ret: fit.std.get(ticker)! }))
+  return rows
 }

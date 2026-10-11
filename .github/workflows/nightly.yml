@@ -1,0 +1,44 @@
+name: Nightly signals
+
+# Runs once per evening after the US market closes.
+# 03:30 UTC on Tuesday to Saturday is 22:30 or 23:30 US Eastern on Monday to Friday, after the close in
+# both summer and winter time. Prices for the day are final by then.
+on:
+  schedule:
+    - cron: '30 3 * * 2-6'
+  workflow_dispatch: {}
+
+concurrency:
+  group: nightly-signals
+  cancel-in-progress: false
+
+jobs:
+  nightly:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    env:
+      SITE_URL: ${{ secrets.SITE_URL }}
+      REVALIDATE_SECRET: ${{ secrets.REVALIDATE_SECRET }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      # Exits non-zero if prices are stale, VIX is stale, or any integrity check fails.
+      # In that case no signal rows are written and the run shows as failed in the Actions tab.
+      - name: Run nightly job
+        run: npx ts-node --project tsconfig.scripts.json scripts/nightly.ts
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+
+      # Tells the site to drop its cached pages so the new day appears. Skipped until the
+      # SITE_URL and REVALIDATE_SECRET secrets are set.
+      - name: Refresh site cache
+        if: success() && env.SITE_URL != ''
+        run: curl -fsS -X POST "$SITE_URL/api/revalidate" -H "x-revalidate-secret: $REVALIDATE_SECRET"
