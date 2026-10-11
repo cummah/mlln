@@ -14,9 +14,11 @@ const VOL_AGGRESSION = 0.6
 const VOL_CLAMP = 0.3
 
 /**
- * Bonus on down days only: positive when volatility is calm against its own one year median,
- * negative when elevated. The variance seed is the first 20 returns of the window, and the
- * window is fixed, so the same date always gives the same value.
+ * Bonus on down days only: positive when volatility is calm against its median over the previous
+ * year, negative when elevated. On a day that is not a down day it is exactly 0, meaning "no dip".
+ * Today is compared with the year BEFORE it, not a year that includes itself, so a zero can never
+ * be a coincidence of today equalling its own median. The variance seed is the first 20 returns of
+ * the window, and the window is fixed, so the same date always gives the same value.
  */
 export function volTimingAt(bars: Bar[], idx: number): number | null {
   const s = windowStart(idx)
@@ -42,8 +44,8 @@ export function volTimingAt(bars: Bar[], idx: number): number | null {
 
   const last = r.length - 1
   if (!(r[last] < 0)) return 0 // up or flat day: no dip to buy
-  const from = Math.max(0, last - VOL_MEDIAN_WINDOW + 1)
-  const sorted = Array.from(vol.subarray(from, last + 1)).sort((a, b) => a - b)
+  const from = Math.max(0, last - VOL_MEDIAN_WINDOW)
+  const sorted = Array.from(vol.subarray(from, last)).sort((a, b) => a - b)
   const median = sorted[Math.floor(sorted.length / 2)]
   const ratio = median > 0 ? vol[last] / median : 1
   const clamped = Math.max(VOL_RATIO_MIN, Math.min(VOL_RATIO_MAX, ratio))

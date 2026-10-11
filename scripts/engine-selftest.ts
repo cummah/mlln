@@ -76,6 +76,20 @@ async function main() {
       check(`${ticker} causality ${freq} (${n} dates)`, bad === 0, bad ? `${bad} differ` : '')
     }
 
+    // Volatility timing is exactly zero if and only if the day was not a down day
+    {
+      let zeroOnDown = 0, nonZeroOnUp = 0, n = 0
+      for (let idx = MIN_BARS + 300; idx < bars.length; idx += 3) {
+        const v = volTimingAt(bars, idx)
+        if (v === null) continue
+        n++
+        const down = bars[idx].close < bars[idx - 1].close
+        if (v === 0 && down) zeroOnDown++
+        if (v !== 0 && !down) nonZeroOnUp++
+      }
+      check(`${ticker} vol timing is zero only on non-down days (${n} dates)`, zeroOnDown === 0 && nonZeroOnUp === 0, `zero on down day ${zeroOnDown}, non-zero on up day ${nonZeroOnUp}`)
+    }
+
     // 2. Stability: drop 200 old bars, compare dates whose window starts after the cut
     let bad = 0, n = 0
     const cut = 200

@@ -123,6 +123,13 @@ test('sliders at full range keep rows with no value, narrowed sliders drop them'
   assert.equal(applyFilters(rows, tickers, { ...DEFAULT_FILTERS, factor: [-40, 20] }).length, 2)
 })
 
+test('a narrowed volatility timing slider keeps only actual dips, never no-dip days', () => {
+  const rows = [row({ v: 0 }), row({ v: 0.1 }), row({ v: -0.1 }), row({ v: null })]
+  assert.equal(applyFilters(rows, tickers, DEFAULT_FILTERS).length, 4)
+  const calm = applyFilters(rows, tickers, { ...DEFAULT_FILTERS, vol: [0, 30] })
+  assert.deepEqual(calm.map(r => r.v), [0.1]) // the zero (no dip) row is not a calm dip
+})
+
 test('search, sector, date, year and alignment filters', () => {
   const rows = [row({ i: 0, d: '2025-03-01' }), row({ i: 1, d: '2026-03-01', wa: 3 })]
   assert.equal(applyFilters(rows, tickers, { ...DEFAULT_FILTERS, search: 'beta' }).length, 1)

@@ -29,7 +29,8 @@ export function applyFilters(rows: SigRow[], tickers: TickerInfo[], f: Filters):
     if (outside(r.m, f.mult, RANGES.mult)) return false
     if (outside(t.dca, f.dca, RANGES.dca)) return false
     if (outside(r.f === null ? null : r.f * 100, f.factor, RANGES.factor)) return false
-    if (outside(r.v === null ? null : r.v * 100, f.vol, RANGES.vol)) return false
+    // Volatility timing only exists on down days, so a narrowed slider keeps only actual dips
+    if (outside(r.v === null || r.v === 0 ? null : r.v * 100, f.vol, RANGES.vol)) return false
     if (outside(r.r === null ? null : r.r * 100, f.mr, RANGES.mr)) return false
     if (outside(r.a, f.atr, RANGES.atr)) return false
     if (f.weeklyAligned && r.wa === null) return false

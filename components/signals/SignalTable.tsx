@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { useMemo, useState } from 'react'
 import { exportTableToCSV } from '@/lib/csv-export'
 import { effective } from '@/lib/signals/model'
-import { dateShort, fracPct, mult, NA, num, money, pct, tone } from '@/lib/signals/format'
+import { dateShort, fracPct, mult, NA, num, money, pct, tone, volLabel } from '@/lib/signals/format'
 import type { Effective, Freq, SigRow, Strategy, TickerInfo } from '@/lib/signals/types'
 import { Card } from './ui'
 
@@ -53,7 +53,7 @@ const COLS: Col[] = [
   { key: 'exitScore', label: 'Exit score', align: 'right', only: 'sell', sort: x => x.r.xs, csv: x => x.r.xs, cell: x => num(x.r.xs) },
   { key: 'dca', label: 'DCA score', align: 'right', sort: x => x.t.dca, csv: x => x.t.dca, cell: x => (x.t.dca === null ? NA : Math.round(x.t.dca)) },
   { key: 'factor', label: 'Factor regime', align: 'right', sort: x => x.r.f, csv: x => x.r.f, cell: x => <span style={{ color: tone(x.r.f) }}>{fracPct(x.r.f)}</span> },
-  { key: 'vol', label: 'Vol timing', align: 'right', sort: x => x.r.v, csv: x => x.r.v, cell: x => <span style={{ color: tone(x.r.v) }}>{fracPct(x.r.v)}</span> },
+  { key: 'vol', label: 'Vol timing', align: 'right', sort: x => x.r.v, csv: x => x.r.v, hint: 'Applies only on down days. "No dip" means the signal day was not a down day.', cell: x => <span style={{ color: x.r.v === 0 ? 'var(--text-3)' : tone(x.r.v) }}>{volLabel(x.r.v)}</span> },
   { key: 'mr', label: 'Mean reversion', align: 'right', sort: x => x.r.r, csv: x => x.r.r, cell: x => <span style={{ color: tone(x.r.r) }}>{fracPct(x.r.r)}</span> },
   { key: 'atr', label: 'Volatility', align: 'right', sort: x => x.r.a, csv: x => x.r.a, cell: x => (x.r.a === null ? NA : `${x.r.a.toFixed(1)}%`), hint: 'ATR(14) as a percent of price' },
   { key: 'wa', label: 'Weekly buy', align: 'right', only: 'daily', sort: x => x.r.wa, csv: x => x.r.wa, cell: x => (x.r.wa === null ? '-' : `${x.r.wa} d ago`) },

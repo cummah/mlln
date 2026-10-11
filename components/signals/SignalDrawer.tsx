@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import { ATR_MULTIPLIERS } from '@/lib/signals/config'
-import { dateShort, fracPct, mult, NA, num, pct, tone } from '@/lib/signals/format'
+import { dateShort, fracPct, mult, NA, num, pct, tone, volLabel } from '@/lib/signals/format'
 import type { Freq } from '@/lib/signals/types'
 
 interface Detail { [k: string]: any }
@@ -76,7 +76,7 @@ export function SignalDrawer({ ticker, name, date, freq, onClose }: { ticker: st
 
             <Section title="Indicators on the signal date">
               <Row k="Factor regime" v={fracPct(d.factor_regime)} color={tone(d.factor_regime)} />
-              <Row k="Volatility timing" v={fracPct(d.vol_timing)} color={tone(d.vol_timing)} />
+              <Row k="Volatility timing" v={volLabel(d.vol_timing)} color={d.vol_timing === 0 ? 'var(--text-3)' : tone(d.vol_timing)} />
               <Row k="Mean reversion" v={fracPct(d.mean_reversion)} color={tone(d.mean_reversion)} />
               <Row k="Reversion half-life" v={d.mr_half_life === null ? 'none measured' : `${num(d.mr_half_life)} days`} />
               <Row k="Volatility (ATR 14)" v={d.atr_pct === null ? NA : `${num(d.atr_pct)}%`} />

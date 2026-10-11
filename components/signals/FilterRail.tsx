@@ -58,7 +58,7 @@ export function FilterRail({ settings, filters, setFilters, base, setBase, dateP
           <RangeRow label="Multiplier" range={filters.mult} full={RANGES.mult} step={0.5} onChange={r => set({ mult: r })} show={v => `${v.toFixed(1)}×`} />
           <RangeRow label="DCA score" range={filters.dca} full={RANGES.dca} onChange={r => set({ dca: r })} show={v => `${v}`} note={NA_NOTE} />
           <RangeRow label="Factor regime" range={filters.factor} full={RANGES.factor} onChange={r => set({ factor: r })} show={v => `${v}%`} note={NA_NOTE} />
-          <RangeRow label="Volatility timing" range={filters.vol} full={RANGES.vol} onChange={r => set({ vol: r })} show={v => `${v}%`} note={NA_NOTE} />
+          <RangeRow label="Volatility timing" range={filters.vol} full={RANGES.vol} onChange={r => set({ vol: r })} show={v => `${v}%`} note="Applies only on down days. Narrowing it keeps only actual dips; up days have no volatility timing." />
           <RangeRow label="Mean reversion" range={filters.mr} full={RANGES.mr} onChange={r => set({ mr: r })} show={v => `${v}%`} note={NA_NOTE} />
           <RangeRow label="Volatility (ATR 14)" range={filters.atr} full={RANGES.atr} onChange={r => set({ atr: r })} show={v => `${v}%`} note={NA_NOTE} />
         </div>

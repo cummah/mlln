@@ -30,6 +30,13 @@ export function dateShort(d: string | null | undefined): string {
   return new Date(d + 'T12:00:00Z').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', timeZone: 'UTC' })
 }
 
+/** Volatility timing applies only on down days. Zero means the signal day was not a down day. */
+export function volLabel(v: number | null | undefined): string {
+  if (v === null || v === undefined) return NA
+  if (v === 0) return 'No dip'
+  return `${v > 0 ? 'Calm dip' : 'Elevated dip'} ${pct(v * 100)}`
+}
+
 export const GREEN = 'var(--green)'
 export const RED = '#E24B4A'
 

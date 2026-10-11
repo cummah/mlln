@@ -51,7 +51,7 @@ export const WINDOW_BARS = 756
 export const MIN_BARS = 252
 
 /** Bump when the maths changes, so stored rows can be told apart and rebuilt on purpose. */
-export const ENGINE_VERSION = 1
+export const ENGINE_VERSION = 2
 
 const BASE: EngineConfig = {
   slippagePct: 0.05,
