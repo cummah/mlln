@@ -12,6 +12,9 @@ const SectorPerformers = dynamic(() => import('@/components/sectors/SectorPerfor
 const SectorAssetsTable = dynamic(() => import('@/components/sectors/SectorAssetsTable').then(m => ({ default: m.SectorAssetsTable })))
 const RelatedSectorsList = dynamic(() => import('@/components/sectors/RelatedSectorsList').then(m => ({ default: m.RelatedSectorsList })))
 
+// Built once a day and refreshed by the nightly job (/api/revalidate).
+export const revalidate = 86400
+
 interface PageProps {
   params: {
     sector: string
@@ -93,8 +96,8 @@ export default async function SectorPage({ params }: PageProps) {
 
             <div style={componentStyles.statBox}>
               <div style={componentStyles.statLabel}>1M Sector Return</div>
-              <div style={{ ...componentStyles.statValue, color: stats.sectorReturn1M > 0 ? colors.green : colors.red }}>
-                {stats.sectorReturn1M > 0 ? '+' : ''}{stats.sectorReturn1M.toFixed(2)}%
+              <div style={{ ...componentStyles.statValue, color: stats.sectorReturn1M === null ? colors.text2 : stats.sectorReturn1M > 0 ? colors.green : colors.red }}>
+                {stats.sectorReturn1M === null ? 'n/a' : `${stats.sectorReturn1M > 0 ? '+' : ''}${stats.sectorReturn1M.toFixed(2)}%`}
               </div>
             </div>
           </div>

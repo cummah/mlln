@@ -24,7 +24,7 @@ export async function SectorInsightText({ sector }: SectorInsightTextProps) {
     // Get top N performers (from settings)
     const topPerformersToShow = topPerformers.slice(0, topN)
     const topPerformersText = topPerformersToShow
-      .map((p, i) => `${p.ticker} (+${p.dcaReturnPct}% EDCA)`)
+      .map(p => `${p.ticker} (${p.dcaReturnPct > 0 ? '+' : ''}${p.dcaReturnPct}% EDCA)`)
       .join(', ')
 
     // Count assets with positive 1-year Enhanced DCA returns
@@ -40,7 +40,7 @@ export async function SectorInsightText({ sector }: SectorInsightTextProps) {
             .join(' and ')
         : ''
 
-    const text = `The top performing ${sectorName} stocks by Enhanced DCA return over the last month are ${topPerformersText}. ${positiveReturns} of the top ${topPerformers.length} have positive DCA returns. ${buyOpportunitiesCount} assets in the ${sectorName} sector currently have active buy signals${buyOpportunitiesTickers ? `, including ${buyOpportunitiesTickers}` : ''}.`
+    const text = `The top performing ${sectorName} stocks by Enhanced DCA return over the last month are ${topPerformersText}. ${positiveReturns} of the top ${topPerformers.length} have positive DCA returns. ${buyOpportunitiesCount} ${buyOpportunitiesCount === 1 ? 'asset' : 'assets'} in the ${sectorName} sector received a weekly buy signal above 1× in the last 7 days${buyOpportunitiesTickers ? `, including ${buyOpportunitiesTickers}` : ''}.`
 
     return (
       <p className="text-[15px] text-[var(--text-secondary)] leading-relaxed">

@@ -1,4 +1,4 @@
-import { revalidatePath } from 'next/cache'
+import { revalidatePath, revalidateTag } from 'next/cache'
 import { NextRequest, NextResponse } from 'next/server'
 
 // Called by the nightly job after it has written the day's signals. Pages are cached between
@@ -10,5 +10,7 @@ export async function POST(request: NextRequest) {
   }
   revalidatePath('/asset', 'layout')
   revalidatePath('/rank')
+  revalidatePath('/sectors', 'layout')
+  revalidateTag('sectors')
   return NextResponse.json({ revalidated: true, at: new Date().toISOString() })
 }

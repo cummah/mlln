@@ -7,11 +7,11 @@ import { ChevronUp, ChevronDown } from 'lucide-react'
 interface Asset {
   ticker: string
   name: string
-  currentPrice: number
-  signalMult: number
+  currentPrice: number | null
+  signalMult: number | null
   signalStrength: string
-  dcaReturn: number
-  dcaSuitabilityScore: number
+  dcaReturn: number | null
+  dcaSuitabilityScore: number | null
 }
 
 interface SectorAssetsTableProps {
@@ -31,6 +31,11 @@ export function SectorAssetsTable({ assets }: SectorAssetsTableProps) {
     sorted.sort((a, b) => {
       let aVal = a[sortKey]
       let bVal = b[sortKey]
+
+      // Assets with no value for this column always sort last, whichever way the column is sorted
+      if (aVal === null && bVal === null) return 0
+      if (aVal === null) return 1
+      if (bVal === null) return -1
 
       if (typeof aVal === 'string') {
         aVal = (aVal as string).toLowerCase()
@@ -113,7 +118,7 @@ export function SectorAssetsTable({ assets }: SectorAssetsTableProps) {
               >
                 <td className="py-3 px-2">
                   <Link
-                    href={`/dashboard/${asset.ticker.toLowerCase()}`}
+                    href={`/asset/${asset.ticker.toLowerCase()}`}
                     className="font-medium text-[var(--accent)] hover:underline transition-colors"
                   >
                     {asset.ticker}
@@ -121,14 +126,14 @@ export function SectorAssetsTable({ assets }: SectorAssetsTableProps) {
                 </td>
                 <td className="py-3 px-2">
                   <Link
-                    href={`/dashboard/${asset.ticker.toLowerCase()}`}
+                    href={`/asset/${asset.ticker.toLowerCase()}`}
                     className="text-[var(--text-secondary)] hover:text-[var(--accent)] transition-colors"
                   >
                     {asset.name}
                   </Link>
                 </td>
                 <td className="text-center py-3 px-2">
-                  {asset.signalMult > 1.0 ? (
+                  {asset.signalMult !== null && asset.signalMult > 1.0 ? (
                     <span className="text-green-500 font-medium">
                       buy {asset.signalMult.toFixed(1)}x
                     </span>
@@ -138,13 +143,13 @@ export function SectorAssetsTable({ assets }: SectorAssetsTableProps) {
                 </td>
                 <td
                   className={`text-right py-3 px-2 font-medium ${
-                    asset.dcaReturn > 0 ? 'text-green-500' : 'text-red-500'
+                    asset.dcaReturn === null ? 'text-[var(--text-secondary)]' : asset.dcaReturn > 0 ? 'text-green-500' : 'text-red-500'
                   }`}
                 >
-                  {asset.dcaReturn > 0 ? '+' : ''}{asset.dcaReturn.toFixed(2)}%
+                  {asset.dcaReturn === null ? 'n/a' : `${asset.dcaReturn > 0 ? '+' : ''}${asset.dcaReturn.toFixed(2)}%`}
                 </td>
                 <td className="text-right py-3 px-2 font-medium text-[var(--text-primary)]">
-                  {(asset.dcaSuitabilityScore ?? 0).toFixed(0)}
+                  {asset.dcaSuitabilityScore === null ? 'n/a' : asset.dcaSuitabilityScore.toFixed(0)}
                 </td>
               </tr>
             ))}

@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { getSupabaseClient } from '@/lib/supabase'
+import { fetchAllPages, getSupabaseClient } from '@/lib/supabase'
 
 export function sectorToSlug(sector: string): string {
   return sector
@@ -16,17 +16,8 @@ export function slugToSector(slug: string): string {
 }
 
 export async function getAllSectors(): Promise<string[]> {
-  const { data, error } = await getSupabaseClient()
-    .from('assets')
-    .select('sector')
-    .eq('is_active', true)
-    .not('sector', 'is', null)
-
-  if (error) {
-    console.error('Error fetching sectors:', error)
-    return []
-  }
-
-  const sectors = new Set(data?.map(row => row.sector).filter(Boolean) || [])
-  return Array.from(sectors).sort()
+  // Read every active asset: a single unpaginated query is cut off at 1000 rows and can drop sectors
+  const rows = await fetchAllPages<{ sector: string | null }>((from, to) =>
+    getSupabaseClient().from('assets').select('sector').eq('is_active', true).not('sector', 'is', null).order('ticker').range(from, to))
+  return Array.from(new Set(rows.map(r => r.sector).filter((x): x is string => !!x))).sort()
 }

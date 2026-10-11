@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { slugToSector, getAllSectors } from '@/lib/sectors'
-import { getTopPerformers, getOversoldAssets } from '@/lib/sector-queries'
-import { getRecentBuyZoneEntriesUncached } from '@/lib/sector-queries'
+import { getTopPerformers, getOversoldAssets, getRecentBuyZoneEntries } from '@/lib/sector-queries'
 import {
   getSkeletonLoadersCount,
   getSignalReasoningTruncateChars,
@@ -27,19 +26,15 @@ export async function GET(
     }
 
     // Fetch settings and data in parallel
-    console.error(`[ROUTE] Calling getRecentBuyZoneEntriesUncached for ${sector} with frequency ${signalFrequency}`)
     const [topPerformers, oversold, recentBuyZone, skeletonCount, reasoningTruncate, daysWindow, tableLimit] = await Promise.all([
       getTopPerformers(sector, period),
       getOversoldAssets(sector),
-      getRecentBuyZoneEntriesUncached(sector, signalFrequency),
+      getRecentBuyZoneEntries(sector, signalFrequency),
       getSkeletonLoadersCount(),
       getSignalReasoningTruncateChars(),
       getRecentSignalsDaysWindow(),
       getTableRowsLimit(),
     ])
-
-    console.error(`[ROUTE] Got ${recentBuyZone.length} recent buy zone entries`)
-    console.log('[DEBUG] recentBuyZone result:', JSON.stringify(recentBuyZone))
 
     // Create response with settings included
     const response = NextResponse.json({
@@ -55,8 +50,8 @@ export async function GET(
       generatedAt: new Date().toISOString(),
     })
 
-    // Cache for 3 hours
-    response.headers.set('Cache-Control', 'public, s-maxage=10800, stale-while-revalidate=86400')
+    // The data changes once a day, after the nightly job
+    response.headers.set('Cache-Control', 'public, s-maxage=3600, stale-while-revalidate=86400')
 
     return response
   } catch (error) {
