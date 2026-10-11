@@ -45,9 +45,9 @@ export interface FeedPayload {
   truncated: boolean // true if the row cap was hit, so the page can say so
 }
 
+/** The rules for the "sell on exit signal" side. Buy and hold has no rules and is always shown beside it. */
 export interface Strategy {
-  mode: 'hold' | 'sell'
-  minExit: number // exit score range, used in sell mode
+  minExit: number // exit score range
   maxExit: number
   nextOpen: boolean // sell at the next open instead of the exit day's close
   atrIdx: number | null // index into ATR_MULTIPLIERS, daily page only

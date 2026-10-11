@@ -14,14 +14,13 @@ interface Props {
   datePreset: number | null
   setDatePreset: (d: number | null) => void
   sectors: string[]
-  sellMode: boolean
   years: number[]
   onReset: () => void
 }
 
 const NA_NOTE = 'Signals with no value for this indicator are hidden only while this is narrowed.'
 
-export function FilterRail({ settings, filters, setFilters, base, setBase, datePreset, setDatePreset, sectors, sellMode, years, onReset }: Props) {
+export function FilterRail({ settings, filters, setFilters, base, setBase, datePreset, setDatePreset, sectors, years, onReset }: Props) {
   const [sectorsOpen, setSectorsOpen] = useState(false)
   const [moreOpen, setMoreOpen] = useState(false)
   const set = (patch: Partial<Filters>) => setFilters({ ...filters, ...patch })
@@ -85,7 +84,7 @@ export function FilterRail({ settings, filters, setFilters, base, setBase, dateP
             </div>
 
             <div>
-              <Label>Result</Label>
+              <Label>Return if held</Label>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '4px' }}>
                 {(['all', 'positive', 'negative'] as const).map(k => (
                   <Chip key={k} active={filters.returns === k} onClick={() => set({ returns: k })}>{k === 'all' ? 'All' : k === 'positive' ? 'Gains' : 'Losses'}</Chip>
@@ -93,12 +92,12 @@ export function FilterRail({ settings, filters, setFilters, base, setBase, dateP
               </div>
             </div>
 
-            {sellMode && (
+            {(
               <div>
-                <Label>Status</Label>
+                <Label>If sold on exit signal</Label>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '4px' }}>
                   {(['all', 'open', 'closed'] as const).map(k => (
-                    <Chip key={k} active={filters.status === k} onClick={() => set({ status: k })}>{k[0].toUpperCase() + k.slice(1)}</Chip>
+                    <Chip key={k} active={filters.status === k} onClick={() => set({ status: k })}>{k === 'all' ? 'All' : k === 'open' ? 'Held' : 'Sold'}</Chip>
                   ))}
                 </div>
               </div>

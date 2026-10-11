@@ -42,14 +42,12 @@ export function applyFilters(rows: SigRow[], tickers: TickerInfo[], f: Filters):
 // ─── Exits ──────────────────────────────────────────────────────────────────────────────────
 
 /**
- * What happens to a signal under a strategy. Buy and hold never sells. Sell mode closes it at the
- * exit signal (if its score is inside the chosen range) or at the ATR stop, whichever came first.
- * A return that cannot be known yet, such as a next-open sale that has not opened, is reported as
- * still open rather than guessed.
+ * What happens to a signal if it is sold on the exit signal: closed at the exit signal (if its score
+ * is inside the chosen range) or at the ATR stop, whichever came first. A return that cannot be
+ * known yet, such as a next-open sale that has not opened, is reported as still open rather than
+ * guessed. Buy and hold has no such rules, it is simply the return to the latest close.
  */
 export function effective(r: SigRow, s: Strategy): Effective {
-  if (s.mode === 'hold') return { closed: false, date: null, retPct: r.p, reason: null }
-
   let sigDate: string | null = null
   let sigRet: number | null = null
   if (r.xd && r.xs !== null && r.xs >= s.minExit && r.xs <= s.maxExit) {
@@ -103,6 +101,8 @@ export interface HoldStats {
 }
 
 export interface SellStats {
+  profit: number // realised plus unrealised
+  medianPct: number | null
   closedCount: number
   openCount: number
   closedProfit: number
@@ -120,8 +120,8 @@ export interface Stats {
   count: number // rows shown
   pending: number // rows whose entry price is not known yet, left out of the figures below
   hold: HoldStats
-  spy: { value: number; returnPct: number | null; deltaPct: number | null; n: number }
-  sell: SellStats | null
+  spy: { invested: number; value: number; returnPct: number | null; deltaPct: number | null; n: number }
+  sell: SellStats
   avgMult: number | null
 }
 
@@ -175,9 +175,8 @@ export function computeStats(rows: SigRow[], base: number, strat: Strategy, spy:
     winRate: rets.length ? (wins / rets.length) * 100 : null,
   }
 
-  // Sell on signal
-  let sell: SellStats | null = null
-  if (strat.mode === 'sell') {
+  // Sell on exit signal, always worked out beside buy and hold so the two can be compared
+  const sell: SellStats = (() => {
     const events: { date: string; amount: number }[] = []
     let closedProfit = 0
     let openProfit = 0
@@ -219,7 +218,9 @@ export function computeStats(rows: SigRow[], base: number, strat: Strategy, spy:
     }
     const minCapital = Math.max(0, -minBalance)
     const endingValue = minCapital + balance + openValue
-    sell = {
+    return {
+      profit: closedProfit + openProfit,
+      medianPct: median(sellRets),
       closedCount,
       openCount,
       closedProfit,
@@ -232,13 +233,14 @@ export function computeStats(rows: SigRow[], base: number, strat: Strategy, spy:
       byAtr,
       bySignal,
     }
-  }
+  })()
 
   return {
     count: rows.length,
     pending,
     hold,
     spy: {
+      invested: spyInvested,
       value: spyValue,
       returnPct: spyReturnPct,
       deltaPct: heldOnSpyRows !== null && spyReturnPct !== null ? heldOnSpyRows - spyReturnPct : null,
@@ -256,7 +258,8 @@ export interface Cohort {
   label: string
   signals: number
   invested: number
-  returnPct: number | null
+  holdPct: number | null
+  sellPct: number | null
 }
 
 function periodKey(date: string, freq: Freq): string {
@@ -272,20 +275,21 @@ function periodLabel(firstDate: string, freq: Freq): string {
     : d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', timeZone: 'UTC' })
 }
 
-/** The last `limit` periods that have signals, oldest first, using the strategy's returns. */
+/** The last `limit` periods that have signals, oldest first, with both the held and the sold return. */
 export function cohorts(rows: SigRow[], base: number, strat: Strategy, freq: Freq, limit = 12): Cohort[] {
-  const groups = new Map<string, { first: string; n: number; inv: number; val: number }>()
+  const groups = new Map<string, { first: string; n: number; inv: number; hold: number; sell: number }>()
   for (const r of rows) {
     if (r.p === null) continue
     const eff = effective(r, strat)
-    const ret = eff.closed && eff.retPct !== null ? eff.retPct : r.p
+    const sellRet = eff.closed && eff.retPct !== null ? eff.retPct : r.p
     const inv = base * r.m
     const k = periodKey(r.d, freq)
-    const g = groups.get(k) ?? { first: r.d, n: 0, inv: 0, val: 0 }
+    const g = groups.get(k) ?? { first: r.d, n: 0, inv: 0, hold: 0, sell: 0 }
     if (r.d < g.first) g.first = r.d
     g.n++
     g.inv += inv
-    g.val += inv * (1 + ret / 100)
+    g.hold += inv * (1 + r.p / 100)
+    g.sell += inv * (1 + sellRet / 100)
     groups.set(k, g)
   }
   return Array.from(groups.entries())
@@ -296,6 +300,7 @@ export function cohorts(rows: SigRow[], base: number, strat: Strategy, freq: Fre
       label: periodLabel(g.first, freq),
       signals: g.n,
       invested: g.inv,
-      returnPct: g.inv > 0 ? (g.val / g.inv - 1) * 100 : null,
+      holdPct: g.inv > 0 ? (g.hold / g.inv - 1) * 100 : null,
+      sellPct: g.inv > 0 ? (g.sell / g.inv - 1) * 100 : null,
     }))
 }

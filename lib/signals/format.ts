@@ -30,6 +30,14 @@ export function dateShort(d: string | null | undefined): string {
   return new Date(d + 'T12:00:00Z').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', timeZone: 'UTC' })
 }
 
+/** Short date for tables, such as Oct 5 '26. */
+export function dateCompact(d: string | null | undefined): string {
+  if (!d) return NA
+  const x = new Date(d + 'T12:00:00Z')
+  const md = x.toLocaleDateString('en-US', { month: 'short', day: 'numeric', timeZone: 'UTC' })
+  return md + " '" + String(x.getUTCFullYear()).slice(2)
+}
+
 /** Volatility timing applies only on down days. Zero means the signal day was not a down day. */
 export function volLabel(v: number | null | undefined): string {
   if (v === null || v === undefined) return NA

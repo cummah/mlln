@@ -1,138 +1,184 @@
 'use client'
 
+import type { ReactNode } from 'react'
 import { ATR_MULTIPLIERS, RANGES, type FreqSettings } from '@/lib/signals/config'
-import { money, num, pct, tone, NA } from '@/lib/signals/format'
+import { money, NA, num, pct, tone } from '@/lib/signals/format'
 import type { Cohort, Stats } from '@/lib/signals/model'
-import type { Freq, Strategy } from '@/lib/signals/types'
-import { Card, Label, Line, Segmented, Stat } from './ui'
+import type { Strategy } from '@/lib/signals/types'
+import { Card, Label, Segmented } from './ui'
 
-export function Tiles({ stats, base }: { stats: Stats; base: number }) {
-  const h = stats.hold
-  const delta = stats.spy.deltaPct
+const th = { padding: '8px 10px', fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--text-2)', textAlign: 'right', whiteSpace: 'nowrap' } as const
+const td = { padding: '7px 10px', textAlign: 'right', fontFamily: 'DM Mono, monospace', whiteSpace: 'nowrap' } as const
+const rowLabel = { padding: '7px 10px 7px 0', fontSize: '12px', color: 'var(--text-2)', textAlign: 'left' } as const
+const dash = <span style={{ color: 'var(--text-3)' }}>-</span>
+
+function Row({ label, hold, sell, spy, strong, hint }: { label: string; hold?: ReactNode; sell?: ReactNode; spy?: ReactNode; strong?: boolean; hint?: string }) {
+  const cell = (v: ReactNode) => (
+    <td style={{ ...td, fontWeight: strong ? 700 : 500, fontSize: strong ? '16px' : '13px' }}>{v === undefined ? dash : v}</td>
+  )
   return (
-    <Card pad={0}>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '18px', padding: '16px 20px' }}>
-        <Stat label="Signals" value={stats.count.toLocaleString()} sub={`${stats.avgMult === null ? NA : stats.avgMult.toFixed(2) + '×'} average multiplier${stats.pending ? ` · ${stats.pending} awaiting entry price` : ''}`} />
-        <Stat label="Invested" value={money(h.invested)} sub={`$${base} base per signal`} />
-        <Stat label="Value now" value={money(h.value)} sub={`${h.value - h.invested >= 0 ? '+' : ''}${money(h.value - h.invested)} profit`} color={tone(h.value - h.invested)} />
-        <Stat
-          label="Return, buy and hold"
-          value={pct(h.returnPct)}
-          color={tone(h.returnPct)}
-          sub={stats.spy.returnPct === null ? 'SPY comparison unavailable' : <>Same dollars in SPY on the same dates: {pct(stats.spy.returnPct)}<br /><span style={{ color: tone(delta) }}>{delta === null ? '' : `${delta >= 0 ? '+' : ''}${delta.toFixed(1)} pts vs SPY`}</span></>}
-        />
-        <Stat label="Win rate" value={h.winRate === null ? NA : `${h.winRate.toFixed(0)}%`} sub={`${h.wins} of ${h.n} · median ${pct(h.medianPct)}`} />
-      </div>
-    </Card>
+    <tr style={{ borderTop: '1px solid var(--border)' }}>
+      <td style={rowLabel} title={hint}>{label}</td>
+      {cell(hold)}
+      {cell(sell)}
+      {cell(spy)}
+    </tr>
   )
 }
 
-interface StrategyProps {
+const signed = (v: number | null, f: (n: number) => string = n => money(n)): ReactNode =>
+  v === null ? NA : <span style={{ color: tone(v) }}>{v >= 0 ? '+' : ''}{f(v)}</span>
+
+interface ResultsProps {
   stats: Stats
+  base: number
   strategy: Strategy
   setStrategy: (s: Strategy) => void
   settings: FreqSettings
 }
 
-export function StrategyCard({ stats, strategy, setStrategy, settings }: StrategyProps) {
+/** Buy and hold, sell on exit signal and SPY side by side, with the sell rules directly beneath. */
+export function Results({ stats, base, strategy, setStrategy, settings }: ResultsProps) {
+  const h = stats.hold
   const s = stats.sell
+  const spy = stats.spy
   const set = (patch: Partial<Strategy>) => setStrategy({ ...strategy, ...patch })
-  const vsHold = s && s.returnOnCapital !== null && stats.hold.returnPct !== null ? s.returnOnCapital - stats.hold.returnPct : null
+  const holdProfit = h.value - h.invested
+  const vsHold = s.returnOnCapital !== null && h.returnPct !== null ? s.returnOnCapital - h.returnPct : null
+
   return (
-    <Card>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '12px', flexWrap: 'wrap', marginBottom: '12px' }}>
-        <div style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--text-2)' }}>Strategy</div>
-        <div style={{ minWidth: '260px' }}>
-          <Segmented
-            value={strategy.mode}
-            onChange={mode => set({ mode })}
-            options={[{ key: 'hold', label: 'Buy and hold' }, { key: 'sell', label: 'Sell on exit signal' }]}
-          />
+    <Card pad={0}>
+      <div style={{ padding: '14px 18px 0', display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: '6px' }}>
+        <div style={{ fontSize: '13px', fontWeight: 700, color: 'var(--text)' }}>
+          {stats.count.toLocaleString()} signals
+          <span style={{ fontWeight: 400, color: 'var(--text-2)' }}> · {stats.avgMult === null ? NA : stats.avgMult.toFixed(2) + '×'} average multiplier · ${base} base per signal</span>
+        </div>
+        {stats.pending > 0 && (
+          <div style={{ fontSize: '11px', color: 'var(--text-3)' }}>{stats.pending} signals from the latest day are left out until their entry price exists</div>
+        )}
+      </div>
+
+      <div style={{ padding: '4px 18px 6px' }}>
+        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+          <thead>
+            <tr>
+              <th style={{ ...th, textAlign: 'left', paddingLeft: 0 }} />
+              <th style={th}>Buy and hold</th>
+              <th style={{ ...th, color: 'var(--teal)' }}>Sell on exit signal</th>
+              <th style={th} title="The same dollars put into SPY on the same dates">SPY, same dollars</th>
+            </tr>
+          </thead>
+          <tbody>
+            <Row
+              strong
+              label="Return"
+              hint="Buy and hold: on everything invested. Sell: on the cash actually needed, because sale proceeds are reused for later buys."
+              hold={<span style={{ color: tone(h.returnPct) }}>{pct(h.returnPct)}</span>}
+              sell={<span style={{ color: tone(s.returnOnCapital) }}>{pct(s.returnOnCapital)}</span>}
+              spy={<span style={{ color: tone(spy.returnPct) }}>{pct(spy.returnPct)}</span>}
+            />
+            <Row
+              label="Difference"
+              hint="Buy and hold against SPY, and sell against buy and hold, in percentage points"
+              hold={signed(spy.deltaPct, n => `${n.toFixed(1)} pts vs SPY`)}
+              sell={signed(vsHold, n => `${n.toFixed(1)} pts vs hold`)}
+            />
+            <Row
+              label="Cash needed"
+              hint="Buy and hold funds every signal. Selling reuses sale proceeds, so less cash is needed."
+              hold={money(h.invested)}
+              sell={money(s.minCapital)}
+              spy={money(spy.invested)}
+            />
+            <Row label="Profit" hold={signed(holdProfit)} sell={signed(s.profit)} spy={signed(spy.value - spy.invested)} />
+            <Row label="Ending value" hold={money(h.value)} sell={money(s.endingValue)} spy={money(spy.value)} />
+            <Row label="Win rate" hold={h.winRate === null ? NA : `${h.winRate.toFixed(0)}%`} sell={s.winRate === null ? NA : `${s.winRate.toFixed(0)}%`} />
+            <Row label="Median return" hold={pct(h.medianPct)} sell={pct(s.medianPct)} />
+            <Row label="Positions" hold={`${h.n.toLocaleString()} held`} sell={`${s.closedCount.toLocaleString()} sold · ${s.openCount.toLocaleString()} held`} />
+            <Row label="Average days held when sold" sell={s.avgHoldDays === null ? NA : `${num(s.avgHoldDays, 0)} d`} />
+            {strategy.atrIdx !== null && <Row label="Sold by signal / stop" sell={`${s.bySignal.toLocaleString()} / ${s.byAtr.toLocaleString()}`} />}
+          </tbody>
+        </table>
+        <div style={{ fontSize: '10.5px', color: 'var(--text-3)', margin: '4px 0 10px', lineHeight: 1.4 }}>
+          Sell side: minimum starting cash {money(s.minCapital)} + realised profit {money(s.closedProfit)} + unrealised profit {money(s.openProfit)} = ending value {money(s.endingValue)}.
         </div>
       </div>
 
-      {strategy.mode === 'hold' ? (
-        <div style={{ fontSize: '12px', color: 'var(--text-2)', lineHeight: 1.5 }}>
-          Every signal is held to the latest close. Switch to <b>Sell on exit signal</b> to see what selling at the model&apos;s own exit signal would have done, and how much cash it would have needed.
-        </div>
-      ) : (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '20px' }}>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-            <div>
-              <Label right={strategy.minExit >= 2 ? `${strategy.minExit.toFixed(1)}${strategy.maxExit >= RANGES.exit[1] ? '+' : ` to ${strategy.maxExit.toFixed(1)}`}` : ''}>Exit score</Label>
-              <input type="range" min={2} max={RANGES.exit[1]} step={0.5} value={strategy.minExit} onChange={e => set({ minExit: Number(e.target.value) })} />
-              <div style={{ fontSize: '10px', color: 'var(--text-3)', marginTop: '3px' }}>Sells when a later evaluation date scores at least this. 2 is the model&apos;s own threshold.</div>
-            </div>
-            <div>
-              <Label>Sell price</Label>
-              <Segmented value={strategy.nextOpen ? 'open' : 'close'} onChange={v => set({ nextOpen: v === 'open' })} options={[{ key: 'close', label: 'Exit day close' }, { key: 'open', label: 'Next open' }]} />
-            </div>
-            {settings.hasAtrStops && (
-              <div>
-                <Label right={strategy.atrIdx === null ? 'off' : `${ATR_MULTIPLIERS[strategy.atrIdx]}× ATR`}>Stop loss</Label>
-                <input type="range" min={0} max={ATR_MULTIPLIERS.length} step={1} value={strategy.atrIdx === null ? 0 : strategy.atrIdx + 1} onChange={e => { const v = Number(e.target.value); set({ atrIdx: v === 0 ? null : v - 1 }) }} />
-                <div style={{ fontSize: '10px', color: 'var(--text-3)', marginTop: '3px' }}>Sells if the close falls this many ATR(14) below the highest close since the signal. Whichever comes first wins.</div>
-              </div>
-            )}
-            <div>
-              <Label right={`$${strategy.fee}`}>Fee per sale</Label>
-              <input type="range" min={0} max={20} step={1} value={strategy.fee} onChange={e => set({ fee: Number(e.target.value) })} />
-            </div>
-          </div>
-
+      <div style={{ borderTop: '1px solid var(--border)', background: 'var(--surface2)', borderRadius: '0 0 12px 12px', padding: '12px 18px 14px' }}>
+        <div style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--teal)', marginBottom: '8px' }}>Sell rules</div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(190px, 1fr))', gap: '16px' }}>
           <div>
-            <div style={{ display: 'flex', alignItems: 'baseline', gap: '10px', flexWrap: 'wrap' }}>
-              <span style={{ fontSize: '26px', fontWeight: 700, color: tone(s?.returnOnCapital ?? null), fontFamily: 'DM Mono, monospace' }}>{pct(s?.returnOnCapital ?? null)}</span>
-              {vsHold !== null && <span style={{ fontSize: '12px', fontWeight: 600, color: tone(vsHold) }}>{vsHold >= 0 ? '+' : ''}{vsHold.toFixed(1)} pts vs buy and hold</span>}
+            <Label right={`${strategy.minExit.toFixed(1)}${strategy.maxExit >= RANGES.exit[1] ? '+' : ` to ${strategy.maxExit.toFixed(1)}`}`}>Exit score</Label>
+            <input type="range" min={2} max={RANGES.exit[1]} step={0.5} value={strategy.minExit} onChange={e => set({ minExit: Number(e.target.value) })} />
+            <div style={{ fontSize: '10px', color: 'var(--text-3)', marginTop: '3px' }}>2 is the model&apos;s own exit threshold</div>
+          </div>
+          <div>
+            <Label>Sell price</Label>
+            <Segmented
+              value={strategy.nextOpen ? 'open' : 'close'}
+              onChange={v => set({ nextOpen: v === 'open' })}
+              options={[{ key: 'close', label: 'Close' }, { key: 'open', label: 'Next open' }]}
+            />
+          </div>
+          {settings.hasAtrStops && (
+            <div>
+              <Label right={strategy.atrIdx === null ? 'off' : `${ATR_MULTIPLIERS[strategy.atrIdx]}× ATR`}>Stop loss</Label>
+              <input
+                type="range" min={0} max={ATR_MULTIPLIERS.length} step={1}
+                value={strategy.atrIdx === null ? 0 : strategy.atrIdx + 1}
+                onChange={e => { const v = Number(e.target.value); set({ atrIdx: v === 0 ? null : v - 1 }) }}
+              />
+              <div style={{ fontSize: '10px', color: 'var(--text-3)', marginTop: '3px' }}>Below the highest close since the signal. First trigger wins.</div>
             </div>
-            <div style={{ fontSize: '11px', color: 'var(--text-2)', marginBottom: '8px' }}>return on the cash actually needed, because sale proceeds are reused for later buys</div>
-            {s && (
-              <>
-                <Line label="Sold / still held" value={`${s.closedCount.toLocaleString()} / ${s.openCount.toLocaleString()}`} />
-                {strategy.atrIdx !== null && <Line label="Sold by signal / stop" value={`${s.bySignal.toLocaleString()} / ${s.byAtr.toLocaleString()}`} />}
-                <Line label="Realised profit" value={money(s.closedProfit)} color={tone(s.closedProfit)} />
-                <Line label="Unrealised profit" value={money(s.openProfit)} color={tone(s.openProfit)} />
-                <Line label="Average days held when sold" value={s.avgHoldDays === null ? NA : `${num(s.avgHoldDays, 0)} d`} />
-                <Line label="Win rate" value={s.winRate === null ? NA : `${s.winRate.toFixed(0)}%`} />
-                <div style={{ borderTop: '1px solid var(--border)', marginTop: '6px', paddingTop: '6px' }}>
-                  <Line label="Minimum starting cash" value={money(s.minCapital)} />
-                  <Line label="Ending value" value={money(s.endingValue)} />
-                </div>
-                <div style={{ fontSize: '10px', color: 'var(--text-3)', marginTop: '4px', lineHeight: 1.4 }}>
-                  Minimum starting cash + realised profit + unrealised profit = ending value ({money(s.minCapital)} + {money(s.closedProfit)} + {money(s.openProfit)} = {money(s.endingValue)}).
-                </div>
-              </>
-            )}
+          )}
+          <div>
+            <Label right={`$${strategy.fee}`}>Fee per sale</Label>
+            <input type="range" min={0} max={20} step={1} value={strategy.fee} onChange={e => set({ fee: Number(e.target.value) })} />
           </div>
         </div>
-      )}
+      </div>
     </Card>
   )
 }
 
-export function CohortChart({ data, freq, unit }: { data: Cohort[]; freq: Freq; unit: string }) {
+export function CohortChart({ data, unit }: { data: Cohort[]; unit: string }) {
   if (data.length === 0) return null
-  const max = Math.max(...data.map(d => Math.abs(d.returnPct ?? 0)), 5)
+  const max = Math.max(...data.flatMap(d => [Math.abs(d.holdPct ?? 0), Math.abs(d.sellPct ?? 0)]), 5)
+  const bar = (v: number | null, strong: boolean) => {
+    const h = v === null ? 0 : Math.max(3, (Math.abs(v) / max) * 90)
+    return <div style={{ flex: 1, height: `${h}px`, background: v !== null && v >= 0 ? 'var(--green)' : '#E24B4A', opacity: strong ? 0.9 : 0.45, borderRadius: '3px 3px 0 0' }} />
+  }
+  const swatch = (opacity: number) => (
+    <span style={{ display: 'inline-block', width: 10, height: 10, background: 'var(--green)', opacity, marginRight: 5, borderRadius: 2 }} />
+  )
   return (
     <Card pad={0}>
-      <div style={{ padding: '18px 22px' }}>
-        <div style={{ fontSize: '14px', fontWeight: 700, color: 'var(--text)' }}>Return by {unit} of signal</div>
-        <div style={{ fontSize: '12px', color: 'var(--text-3)', margin: '2px 0 16px' }}>
-          Dollar weighted return to the latest close of the signals issued in each {unit}. The number under each bar is how many signals it holds.
+      <div style={{ padding: '16px 20px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', flexWrap: 'wrap', gap: '8px' }}>
+          <div style={{ fontSize: '14px', fontWeight: 700, color: 'var(--text)' }}>Return by {unit} of signal</div>
+          <div style={{ fontSize: '11px', color: 'var(--text-2)', display: 'flex', gap: '12px' }}>
+            <span>{swatch(0.9)}Buy and hold</span>
+            <span>{swatch(0.45)}Sell on exit signal</span>
+          </div>
         </div>
-        <div style={{ display: 'flex', alignItems: 'flex-end', gap: '6px', height: '130px' }}>
-          {data.map(d => {
-            const v = d.returnPct
-            const h = v === null ? 0 : Math.max(4, (Math.abs(v) / max) * 90)
-            return (
-              <div key={d.key} title={`${d.label}: ${pct(v)} on ${money(d.invested)} invested`} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-end', gap: '4px', minWidth: 0 }}>
-                <div style={{ fontSize: '10px', fontWeight: 600, color: tone(v) }}>{pct(v)}</div>
-                <div style={{ width: '100%', height: `${h}px`, background: v !== null && v >= 0 ? 'var(--green)' : '#E24B4A', opacity: 0.85, borderRadius: '4px 4px 0 0' }} />
-                <div style={{ fontSize: '10.5px', fontWeight: 600, color: 'var(--text-2)', whiteSpace: 'nowrap' }}>{d.label}</div>
-                <div style={{ fontSize: '9.5px', color: 'var(--text-3)' }}>{d.signals.toLocaleString()}</div>
-              </div>
-            )
-          })}
+        <div style={{ fontSize: '12px', color: 'var(--text-3)', margin: '2px 0 14px' }}>Dollar weighted return to the latest close, for the signals issued in each {unit}.</div>
+        <div style={{ display: 'flex', alignItems: 'flex-end', gap: '8px', height: '112px' }}>
+          {data.map(d => (
+            <div key={d.key} title={`${d.label}: held ${pct(d.holdPct)}, sold ${pct(d.sellPct)}, ${d.signals} signals`} style={{ flex: 1, display: 'flex', alignItems: 'flex-end', gap: '2px', minWidth: 0 }}>
+              {bar(d.holdPct, true)}
+              {bar(d.sellPct, false)}
+            </div>
+          ))}
+        </div>
+        <div style={{ display: 'flex', gap: '8px', marginTop: '6px' }}>
+          {data.map(d => (
+            <div key={d.key} style={{ flex: 1, textAlign: 'center', minWidth: 0 }}>
+              <div style={{ fontSize: '10.5px', fontWeight: 600, color: 'var(--text-2)', whiteSpace: 'nowrap' }}>{d.label}</div>
+              <div style={{ fontSize: '9.5px', fontWeight: 600, color: tone(d.holdPct) }}>{pct(d.holdPct)}</div>
+              <div style={{ fontSize: '9.5px', color: tone(d.sellPct), opacity: 0.7 }}>{pct(d.sellPct)}</div>
+              <div style={{ fontSize: '9px', color: 'var(--text-3)' }}>{d.signals.toLocaleString()}</div>
+            </div>
+          ))}
         </div>
       </div>
     </Card>

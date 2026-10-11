@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { useMemo, useState } from 'react'
 import { exportTableToCSV } from '@/lib/csv-export'
 import { effective } from '@/lib/signals/model'
-import { dateShort, fracPct, mult, NA, num, money, pct, tone, volLabel } from '@/lib/signals/format'
+import { dateCompact, fracPct, mult, NA, num, money, pct, tone } from '@/lib/signals/format'
 import type { Effective, Freq, SigRow, Strategy, TickerInfo } from '@/lib/signals/types'
 import { Card } from './ui'
 
@@ -13,54 +13,70 @@ export interface TRow {
   t: TickerInfo
   eff: Effective
   invested: number
-  ret: number | null
-  pnl: number | null
+  pnl: number | null // held to the latest close
 }
 
+// pri 1 is always shown. Columns of pri 2 and 3 are dropped, in that order, when the table is narrow,
+// so the table always fits its box and never scrolls sideways.
 interface Col {
   key: string
   label: string
+  pri: 1 | 2 | 3
   align: 'left' | 'right'
   sort: (x: TRow) => string | number | null
   cell: (x: TRow) => React.ReactNode
   csv: (x: TRow) => string | number | null
-  only?: 'sell' | 'daily'
+  only?: 'daily'
   hint?: string
+  off?: boolean // hidden until chosen in the column picker
 }
+
+// A signal from the latest day has no entry price until the next open
+const pendingCell = <span title="The entry price fills at the next open" style={{ color: 'var(--text-3)' }}>pending</span>
+
+const soldRet = (x: TRow) => (x.eff.closed ? x.eff.retPct : null)
 
 const COLS: Col[] = [
   {
-    key: 'ticker', label: 'Asset', align: 'left', sort: x => x.t.ticker, csv: x => x.t.ticker,
+    key: 'ticker', label: 'Asset', pri: 1, align: 'left', sort: x => x.t.ticker, csv: x => x.t.ticker,
     cell: x => (
       <>
         <Link href={`/asset/${x.t.ticker.toLowerCase()}`} onClick={e => e.stopPropagation()} style={{ color: 'var(--teal)', textDecoration: 'none', fontWeight: 600 }} className="hover:underline">{x.t.ticker}</Link>
-        <div style={{ fontSize: '11px', color: 'var(--text-2)', marginTop: '2px', maxWidth: '190px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{x.t.name}</div>
+        <div style={{ fontSize: '10.5px', color: 'var(--text-2)', marginTop: '1px', maxWidth: '140px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{x.t.name}</div>
       </>
     ),
   },
-  { key: 'sector', label: 'Sector', align: 'left', sort: x => x.t.sector, csv: x => x.t.sector, cell: x => x.t.sector },
-  { key: 'date', label: 'Signal date', align: 'left', sort: x => x.r.d, csv: x => x.r.d, cell: x => dateShort(x.r.d) },
-  { key: 'mult', label: 'Multiplier', align: 'right', sort: x => x.r.m, csv: x => x.r.m, cell: x => mult(x.r.m) },
-  { key: 'invested', label: 'Invested', align: 'right', sort: x => x.invested, csv: x => Math.round(x.invested), cell: x => money(x.invested) },
-  { key: 'pnl', label: 'P&L', align: 'right', sort: x => x.pnl, csv: x => x.pnl === null ? null : Math.round(x.pnl), cell: x => <span style={{ color: tone(x.pnl), fontWeight: 600 }}>{money(x.pnl)}</span> },
-  { key: 'ret', label: 'Return', align: 'right', sort: x => x.ret, csv: x => x.ret, cell: x => <span style={{ color: tone(x.ret), fontWeight: 600 }}>{pct(x.ret)}</span>, hint: 'To the latest close, or to the sale if sold' },
+  { key: 'date', label: 'Signal', pri: 1, align: 'left', sort: x => x.r.d, csv: x => x.r.d, cell: x => dateCompact(x.r.d) },
+  { key: 'mult', label: 'Mult', pri: 1, align: 'right', sort: x => x.r.m, csv: x => x.r.m, cell: x => mult(x.r.m), hint: 'Buy multiplier' },
+  { key: 'pnl', label: 'P&L held', pri: 2, align: 'right', sort: x => x.pnl, csv: x => (x.pnl === null ? null : Math.round(x.pnl)), cell: x => (x.pnl === null ? pendingCell : <span style={{ color: tone(x.pnl), fontWeight: 600 }}>{money(x.pnl)}</span>), hint: 'Profit if held to the latest close' },
+  { key: 'ret', label: 'Return held', pri: 1, align: 'right', sort: x => x.r.p, csv: x => x.r.p, cell: x => (x.r.p === null ? pendingCell : <span style={{ color: tone(x.r.p), fontWeight: 600 }}>{pct(x.r.p)}</span>), hint: 'Return if held to the latest close' },
   {
-    key: 'status', label: 'Status', align: 'left', only: 'sell', sort: x => (x.eff.closed ? 1 : 0), csv: x => (x.eff.closed ? `Sold ${x.eff.date}` : 'Held'),
+    key: 'sold', label: 'If sold', pri: 1, align: 'right', sort: soldRet,
+    csv: x => (x.eff.closed ? x.eff.retPct : null),
+    hint: 'Return if sold at the exit signal, or Held if no exit has happened',
     cell: x => x.eff.closed
-      ? <span style={{ color: 'var(--text-2)' }}>Sold {dateShort(x.eff.date)}{x.eff.reason === 'atr' ? ' (stop)' : ''}</span>
-      : <span style={{ color: 'var(--green)', fontWeight: 600 }}>Held</span>,
+      ? <span title={`Sold ${x.eff.date}${x.eff.reason === 'atr' ? ' by stop loss' : ''}`} style={{ color: tone(x.eff.retPct), fontWeight: 600 }}>{pct(x.eff.retPct)}{x.eff.reason === 'atr' ? ' ◦' : ''}</span>
+      : <span style={{ color: 'var(--text-3)' }}>Held</span>,
   },
-  { key: 'exitScore', label: 'Exit score', align: 'right', only: 'sell', sort: x => x.r.xs, csv: x => x.r.xs, cell: x => num(x.r.xs) },
-  { key: 'dca', label: 'DCA score', align: 'right', sort: x => x.t.dca, csv: x => x.t.dca, cell: x => (x.t.dca === null ? NA : Math.round(x.t.dca)) },
-  { key: 'factor', label: 'Factor regime', align: 'right', sort: x => x.r.f, csv: x => x.r.f, cell: x => <span style={{ color: tone(x.r.f) }}>{fracPct(x.r.f)}</span> },
-  { key: 'vol', label: 'Vol timing', align: 'right', sort: x => x.r.v, csv: x => x.r.v, hint: 'Applies only on down days. "No dip" means the signal day was not a down day.', cell: x => <span style={{ color: x.r.v === 0 ? 'var(--text-3)' : tone(x.r.v) }}>{volLabel(x.r.v)}</span> },
-  { key: 'mr', label: 'Mean reversion', align: 'right', sort: x => x.r.r, csv: x => x.r.r, cell: x => <span style={{ color: tone(x.r.r) }}>{fracPct(x.r.r)}</span> },
-  { key: 'atr', label: 'Volatility', align: 'right', sort: x => x.r.a, csv: x => x.r.a, cell: x => (x.r.a === null ? NA : `${x.r.a.toFixed(1)}%`), hint: 'ATR(14) as a percent of price' },
-  { key: 'wa', label: 'Weekly buy', align: 'right', only: 'daily', sort: x => x.r.wa, csv: x => x.r.wa, cell: x => (x.r.wa === null ? '-' : `${x.r.wa} d ago`) },
-  { key: 'ma', label: 'Monthly buy', align: 'right', only: 'daily', sort: x => x.r.ma, csv: x => x.r.ma, cell: x => (x.r.ma === null ? '-' : `${x.r.ma} d ago`) },
+  { key: 'factor', label: 'Factor', pri: 2, align: 'right', sort: x => x.r.f, csv: x => x.r.f, cell: x => <span style={{ color: tone(x.r.f) }}>{fracPct(x.r.f)}</span>, hint: 'Factor regime' },
+  // Vol timing exists only on down days. Up days have no value, shown as a dash.
+  { key: 'vol', label: 'Vol timing', pri: 2, align: 'right', sort: x => x.r.v, csv: x => x.r.v, cell: x => (x.r.v === 0 ? <span style={{ color: 'var(--text-3)' }}>-</span> : <span style={{ color: tone(x.r.v) }}>{fracPct(x.r.v)}</span>), hint: 'Only on down days, a dash means the signal day was not a down day' },
+  { key: 'mr', label: 'Mean rev', pri: 2, align: 'right', sort: x => x.r.r, csv: x => x.r.r, cell: x => <span style={{ color: tone(x.r.r) }}>{fracPct(x.r.r)}</span>, hint: 'Mean reversion' },
+  { key: 'invested', label: 'Invested', pri: 3, align: 'right', sort: x => x.invested, csv: x => Math.round(x.invested), cell: x => money(x.invested) },
+  { key: 'dca', label: 'DCA', pri: 3, align: 'right', sort: x => x.t.dca, csv: x => x.t.dca, cell: x => (x.t.dca === null ? NA : Math.round(x.t.dca)), hint: 'DCA suitability score' },
+  { key: 'atr', label: 'Volat.', pri: 3, align: 'right', sort: x => x.r.a, csv: x => x.r.a, cell: x => (x.r.a === null ? NA : `${x.r.a.toFixed(1)}%`), hint: 'ATR(14) as a percent of price' },
+  { key: 'sector', label: 'Sector', pri: 3, align: 'left', off: true, sort: x => x.t.sector, csv: x => x.t.sector, cell: x => x.t.sector },
+  { key: 'exitScore', label: 'Exit score', pri: 3, align: 'right', off: true, sort: x => x.r.xs, csv: x => x.r.xs, cell: x => num(x.r.xs) },
+  { key: 'wa', label: 'Wkly buy', pri: 3, align: 'right', only: 'daily', off: true, sort: x => x.r.wa, csv: x => x.r.wa, cell: x => (x.r.wa === null ? '-' : `${x.r.wa}d`), hint: 'Days since a weekly buy' },
+  { key: 'ma', label: 'Mthly buy', pri: 3, align: 'right', only: 'daily', off: true, sort: x => x.r.ma, csv: x => x.r.ma, cell: x => (x.r.ma === null ? '-' : `${x.r.ma}d`), hint: 'Days since a monthly buy' },
 ]
 
-const DEFAULT_VISIBLE = ['ticker', 'date', 'mult', 'invested', 'pnl', 'ret', 'status', 'dca', 'factor', 'vol', 'mr', 'atr', 'wa', 'ma']
+const css = `
+  .sig-wrap { container-type: inline-size; }
+  .sig-wrap .c2, .sig-wrap .c3 { display: none; }
+  @container (min-width: 700px) { .sig-wrap .c2 { display: table-cell; } }
+  @container (min-width: 880px) { .sig-wrap .c3 { display: table-cell; } }
+`
 
 interface Props {
   rows: SigRow[]
@@ -76,21 +92,22 @@ export function SignalTable({ rows, tickers, strategy, base, freq, onSelect }: P
   const [desc, setDesc] = useState(true)
   const [page, setPage] = useState(0)
   const [pageSize, setPageSize] = useState(100)
-  const [visible, setVisible] = useState<Set<string>>(new Set(DEFAULT_VISIBLE))
+  const [visible, setVisible] = useState<Set<string>>(new Set(COLS.filter(c => !c.off).map(c => c.key)))
   const [pickerOpen, setPickerOpen] = useState(false)
 
-  const cols = COLS.filter(c => visible.has(c.key) && (c.only !== 'sell' || strategy.mode === 'sell') && (c.only !== 'daily' || freq === 'daily'))
+  const available = COLS.filter(c => !c.only || c.only === freq)
+  const cols = available.filter(c => visible.has(c.key))
 
-  const trows = useMemo<TRow[]>(() => rows.map(r => {
-    const eff = effective(r, strategy)
-    const invested = base * r.m
-    const ret = eff.closed ? eff.retPct : r.p
-    const pnl = ret === null ? null : invested * (ret / 100) - (eff.closed ? strategy.fee : 0)
-    return { r, t: tickers[r.i], eff, invested, ret, pnl }
-  }), [rows, tickers, strategy, base])
+  const trows = useMemo<TRow[]>(() => rows.map(r => ({
+    r,
+    t: tickers[r.i],
+    eff: effective(r, strategy),
+    invested: base * r.m,
+    pnl: r.p === null ? null : base * r.m * (r.p / 100),
+  })), [rows, tickers, strategy, base])
 
   const sorted = useMemo(() => {
-    const col = COLS.find(c => c.key === sortKey) ?? COLS[2]
+    const col = COLS.find(c => c.key === sortKey) ?? COLS[1]
     const dir = desc ? -1 : 1
     return [...trows].sort((a, b) => {
       const x = col.sort(a), y = col.sort(b)
@@ -105,44 +122,51 @@ export function SignalTable({ rows, tickers, strategy, base, freq, onSelect }: P
   const cur = Math.min(page, pages - 1)
   const slice = sorted.slice(cur * pageSize, (cur + 1) * pageSize)
 
-  const header = (c: Col) => {
-    const active = sortKey === c.key
-    return (
-      <th key={c.key} title={c.hint} onClick={() => { if (active) setDesc(!desc); else { setSortKey(c.key); setDesc(true) } setPage(0) }}
-        style={{ padding: '12px 14px', textAlign: c.align, fontWeight: 600, color: active ? 'var(--text)' : 'var(--text-2)', whiteSpace: 'nowrap', cursor: 'pointer', userSelect: 'none', position: 'sticky', top: 0, background: 'var(--surface2)' }}>
-        {c.label}{active ? (desc ? ' ↓' : ' ↑') : ''}
-      </th>
-    )
-  }
+  const cls = (c: Col) => (c.pri === 1 ? undefined : `c${c.pri}`)
+  const pad = '8px 9px'
 
-  const btn = { padding: '8px 12px', background: 'var(--surface)', border: '1px solid var(--border-elevated)', borderRadius: '8px', fontSize: '12px', fontWeight: 600, color: 'var(--text)', cursor: 'pointer' } as const
+  const btn = { padding: '7px 11px', background: 'var(--surface)', border: '1px solid var(--border-elevated)', borderRadius: '8px', fontSize: '12px', fontWeight: 600, color: 'var(--text)', cursor: 'pointer' } as const
 
   return (
     <div>
-      <div style={{ display: 'flex', gap: '10px', marginBottom: '12px', alignItems: 'center' }}>
+      <div style={{ display: 'flex', gap: '10px', marginBottom: '10px', alignItems: 'center', flexWrap: 'wrap' }}>
         <div style={{ position: 'relative' }}>
           <button style={btn} onClick={() => setPickerOpen(!pickerOpen)}>Columns</button>
           {pickerOpen && (
-            <div style={{ position: 'absolute', top: '100%', left: 0, marginTop: '8px', background: 'var(--surface2-elevated, var(--surface-elevated))', border: '1px solid var(--border-elevated)', borderRadius: '8px', padding: '10px 12px', minWidth: '190px', maxHeight: '320px', overflowY: 'auto', zIndex: 50, boxShadow: 'var(--shadow-lg)' }}>
-              {COLS.filter(c => (c.only !== 'sell' || strategy.mode === 'sell') && (c.only !== 'daily' || freq === 'daily')).map(c => (
-                <label key={c.key} style={{ display: 'flex', gap: '8px', alignItems: 'center', padding: '6px 0', fontSize: '12px', cursor: 'pointer' }}>
+            <div style={{ position: 'absolute', top: '100%', left: 0, marginTop: '8px', background: 'var(--surface-elevated)', border: '1px solid var(--border-elevated)', borderRadius: '8px', padding: '10px 12px', minWidth: '200px', maxHeight: '320px', overflowY: 'auto', zIndex: 50, boxShadow: 'var(--shadow-lg)' }}>
+              {available.map(c => (
+                <label key={c.key} style={{ display: 'flex', gap: '8px', alignItems: 'center', padding: '5px 0', fontSize: '12px', cursor: 'pointer' }}>
                   <input type="checkbox" checked={visible.has(c.key)} onChange={() => { const n = new Set(visible); if (n.has(c.key)) n.delete(c.key); else n.add(c.key); setVisible(n) }} />
                   {c.label}
                 </label>
               ))}
+              <div style={{ fontSize: '10px', color: 'var(--text-3)', marginTop: '6px', maxWidth: '190px' }}>On a narrow screen the less important columns are hidden so the table never scrolls sideways.</div>
             </div>
           )}
         </div>
-        <button style={btn} onClick={() => exportTableToCSV(sorted.map(x => Object.fromEntries(cols.map(c => [c.key, c.csv(x)]))), cols.map(c => ({ key: c.key, label: c.label })), `${freq}-signals.csv`)}>
+        <button style={btn} onClick={() => exportTableToCSV(sorted.map(x => Object.fromEntries(available.map(c => [c.key, c.csv(x)]))), available.map(c => ({ key: c.key, label: c.label })), `${freq}-signals.csv`)}>
           Export CSV
         </button>
         <div style={{ fontSize: '12px', color: 'var(--text-3)', marginLeft: 'auto' }}>Click a row for the indicators behind it</div>
       </div>
 
       <Card pad={0} style={{ overflow: 'hidden' }}>
-        <div style={{ overflowX: 'auto', maxHeight: '75vh', overflowY: 'auto' }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
-            <thead><tr style={{ borderBottom: '1px solid var(--border)' }}>{cols.map(header)}</tr></thead>
+        <div className="sig-wrap">
+          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12px' }}>
+            <thead>
+              <tr style={{ borderBottom: '1px solid var(--border)', background: 'var(--surface2)' }}>
+                {cols.map(c => {
+                  const active = sortKey === c.key
+                  return (
+                    <th key={c.key} className={cls(c)} title={c.hint}
+                      onClick={() => { if (active) setDesc(!desc); else { setSortKey(c.key); setDesc(true) } setPage(0) }}
+                      style={{ padding: pad, textAlign: c.align, fontWeight: 600, color: active ? 'var(--text)' : 'var(--text-2)', whiteSpace: 'nowrap', cursor: 'pointer', userSelect: 'none' }}>
+                      {c.label}{active ? (desc ? ' ↓' : ' ↑') : ''}
+                    </th>
+                  )
+                })}
+              </tr>
+            </thead>
             <tbody>
               {slice.map((x, i) => (
                 <tr key={`${x.t.ticker}-${x.r.d}`} onClick={() => onSelect(x.r)}
@@ -150,7 +174,7 @@ export function SignalTable({ rows, tickers, strategy, base, freq, onSelect }: P
                   onMouseEnter={e => (e.currentTarget.style.background = 'var(--surface2)')}
                   onMouseLeave={e => (e.currentTarget.style.background = i % 2 ? 'rgba(255,255,255,0.02)' : 'transparent')}>
                   {cols.map(c => (
-                    <td key={c.key} style={{ padding: '11px 14px', textAlign: c.align, whiteSpace: 'nowrap', color: 'var(--text-2)', fontFamily: c.align === 'right' ? 'DM Mono, monospace' : undefined }}>{c.cell(x)}</td>
+                    <td key={c.key} className={cls(c)} style={{ padding: pad, textAlign: c.align, whiteSpace: 'nowrap', color: 'var(--text-2)', fontFamily: c.align === 'right' ? 'DM Mono, monospace' : undefined }}>{c.cell(x)}</td>
                   ))}
                 </tr>
               ))}
@@ -161,7 +185,7 @@ export function SignalTable({ rows, tickers, strategy, base, freq, onSelect }: P
           </table>
         </div>
 
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '14px 16px', borderTop: '1px solid var(--border)', flexWrap: 'wrap', gap: '8px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 14px', borderTop: '1px solid var(--border)', flexWrap: 'wrap', gap: '8px' }}>
           <div style={{ fontSize: '12px', color: 'var(--text-2)' }}>
             {sorted.length === 0 ? 0 : cur * pageSize + 1}-{Math.min((cur + 1) * pageSize, sorted.length)} of {sorted.length.toLocaleString()} signals
           </div>
@@ -175,6 +199,7 @@ export function SignalTable({ rows, tickers, strategy, base, freq, onSelect }: P
           </div>
         </div>
       </Card>
+      <style dangerouslySetInnerHTML={{ __html: css }} />
     </div>
   )
 }

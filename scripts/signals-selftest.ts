@@ -19,13 +19,15 @@ const tickers: TickerInfo[] = [
   { ticker: 'AAA', name: 'Alpha Corp', sector: 'Tech', dca: 80, alpha: 1 },
   { ticker: 'BBB', name: 'Beta Inc', sector: 'Energy', dca: null, alpha: null },
 ]
-const sell = (o: Partial<Strategy> = {}): Strategy => ({ ...DEFAULT_STRATEGY, mode: 'sell', ...o })
+const sell = (o: Partial<Strategy> = {}): Strategy => ({ ...DEFAULT_STRATEGY, ...o })
 const noSpy = () => null
 
-test('buy and hold never closes a signal', () => {
-  const e = effective(row({ p: 12, xd: '2026-02-01', xr: 5, xs: 4 }), DEFAULT_STRATEGY)
-  assert.equal(e.closed, false)
-  assert.equal(e.retPct, 12)
+test('buy and hold figures ignore the sell rules entirely', () => {
+  const rows = [row({ p: 12, xd: '2026-02-01', xr: 5, xs: 4 })]
+  const a = computeStats(rows, 100, sell({ minExit: 2 }), noSpy).hold
+  const b = computeStats(rows, 100, sell({ minExit: 9, atrIdx: 1, fee: 20 }), noSpy).hold
+  assert.deepEqual(a, b)
+  near(a.returnPct, 12)
 })
 
 test('sell mode closes at the exit signal, close or next open', () => {
@@ -88,22 +90,32 @@ test('sell statistics: minimum capital, ending value and the profit identity', (
   const A = row({ d: '2026-01-01', m: 1, p: 20, xd: '2026-01-10', xr: 10, xn: 10, xs: 3 })
   const B = row({ d: '2026-01-05', m: 2, p: 0 })
   const s = computeStats([A, B], 100, sell(), noSpy)
-  near(s.sell!.minCapital, 300) // balance goes -100, -300, -190
-  near(s.sell!.endingValue, 300 + -190 + 200)
-  near(s.sell!.returnOnCapital, (10 / 300) * 100)
-  near(s.sell!.closedProfit, 10)
-  near(s.sell!.openProfit, 0)
-  assert.equal(s.sell!.closedCount, 1)
-  near(s.sell!.avgHoldDays, 9)
+  near(s.sell.minCapital, 300) // balance goes -100, -300, -190
+  near(s.sell.endingValue, 300 + -190 + 200)
+  near(s.sell.returnOnCapital, (10 / 300) * 100)
+  near(s.sell.closedProfit, 10)
+  near(s.sell.openProfit, 0)
+  assert.equal(s.sell.closedCount, 1)
+  near(s.sell.avgHoldDays, 9)
   // identity holds with fees too
-  const f = computeStats([A, B], 100, sell({ fee: 5 }), noSpy).sell!
+  const f = computeStats([A, B], 100, sell({ fee: 5 }), noSpy).sell
   near(f.endingValue, f.minCapital + f.closedProfit + f.openProfit)
+})
+
+test('side by side: held and sold figures are both present and consistent', () => {
+  const A = row({ d: '2026-01-01', m: 1, p: 20, xd: '2026-01-10', xr: 10, xn: 10, xs: 3 })
+  const B = row({ d: '2026-01-05', m: 2, p: 0 })
+  const s = computeStats([A, B], 100, sell(), noSpy)
+  near(s.hold.value - s.hold.invested, 20) // held: +20 on A, 0 on B
+  near(s.sell.profit, 10) // sold: +10 realised on A, 0 on B
+  near(s.sell.medianPct, 5) // returns 10 and 0
+  near(s.sell.profit, s.sell.closedProfit + s.sell.openProfit)
 })
 
 test('same-day sale proceeds fund same-day buys', () => {
   const A = row({ d: '2026-01-01', m: 1, p: 0, xd: '2026-01-10', xr: 0, xn: 0, xs: 3 })
   const B = row({ d: '2026-01-10', m: 1, p: 0 })
-  const s = computeStats([A, B], 100, sell(), noSpy).sell!
+  const s = computeStats([A, B], 100, sell(), noSpy).sell
   near(s.minCapital, 100) // not 200
 })
 
@@ -148,8 +160,9 @@ test('cohorts group by ISO week and keep only the latest periods', () => {
   const c = cohorts(rows, 100, DEFAULT_STRATEGY, 'weekly')
   assert.equal(c.length, 2)
   assert.equal(c[0].signals, 2)
-  near(c[0].returnPct, 20)
-  near(c[1].returnPct, -10)
+  near(c[0].holdPct, 20)
+  near(c[1].holdPct, -10)
+  near(c[0].sellPct, 20) // nothing exited, so the sold return equals the held return
   assert.equal(cohorts(rows, 100, DEFAULT_STRATEGY, 'weekly', 1).length, 1)
 })
 

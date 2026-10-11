@@ -9,8 +9,8 @@ import type { FeedPayload, Filters, Freq, SigRow, Strategy } from '@/lib/signals
 import { FilterRail } from './FilterRail'
 import { SignalDrawer } from './SignalDrawer'
 import { SignalTable } from './SignalTable'
-import { CohortChart, StrategyCard, Tiles } from './Summary'
-import { Card, sliderCss } from './ui'
+import { CohortChart, Results } from './Summary'
+import { sliderCss } from './ui'
 
 const TABS: { key: Freq; label: string }[] = [
   { key: 'daily', label: 'Daily' },
@@ -46,14 +46,16 @@ export function SignalExplorer({ data }: { data: FeedPayload }) {
 
   const rows = useMemo(() => {
     const filtered = applyFilters(data.rows, data.tickers, dFilters)
-    if (dFilters.returns === 'all' && (dStrategy.mode === 'hold' || dFilters.status === 'all')) return filtered
+    if (dFilters.returns === 'all' && dFilters.status === 'all') return filtered
     return filtered.filter(r => {
-      const e = effective(r, dStrategy)
-      const ret = e.closed ? e.retPct : r.p
-      if (dFilters.returns === 'positive' && !(ret !== null && ret >= 0)) return false
-      if (dFilters.returns === 'negative' && !(ret !== null && ret < 0)) return false
-      if (dStrategy.mode === 'sell' && dFilters.status === 'open' && e.closed) return false
-      if (dStrategy.mode === 'sell' && dFilters.status === 'closed' && !e.closed) return false
+      // Return filter is on the held return. Status filter is on whether the exit signal sold it.
+      if (dFilters.returns === 'positive' && !(r.p !== null && r.p >= 0)) return false
+      if (dFilters.returns === 'negative' && !(r.p !== null && r.p < 0)) return false
+      if (dFilters.status !== 'all') {
+        const closed = effective(r, dStrategy).closed
+        if (dFilters.status === 'open' && closed) return false
+        if (dFilters.status === 'closed' && !closed) return false
+      }
       return true
     })
   }, [data.rows, data.tickers, dFilters, dStrategy])
@@ -67,7 +69,7 @@ export function SignalExplorer({ data }: { data: FeedPayload }) {
   const staleWarning = (age !== null && age > 4) || data.signalsStatus === 'failed'
 
   return (
-    <div className="min-h-screen bg-[var(--bg)]" style={{ padding: '14px 18px 28px', maxWidth: '1600px', marginLeft: 'auto', marginRight: 'auto' }}>
+    <div className="min-h-screen bg-[var(--bg)]" style={{ padding: '14px 18px 28px', width: '100%', maxWidth: '1360px', marginLeft: 'auto', marginRight: 'auto', overflowX: 'clip' }}>
       <nav style={{ fontSize: '12px', color: 'var(--text-2)', display: 'flex', gap: '6px', marginBottom: '12px' }}>
         <Link href="/sectors" style={{ color: 'var(--text-2)', textDecoration: 'none' }} className="hover:text-[var(--text)]">Assets</Link>
         <span>›</span>
@@ -105,20 +107,16 @@ export function SignalExplorer({ data }: { data: FeedPayload }) {
         </div>
       )}
 
-      <div className="grid grid-cols-1 lg:grid-cols-[290px_minmax(0,1fr)] xl:grid-cols-[320px_minmax(0,1fr)]" style={{ gap: '14px', alignItems: 'start' }}>
+      <div className="grid grid-cols-1 lg:grid-cols-[270px_minmax(0,1fr)]" style={{ gap: '14px', alignItems: 'start' }}>
         <FilterRail
           settings={settings} filters={filters} setFilters={setFilters} base={base} setBase={setBase}
-          datePreset={datePreset} setDatePreset={setDatePreset} sectors={sectors} years={years}
-          sellMode={strategy.mode === 'sell'} onReset={reset}
+          datePreset={datePreset} setDatePreset={setDatePreset} sectors={sectors} years={years} onReset={reset}
         />
 
         <div style={{ display: 'grid', gap: '12px', minWidth: 0 }}>
-          <Tiles stats={stats} base={dBase} />
-          <StrategyCard stats={stats} strategy={strategy} setStrategy={setStrategy} settings={settings} />
-          <CohortChart data={chart} freq={freq} unit={settings.unit} />
-          <Card pad={0} style={{ background: 'transparent', border: 'none', boxShadow: 'none' }}>
-            <SignalTable rows={rows} tickers={data.tickers} strategy={dStrategy} base={dBase} freq={freq} onSelect={setSelected} />
-          </Card>
+          <Results stats={stats} base={dBase} strategy={strategy} setStrategy={setStrategy} settings={settings} />
+          <CohortChart data={chart} unit={settings.unit} />
+          <SignalTable rows={rows} tickers={data.tickers} strategy={dStrategy} base={dBase} freq={freq} onSelect={setSelected} />
         </div>
       </div>
 
@@ -128,7 +126,7 @@ export function SignalExplorer({ data }: { data: FeedPayload }) {
           date={selected.d} freq={freq} onClose={() => setSelected(null)}
         />
       )}
-      <style jsx global>{sliderCss}</style>
+      <style dangerouslySetInnerHTML={{ __html: sliderCss }} />
     </div>
   )
 }

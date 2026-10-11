@@ -85,7 +85,6 @@ export const DEFAULT_FILTERS: Filters = {
 }
 
 export const DEFAULT_STRATEGY: Strategy = {
-  mode: 'hold',
   minExit: 2,
   maxExit: RANGES.exit[1],
   nextOpen: false,
