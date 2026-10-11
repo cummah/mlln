@@ -56,7 +56,9 @@ export function runChecks(ctx: CheckContext): CheckResult[] {
       if (v === null) continue
       const g = byDate.get(s.signal_date) ?? { zero: 0, total: 0 }
       g.total++
-      if (v === 0) g.zero++
+      // Mean reversion is legitimately zero when no reversion was measured (no half-life). A zero
+      // with a measured half-life, or a zero in any other column, is what this check is for.
+      if (v === 0 && (col !== 'mean_reversion' || s.mr_half_life !== null)) g.zero++
       byDate.set(s.signal_date, g)
     }
     // vol_timing is legitimately zero on up days, so only the factor and reversion columns are strict
@@ -67,8 +69,9 @@ export function runChecks(ctx: CheckContext): CheckResult[] {
   }
 
   // Entry prices fill in the next day, so only the newest bar may lack one.
-  const noEntry = ctx.signals.filter(s => s.entry_price === null && s.signal_date < ctx.expectedDate)
-  add('entry prices filled', noEntry.length === 0, `${noEntry.length} signals older than ${ctx.expectedDate} have no entry price`)
+  // A ticker that has stopped trading has no next bar, so only count signals that have one.
+  const noEntry = ctx.signals.filter(s => s.entry_price === null && s.signal_date < (ctx.lastBarDate.get(s.ticker) ?? ctx.expectedDate))
+  add('entry prices filled', noEntry.length === 0, `${noEntry.length} signals that have a later bar have no entry price`)
 
   return out
 }
