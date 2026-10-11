@@ -5,7 +5,7 @@ import { useState, useEffect } from 'react'
 import { Skeleton } from '@/components/ui/Skeleton'
 import { dateCompact } from '@/lib/signals/format'
 import type { TopPerformer, OversoldAsset, RecentBuyZoneEntry } from '@/lib/sector-queries'
-import { SignalCell, allocation } from './SignalCell'
+import { SignalCell } from './SignalCell'
 import { SortTh, sortBy, useSort } from './sorting'
 
 interface PerformersData {
@@ -99,9 +99,9 @@ const pill = (active: boolean) => ({
   transition: 'all 0.15s',
 }) as const
 
-type FiredKey = 'ticker' | 'date' | 'mult' | 'dca'
+type FiredKey = 'ticker' | 'date' | 'ret' | 'dca'
 type ReturnKey = 'ticker' | 'date' | 'mult' | 'ret'
-type RankKey = 'rank' | 'ticker' | 'ret' | 'signal' | 'dca'
+type RankKey = 'rank' | 'ticker' | 'ret' | 'date' | 'mult'
 
 export function SectorPerformers({ sector }: SectorPerformersProps) {
   const [period, setPeriod] = useState<'1M' | '3M'>('1M')
@@ -112,7 +112,7 @@ export function SectorPerformers({ sector }: SectorPerformersProps) {
   const [expandedRecent, setExpandedRecent] = useState(false)
   const [expandedSignals, setExpandedSignals] = useState(false)
 
-  const firedSort = useSort<FiredKey>('mult', 'desc', ['ticker'])
+  const firedSort = useSort<FiredKey>('ret', 'desc', ['ticker'])
   const returnSort = useSort<ReturnKey>('ret', 'desc', ['ticker'])
   const rankSort = useSort<RankKey>('rank', 'asc', ['ticker'])
 
@@ -135,7 +135,7 @@ export function SectorPerformers({ sector }: SectorPerformersProps) {
 
   // Recent signals (weekly signals from the last 7 days). Ties at the 6x maximum keep the server order, best DCA suitability first.
   const fired = sortBy(data?.oversold ?? [], firedSort.key, firedSort.dir, (r, k) =>
-    k === 'ticker' ? r.ticker : k === 'date' ? r.signalDate : k === 'mult' ? r.signalMult : r.dcaSuitabilityScore)
+    k === 'ticker' ? r.ticker : k === 'date' ? r.signalDate : k === 'ret' ? r.currentReturn : r.dcaSuitabilityScore)
   const firedShown = expandedSignals ? fired : fired.slice(0, limit)
 
   const recent = sortBy(data?.recentBuyZone ?? [], returnSort.key, returnSort.dir, (r, k) =>
@@ -144,14 +144,14 @@ export function SectorPerformers({ sector }: SectorPerformersProps) {
 
   const ranked = (data?.topPerformers ?? []).map((p, i) => ({ ...p, rank: i + 1 }))
   const rankedSorted = sortBy(ranked, rankSort.key, rankSort.dir, (r, k) =>
-    k === 'rank' ? r.rank : k === 'ticker' ? r.ticker : k === 'ret' ? r.dcaReturnPct : k === 'signal' ? r.signalMult : r.dcaSuitabilityScore)
+    k === 'rank' ? r.rank : k === 'ticker' ? r.ticker : k === 'ret' ? r.dcaReturnPct : k === 'date' ? r.signalDate : r.signalMult)
 
   return (
     <div className="w-full" style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
       {/* Recent signals */}
       <Section
         title="Recent signals fired in this sector"
-        subtitle="Assets that received a weekly buy signal above 1× in the last 7 days. Click a column heading to sort. By default the strongest are first, and where several are at the 6× maximum, the best DCA suitability first."
+        subtitle="Assets that received a weekly buy signal above 1× in the last 7 days. Click a column heading to sort. By default the best current return is first."
       >
         {loading ? <Loading count={settings.skeletonLoadersCount} /> : fired.length === 0 ? (
           <Empty>No weekly buy signals above 1× in this sector in the last 7 days.</Empty>
@@ -163,7 +163,7 @@ export function SectorPerformers({ sector }: SectorPerformersProps) {
                   <tr style={{ borderBottom: '1px solid var(--border)' }}>
                     <SortTh label="Ticker" col="ticker" sort={firedSort} />
                     <SortTh label="Signal Date" col="date" sort={firedSort} />
-                    <SortTh label="Buy Multiplier" col="mult" sort={firedSort} align="center" title="Multiplier and the dollar amount it means on the standard weekly amount" />
+                    <SortTh label="Current % Return" col="ret" sort={firedSort} align="right" />
                     <SortTh label="DCA Suitability" col="dca" sort={firedSort} align="right" />
                   </tr>
                 </thead>
@@ -172,8 +172,8 @@ export function SectorPerformers({ sector }: SectorPerformersProps) {
                     <tr key={asset.ticker} style={{ borderBottom: '1px solid var(--border)' }}>
                       <td style={{ padding: '12px 8px' }}><TickerCell ticker={asset.ticker} name={asset.name} /></td>
                       <td style={{ padding: '12px 8px', color: 'var(--text-2)' }}>{dateCompact(asset.signalDate)}</td>
-                      <td style={{ textAlign: 'center', padding: '12px 8px', color: 'var(--green)', fontWeight: '600' }}>
-                        {asset.signalMult.toFixed(2)}x · {allocation(asset.signalMult)}
+                      <td style={{ textAlign: 'right', padding: '12px 8px', fontWeight: '600', color: asset.currentReturn === null ? 'var(--text-3)' : asset.currentReturn >= 0 ? 'var(--green)' : 'var(--red)' }}>
+                        {asset.currentReturn === null ? 'pending' : `${asset.currentReturn >= 0 ? '+' : ''}${asset.currentReturn.toFixed(1)}%`}
                       </td>
                       <td style={{ textAlign: 'right', padding: '12px 8px', fontWeight: '500', color: 'var(--text)' }}>
                         {asset.dcaSuitabilityScore === null ? NA : asset.dcaSuitabilityScore.toFixed(0)}
@@ -208,7 +208,7 @@ export function SectorPerformers({ sector }: SectorPerformersProps) {
                   <tr style={{ borderBottom: '1px solid var(--border)' }}>
                     <SortTh label="Ticker" col="ticker" sort={returnSort} />
                     <SortTh label="Signal Date" col="date" sort={returnSort} />
-                    <SortTh label="Multiplier" col="mult" sort={returnSort} align="right" title="Multiplier and the dollar amount it means on the standard amount" />
+                    <SortTh label="Multiplier" col="mult" sort={returnSort} align="right" />
                     <SortTh label="Current % Return" col="ret" sort={returnSort} align="right" />
                   </tr>
                 </thead>
@@ -218,7 +218,7 @@ export function SectorPerformers({ sector }: SectorPerformersProps) {
                       <td style={{ padding: '12px 8px' }}><TickerCell ticker={entry.ticker} name={entry.name} /></td>
                       <td style={{ padding: '12px 8px', color: 'var(--text-2)' }}>{dateCompact(entry.signalDate)}</td>
                       <td style={{ textAlign: 'right', padding: '12px 8px', color: 'var(--text-2)' }}>
-                        {entry.signalMult.toFixed(2)}x · ${Math.round(entry.signalMult * (signalFrequency === 'monthly' ? 433 : 100)).toLocaleString()}
+                        {entry.signalMult.toFixed(2)}x
                       </td>
                       <td style={{ textAlign: 'right', padding: '12px 8px', fontWeight: '600', color: entry.currentReturn === null ? 'var(--text-3)' : entry.currentReturn >= 0 ? 'var(--green)' : 'var(--red)' }}>
                         {entry.currentReturn === null ? 'pending' : `${entry.currentReturn >= 0 ? '+' : ''}${entry.currentReturn.toFixed(1)}%`}
@@ -238,7 +238,7 @@ export function SectorPerformers({ sector }: SectorPerformersProps) {
       {/* Period based rankings */}
       <Section
         title="Period-based rankings"
-        subtitle="See which assets are leading the sector for the selected timeframe using Enhanced DCA returns. Different from signal-based returns, this shows overall performance for the period. The signal column is each asset's most recent weekly buy signal, with what it means in dollars."
+        subtitle="See which assets are leading the sector for the selected timeframe using Enhanced DCA returns. Different from signal-based returns, this shows overall performance for the period. The signal date and multiplier are each asset's most recent weekly buy signal."
       >
         <div style={{ display: 'flex', gap: '8px', marginBottom: '16px', alignItems: 'center' }}>
           <span style={{ fontSize: '13px', fontWeight: '600', color: 'var(--text-2)' }}>Period:</span>
@@ -257,8 +257,8 @@ export function SectorPerformers({ sector }: SectorPerformersProps) {
                   <SortTh label="Rank" col="rank" sort={rankSort} />
                   <SortTh label="Ticker" col="ticker" sort={rankSort} />
                   <SortTh label={`${period} EDCA Return`} col="ret" sort={rankSort} align="right" />
-                  <SortTh label="Signal" col="signal" sort={rankSort} align="center" title="Most recent weekly buy signal: multiplier, dollar amount and date" />
-                  <SortTh label="DCA Suitability" col="dca" sort={rankSort} align="right" />
+                  <SortTh label="Signal Date" col="date" sort={rankSort} title="Date of the most recent weekly buy signal" />
+                  <SortTh label="Multiplier" col="mult" sort={rankSort} align="right" title="Multiplier of the most recent weekly buy signal" />
                 </tr>
               </thead>
               <tbody>
@@ -269,11 +269,9 @@ export function SectorPerformers({ sector }: SectorPerformersProps) {
                     <td style={{ textAlign: 'right', padding: '12px 8px', fontWeight: '600', color: performer.dcaReturnPct > 0 ? 'var(--green)' : 'var(--red)' }}>
                       {performer.dcaReturnPct > 0 ? '+' : ''}{performer.dcaReturnPct}%
                     </td>
-                    <td style={{ textAlign: 'center', padding: '12px 8px' }}>
-                      <SignalCell mult={performer.signalMult} date={performer.signalDate} />
-                    </td>
-                    <td style={{ textAlign: 'right', padding: '12px 8px', fontWeight: '500', color: 'var(--text)' }}>
-                      {performer.dcaSuitabilityScore === null ? NA : performer.dcaSuitabilityScore.toFixed(0)}
+                    <td style={{ padding: '12px 8px', color: 'var(--text-2)' }}>{performer.signalDate ? dateCompact(performer.signalDate) : '-'}</td>
+                    <td style={{ textAlign: 'right', padding: '12px 8px' }}>
+                      <SignalCell mult={performer.signalMult} />
                     </td>
                   </tr>
                 ))}

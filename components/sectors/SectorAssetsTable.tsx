@@ -12,6 +12,7 @@ interface Asset {
   currentPrice: number | null
   signalMult: number | null
   signalDate: string | null
+  signalReturn: number | null
   signalStrength: string
   dcaReturn: number | null
   dcaSuitabilityScore: number | null
@@ -21,13 +22,13 @@ interface SectorAssetsTableProps {
   assets: Asset[]
 }
 
-type SortKey = 'ticker' | 'name' | 'signal' | 'signalDate' | 'dcaReturn' | 'dcaSuitabilityScore'
+type SortKey = 'ticker' | 'name' | 'signalDate' | 'signal' | 'signalReturn' | 'dcaReturn' | 'dcaSuitabilityScore'
 
 export function SectorAssetsTable({ assets }: SectorAssetsTableProps) {
   const sort = useSort<SortKey>('ticker', 'asc', ['ticker', 'name'])
   const sortedAssets = useMemo(
     () => sortBy(assets, sort.key, sort.dir, (a, k) =>
-      k === 'ticker' ? a.ticker : k === 'name' ? a.name : k === 'signal' ? a.signalMult : k === 'signalDate' ? a.signalDate
+      k === 'ticker' ? a.ticker : k === 'name' ? a.name : k === 'signal' ? a.signalMult : k === 'signalDate' ? a.signalDate : k === 'signalReturn' ? a.signalReturn
         : k === 'dcaReturn' ? a.dcaReturn : a.dcaSuitabilityScore),
     [assets, sort.key, sort.dir],
   )
@@ -40,9 +41,10 @@ export function SectorAssetsTable({ assets }: SectorAssetsTableProps) {
             <tr className="border-b border-[var(--border-subtle)]">
               <SortTh label="Ticker" col="ticker" sort={sort} />
               <SortTh label="Name" col="name" sort={sort} />
-              <SortTh label="Buy Signal" col="signal" sort={sort} align="center" title="Most recent weekly buy signal: multiplier, dollar amount and date. Click to sort by size. Sorting by date is on the Signal Date heading." />
-              <SortTh label="Signal Date" col="signalDate" sort={sort} />
-              <SortTh label="1Y DCA Return" col="dcaReturn" sort={sort} align="right" />
+              <SortTh label="Signal Date" col="signalDate" sort={sort} title="Date of the most recent weekly buy signal" />
+              <SortTh label="Multiplier" col="signal" sort={sort} align="right" title="Multiplier of the most recent weekly buy signal" />
+              <SortTh label="Current % Return" col="signalReturn" sort={sort} align="right" title="Return since the fill price of that signal" />
+              <SortTh label="1Y EDCA Return" col="dcaReturn" sort={sort} align="right" title="Needs a year of price history, so newer listings show n/a" />
               <SortTh label="DCA Suitability" col="dcaSuitabilityScore" sort={sort} align="right" />
             </tr>
           </thead>
@@ -68,11 +70,18 @@ export function SectorAssetsTable({ assets }: SectorAssetsTableProps) {
                     {asset.name}
                   </Link>
                 </td>
-                <td className="text-center py-3 px-2">
-                  <SignalCell mult={asset.signalMult} date={asset.signalDate} showDate={false} />
-                </td>
                 <td className="py-3 px-2 text-[var(--text-secondary)]">
                   {asset.signalDate ? dateCompact(asset.signalDate) : '-'}
+                </td>
+                <td className="text-right py-3 px-2">
+                  <SignalCell mult={asset.signalMult} />
+                </td>
+                <td
+                  className={`text-right py-3 px-2 font-medium ${
+                    asset.signalReturn === null ? 'text-[var(--text-secondary)]' : asset.signalReturn >= 0 ? 'text-green-500' : 'text-red-500'
+                  }`}
+                >
+                  {asset.signalReturn === null ? 'pending' : `${asset.signalReturn >= 0 ? '+' : ''}${asset.signalReturn.toFixed(1)}%`}
                 </td>
                 <td
                   className={`text-right py-3 px-2 font-medium ${

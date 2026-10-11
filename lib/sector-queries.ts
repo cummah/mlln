@@ -39,6 +39,7 @@ export interface OversoldAsset {
   name: string
   signalMult: number
   signalDate: string
+  currentReturn: number | null // return since the fill price, null until that price exists
   signalStrength: string
   signalReasoning: string
   dcaSuitabilityScore: number | null
@@ -58,6 +59,7 @@ export interface SectorAsset {
   currentPrice: number | null
   signalMult: number | null // most recent weekly buy signal, null if none in the last 26 weeks
   signalDate: string | null
+  signalReturn: number | null // return since the fill price of that signal
   signalStrength: string
   dcaReturn: number | null
   dcaSuitabilityScore: number | null
@@ -101,15 +103,15 @@ async function latestPriceDate(): Promise<string | null> {
  * smaller one than the standard amount, and a week the model skips is not stored at all. So an asset with no entry
  * here has had no buy in the last 26 weeks.
  */
-async function latestWeeklySignals(sectorName: string): Promise<Map<string, { date: string; mult: number }>> {
+async function latestWeeklySignals(sectorName: string): Promise<Map<string, { date: string; mult: number; ret: number | null }>> {
   const asOf = await latestPriceDate()
-  const out = new Map<string, { date: string; mult: number }>()
+  const out = new Map<string, { date: string; mult: number; ret: number | null }>()
   if (!asOf) return out
   const rows = await fetchAllPages<any>((a, b) =>
-    getSupabaseClient().from('signal_feed').select('ticker, signal_date, mult')
+    getSupabaseClient().from('signal_feed').select('ticker, signal_date, mult, performance_pct')
       .eq('sector', sectorName).eq('freq', 'weekly').gte('signal_date', shiftDate(asOf, -SIGNAL_LOOKBACK_DAYS))
       .order('signal_date', { ascending: false }).order('ticker').range(a, b))
-  for (const r of rows) if (!out.has(r.ticker)) out.set(r.ticker, { date: r.signal_date, mult: Number(r.mult) })
+  for (const r of rows) if (!out.has(r.ticker)) out.set(r.ticker, { date: r.signal_date, mult: Number(r.mult), ret: r.performance_pct === null || r.performance_pct === undefined ? null : Number(r.performance_pct) })
   return out
 }
 
@@ -218,7 +220,7 @@ async function getBuyOpportunitiesUncached(sector: string): Promise<OversoldAsse
   if (!asOf) return []
 
   const rows = await fetchAllPages<any>((from, to) =>
-    getSupabaseClient().from('signal_feed').select('ticker, signal_date, mult, rsi_mult, ema_mult, dd_bonus, vix_bonus')
+    getSupabaseClient().from('signal_feed').select('ticker, signal_date, mult, performance_pct, rsi_mult, ema_mult, dd_bonus, vix_bonus')
       .eq('sector', sectorName).eq('freq', 'weekly').gt('mult', 1.0).gte('signal_date', shiftDate(asOf, -7))
       .order('mult', { ascending: false }).order('ticker').range(from, to))
 
@@ -242,6 +244,7 @@ async function getBuyOpportunitiesUncached(sector: string): Promise<OversoldAsse
       name: names.get(r.ticker) ?? r.ticker,
       signalMult: round2(mult),
       signalDate: r.signal_date,
+      currentReturn: r.performance_pct === null || r.performance_pct === undefined ? null : Number(r.performance_pct),
       signalStrength: getSignalStrength(mult),
       signalReasoning: parts.length ? parts.join(' + ') : 'enhanced signal',
       dcaSuitabilityScore: num(sums.get(r.ticker)?.dca_suitability_score),
@@ -300,7 +303,7 @@ async function getSectorAssetsUncached(sector: string): Promise<SectorAsset[]> {
   ])
   const priceBy = new Map<string, number>(prices.map(p => [p.ticker, Number(p.close)]))
 
-  const out: SectorAsset[] = mem.map(m => {
+  const out: SectorAsset[] = mem.filter(m => latest.has(m.ticker)).map(m => {
     const sig = latest.get(m.ticker)
     const ret = num(sums.get(m.ticker)?.enh_return_1y)
     const price = priceBy.get(m.ticker)
@@ -310,19 +313,23 @@ async function getSectorAssetsUncached(sector: string): Promise<SectorAsset[]> {
       currentPrice: price === undefined ? null : round2(price),
       signalMult: sig ? round2(sig.mult) : null,
       signalDate: sig ? sig.date : null,
+      signalReturn: sig ? sig.ret : null,
       signalStrength: sig ? getSignalStrength(sig.mult) : 'neutral',
       dcaReturn: ret === null ? null : round2(ret),
       dcaSuitabilityScore: num(sums.get(m.ticker)?.dca_suitability_score),
     }
   })
-  // Assets with a 1 year result first, best first. Those without one go last.
-  return out.sort((a, b) => (b.dcaReturn ?? -1e9) - (a.dcaReturn ?? -1e9))
+  // Only assets with a recent weekly buy signal are listed, best current return since the signal first
+  return out.sort((a, b) => (b.signalReturn ?? -1e9) - (a.signalReturn ?? -1e9))
 }
 
 // ─── Cached exports ─────────────────────────────────────────────────────────────────────────
 
+// Bump when the shape of any cached result changes, so results saved in the old shape are never served
+const CACHE_VERSION = 'v3'
+
 const cached = <A extends unknown[], R>(fn: (...a: A) => Promise<R>, key: string) =>
-  unstable_cache(fn, [key], { revalidate: CACHE_REVALIDATE, tags: [CACHE_TAG] })
+  unstable_cache(fn, [CACHE_VERSION, key], { revalidate: CACHE_REVALIDATE, tags: [CACHE_TAG] })
 
 export const getSectorStats = cached(getSectorStatsUncached, 'sector-stats')
 export const getTopPerformers = cached(getTopPerformersUncached, 'top-performers')
