@@ -1,46 +1,15 @@
 'use client';
 
-import { Signal, OHLCData } from '@/types';
+import type { CurrentReading, MajorBuy } from '@/lib/ticker/data';
 import { CurrentSignalTile } from './CurrentSignalTile';
 import { formatCurrency } from '@/lib/formatters';
 
 interface SignalDataSectionProps {
-  weeklySignals: Signal[];
-  monthlySignals: Signal[];
-  ohlcData: OHLCData[];
-  ticker: string;
-}
-
-const MAJOR_BUY_THRESHOLD = 5.0;
-
-function getLatestMajorBuy(signals: Signal[]): Signal | null {
-  const majorBuys = signals.filter(s => !s.skipped && s.mult >= MAJOR_BUY_THRESHOLD);
-  if (majorBuys.length === 0) return null;
-  return majorBuys[majorBuys.length - 1];
-}
-
-function getPriceAtDate(ohlcData: OHLCData[], dateStr: string): number | null {
-  const found = ohlcData.find(d => d.time === dateStr);
-  return found?.close || null;
-}
-
-function calculatePerformance(
-  signals: Signal[],
-  ohlcData: OHLCData[],
-  latestPrice: number,
-  baseAmount: number = 100
-): { mult: number; performance: number; invested: number; currentValue: number; date: string } | null {
-  const latestMajorBuy = getLatestMajorBuy(signals);
-  if (!latestMajorBuy || !latestPrice) return null;
-
-  const priceAtSignal = getPriceAtDate(ohlcData, latestMajorBuy.date);
-  if (!priceAtSignal) return null;
-
-  const invested = baseAmount * latestMajorBuy.mult;
-  const currentValue = invested * (latestPrice / priceAtSignal);
-  const performance = ((currentValue - invested) / invested) * 100;
-
-  return { mult: latestMajorBuy.mult, performance, invested, currentValue, date: latestMajorBuy.date };
+  weeklyMajor: MajorBuy | null;
+  monthlyMajor: MajorBuy | null;
+  currentWeekly: CurrentReading | null;
+  currentMonthly: CurrentReading | null;
+  universeCount: number;
 }
 
 function formatPerformance(perf: number): string {
@@ -58,11 +27,11 @@ function formatDateForDisplay(dateStr: string): string {
   return date.toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' });
 }
 
-export function SignalDataSection({ weeklySignals, monthlySignals, ohlcData, ticker }: SignalDataSectionProps) {
-  const latestPrice = ohlcData && ohlcData.length > 0 ? ohlcData[ohlcData.length - 1].close : null;
-
-  const weeklyPerf = latestPrice ? calculatePerformance(weeklySignals, ohlcData, latestPrice, 100) : null;
-  const monthlyPerf = latestPrice ? calculatePerformance(monthlySignals, ohlcData, latestPrice, 433) : null;
+export function SignalDataSection({ weeklyMajor, monthlyMajor, currentWeekly, currentMonthly, universeCount }: SignalDataSectionProps) {
+  // Return to date is measured from the real fill price (next open) to the latest close. It stays empty
+  // until that fill price exists, which is the day after the signal.
+  const weeklyPerf = weeklyMajor && weeklyMajor.performance !== null ? { ...weeklyMajor, performance: weeklyMajor.performance as number, currentValue: weeklyMajor.currentValue as number } : null;
+  const monthlyPerf = monthlyMajor && monthlyMajor.performance !== null ? { ...monthlyMajor, performance: monthlyMajor.performance as number, currentValue: monthlyMajor.currentValue as number } : null;
 
   return (
     <div>
@@ -209,7 +178,7 @@ export function SignalDataSection({ weeklySignals, monthlySignals, ohlcData, tic
         </div>
 
         {/* Latest Major Buy Signal Tile */}
-        <CurrentSignalTile weeklySignals={weeklySignals} monthlySignals={monthlySignals} ohlcData={ohlcData} />
+        <CurrentSignalTile weekly={currentWeekly} monthly={currentMonthly} />
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px' }}>
@@ -244,7 +213,7 @@ export function SignalDataSection({ weeklySignals, monthlySignals, ohlcData, tic
         {/* Middle Column - Info Text */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           <div style={{ fontSize: '12px', color: 'var(--text-2)', fontWeight: '700', textAlign: 'center' }}>
-            Signals like these fire across 700+ assets
+            Signals like these fire across {universeCount.toLocaleString()} assets
           </div>
         </div>
 

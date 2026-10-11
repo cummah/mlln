@@ -41,8 +41,8 @@ export function FAQSection({ ticker, name, data, sector, spyReturn5y }: FAQSecti
       q: `Is weekly or monthly DCA better for ${ticker}?`,
       a: `Over 5 years, Enhanced DCA with weekly $100 purchases returned ${Math.round(data.enhReturn5y)}%,
         while monthly $433 purchases (equivalent capital) returned ${Math.round(data.monthlyEnhReturn5y)}% Enhanced DCA.
-        Weekly typically captures more entry opportunities due to finer-grained timing during volatility,
-        but monthly requires less maintenance. Both benefit significantly from Enhanced DCA's signal-based approach.`,
+        In this backtest Enhanced DCA ${data.alpha5y >= 0 ? 'beat' : 'trailed'} standard DCA by ${Math.abs(Math.round(data.alpha5y))} points with weekly purchases and
+        ${data.monthlyAlpha5y >= 0 ? 'beat' : 'trailed'} it by ${Math.abs(Math.round(data.monthlyAlpha5y))} points with monthly purchases. Monthly requires less maintenance.`,
     },
     {
       q: `How many shares of ${ticker} would I have after 5 years of DCA?`,
@@ -60,15 +60,14 @@ export function FAQSection({ ticker, name, data, sector, spyReturn5y }: FAQSecti
     {
       q: `How does ${ticker} DCA compare to the S&P 500?`,
       a: `Enhanced DCA into ${ticker} returned ${Math.round(data.enhReturn5y)}% over the past 5 years.
-        ${spyComparisonSentence} ${ticker}'s performance reflects its higher volatility as a ${sector ? sector.toLowerCase() : 'growth'} stock.
+        ${spyComparisonSentence} ${ticker}'s result reflects its own price history over the period.
         Enhanced DCA ${outperformed5y ? `outperformed standard DCA by ${alphaMagnitude5y}%, demonstrating the value of timing entries during market dips` : `underperformed standard DCA by ${alphaMagnitude5y}% over this period, showing signal-based timing doesn't always beat buying at regular intervals`}.`,
     },
     {
       q: `What is the risk of dollar cost averaging into ${ticker}?`,
-      a: `Past backtest performance does not guarantee future results. ${ticker} is a high-volatility
-        ${sector ? sector.toLowerCase() : 'growth'} stock, meaning it typically experiences larger
-        price swings than the broader market. While DCA reduces timing risk by spreading purchases
-        over time, losses are still possible if the stock declines significantly. Always invest
+      a: `Past backtest performance does not guarantee future results. ${ticker} is a
+        ${sector ? sector.toLowerCase() : ''} asset whose price can fall as well as rise. While DCA reduces timing risk by spreading purchases
+        over time, losses are still possible if the price declines significantly. Always invest
         within your risk tolerance and consider your overall portfolio diversification.`,
     },
     {

@@ -90,8 +90,8 @@ export function BacktestNarrative({ ticker, name, data, sector, spyReturn5y }: B
               </p>
               {spyReturn5y != null && (
                 <p>
-                  Over the same 5-year period, the S&P 500 returned approximately <strong style={{ color: 'var(--text)' }}>{Math.round(spyReturn5y)}%</strong>, demonstrating that {ticker}'s
-                  <strong style={{ color: 'var(--teal)' }}> {Math.round(data.enhReturn5y)}% return</strong> reflects its higher volatility and growth potential as a {sector ? sector.toLowerCase() : 'growth'} stock.
+                  Over the same 5-year period, standard weekly DCA into the S&P 500 (SPY) returned approximately <strong style={{ color: 'var(--text)' }}>{Math.round(spyReturn5y)}%</strong>, so {ticker}'s
+                  <strong style={{ color: 'var(--teal)' }}> {Math.round(data.enhReturn5y)}% Enhanced DCA return</strong> was {data.enhReturn5y >= spyReturn5y ? 'above' : 'below'} the index over the same period.
                 </p>
               )}
             </div>

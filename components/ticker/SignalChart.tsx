@@ -59,15 +59,6 @@ export function SignalChart({
   useEffect(() => {
     if (!containerRef.current) return;
 
-    // DEBUG: Log OHLC data for this render
-    if (ohlc.length > 0) {
-      console.log(`[SignalChart] Rendering with ${ohlc.length} bars:`, {
-        firstDate: ohlc[0].time,
-        lastDate: ohlc[ohlc.length - 1].time,
-        signalCount: signals.length,
-      });
-    }
-
     // Handle empty OHLC data - still create chart but show placeholder
     if (ohlc.length === 0) {
       const container = containerRef.current;
@@ -130,7 +121,7 @@ export function SignalChart({
     // Add accessibility attributes to canvas
     const canvas = containerRef.current?.querySelector('canvas') as HTMLCanvasElement;
     if (canvas && ticker) {
-      const backtestStartYear = new Date().getFullYear() - 5;
+      const backtestStartYear = ohlc[0].time.slice(0, 4);
       canvas.setAttribute('role', 'img');
       canvas.setAttribute('aria-label', `${ticker} Enhanced DCA buy signal chart showing purchase timing from ${backtestStartYear} to present`);
     }

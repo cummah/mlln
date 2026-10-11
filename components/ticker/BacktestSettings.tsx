@@ -31,16 +31,8 @@ function amountToSlider(amount: number): number {
   }
 }
 
-interface BacktestSettingsProps {
-  showModelToggle?: boolean;
-}
-
-export function BacktestSettings({ showModelToggle = false }: BacktestSettingsProps) {
-  const {
-    frequency, setFrequency, baseAmount, setBaseAmount, backtestModel, setBacktestModel,
-    macroFactorEnabled, setMacroFactorEnabled, macroVolEnabled, setMacroVolEnabled,
-    macroMeanReversionEnabled, setMacroMeanReversionEnabled,
-  } = useAppStore();
+export function BacktestSettings() {
+  const { frequency, setFrequency, baseAmount, setBaseAmount } = useAppStore();
 
   // Clamp baseAmount between 10 and 1000
   const clampedAmount = Math.max(10, Math.min(1000, baseAmount));
@@ -93,84 +85,6 @@ export function BacktestSettings({ showModelToggle = false }: BacktestSettingsPr
           ))}
         </div>
       </div>
-
-      {/* Model Toggle */}
-      {showModelToggle && (
-        <>
-          <div style={{ width: '1px', height: '24px', background: 'var(--border)' }} />
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <div style={{ fontSize: '11px', fontWeight: '600', color: 'var(--text-3)', textTransform: 'uppercase', letterSpacing: '0.07em' }}>
-              Model
-            </div>
-            <div style={{ display: 'flex', background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: '8px', padding: '2px' }}>
-              {([
-                { key: 'enhanced', label: 'Signal-Enhanced' },
-                { key: 'macro', label: 'Macro-Scaled' },
-              ] as const).map(({ key, label }) => (
-                <button
-                  key={key}
-                  onClick={() => setBacktestModel(key)}
-                  title={key === 'enhanced'
-                    ? 'Buys timed and sized by per-asset technical signals'
-                    : 'Buys every period, sized by the macro regime’s sector modifier'}
-                  style={{
-                    padding: '5px 14px',
-                    borderRadius: '6px',
-                    fontSize: '13px',
-                    cursor: 'pointer',
-                    border: 'none',
-                    background: backtestModel === key ? 'var(--teal)' : 'transparent',
-                    color: backtestModel === key ? '#040e18' : 'var(--text-2)',
-                    fontWeight: backtestModel === key ? 600 : 500,
-                    fontFamily: 'DM Sans, sans-serif',
-                    transition: 'all 0.15s'
-                  }}
-                >
-                  {label}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {backtestModel === 'macro' && (
-            <>
-              <div style={{ width: '1px', height: '24px', background: 'var(--border)' }} />
-              <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-                <div style={{ fontSize: '11px', fontWeight: '600', color: 'var(--text-3)', textTransform: 'uppercase', letterSpacing: '0.07em' }}>
-                  Macro Components
-                </div>
-                <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px', color: 'var(--text-2)', cursor: 'pointer' }} title="PCA statistical factor tilt (scripts/compute-factor-model.ts)">
-                  <input
-                    type="checkbox"
-                    checked={macroFactorEnabled}
-                    onChange={(e) => setMacroFactorEnabled(e.target.checked)}
-                    style={{ accentColor: 'var(--teal)', cursor: 'pointer' }}
-                  />
-                  Factor Tilt
-                </label>
-                <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px', color: 'var(--text-2)', cursor: 'pointer' }} title="EWMA volatility-conditioned dip sizing">
-                  <input
-                    type="checkbox"
-                    checked={macroVolEnabled}
-                    onChange={(e) => setMacroVolEnabled(e.target.checked)}
-                    style={{ accentColor: 'var(--teal)', cursor: 'pointer' }}
-                  />
-                  Volatility Timing
-                </label>
-                <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px', color: 'var(--text-2)', cursor: 'pointer' }} title="Ornstein-Uhlenbeck (AR(1)) mean-reversion dip sizing">
-                  <input
-                    type="checkbox"
-                    checked={macroMeanReversionEnabled}
-                    onChange={(e) => setMacroMeanReversionEnabled(e.target.checked)}
-                    style={{ accentColor: 'var(--teal)', cursor: 'pointer' }}
-                  />
-                  Mean Reversion
-                </label>
-              </div>
-            </>
-          )}
-        </>
-      )}
 
       {/* Divider */}
       <div style={{ width: '1px', height: '24px', background: 'var(--border)' }} />

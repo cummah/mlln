@@ -130,9 +130,9 @@ export function StructuredData({ ticker, data, spyReturn5y }: StructuredDataProp
             acceptedAnswer: {
               '@type': 'Answer',
               text:
-                `Past backtest performance does not guarantee future results. ${ticker} is a high-volatility ` +
-                `${sectorLabel} asset, experiencing larger price swings than the broader market. While ` +
-                `DCA reduces timing risk by spreading purchases over time, losses are still possible if the stock ` +
+                `Past backtest performance does not guarantee future results. ${ticker} is a ` +
+                `${sectorLabel} asset whose price can fall as well as rise. While ` +
+                `DCA reduces timing risk by spreading purchases over time, losses are still possible if the price ` +
                 `declines significantly. Always invest within your risk tolerance and consider your overall portfolio diversification.`,
             },
           },

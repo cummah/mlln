@@ -2,27 +2,27 @@
 
 import { motion } from 'framer-motion';
 import { useAppStore } from '@/store/appStore';
-import type { BacktestSummary } from '@/lib/backtest-summary';
+import type { TickerSummary } from '@/lib/ticker/summary';
 import { formatPercent, formatSignedPercent } from '@/lib/formatters';
 
 interface AlphaBannerProps {
-  backtestSummary: BacktestSummary;
-  /** When provided, the Model toggle switches between backtestSummary (enhanced) and this (macro) — same convention as CustomBacktestTiles. */
-  macroSummary?: BacktestSummary | null;
+  backtestSummary: TickerSummary;
 }
 
-export function AlphaBanner({ backtestSummary, macroSummary }: AlphaBannerProps) {
-  const { frequency, baseAmount, backtestModel } = useAppStore();
-  const usingMacro = backtestModel === 'macro' && !!macroSummary;
-  const summary = usingMacro ? (macroSummary as BacktestSummary) : backtestSummary;
-  const modelLabel = usingMacro ? 'Macro-Scaled' : 'Enhanced';
+export function AlphaBanner({ backtestSummary }: AlphaBannerProps) {
+  const { frequency, baseAmount } = useAppStore();
+  const summary = backtestSummary;
+  const modelLabel = 'Enhanced';
 
-  const getField = (fieldName: keyof BacktestSummary): number => {
+  const getField = (fieldName: keyof TickerSummary): number => {
     const val = summary[fieldName];
     return typeof val === 'number' ? val : 0;
   };
 
   const isMonthly = frequency === 'monthly';
+
+  // Only shown when a real five year result exists for this frequency
+  if (!summary.available[frequency]['5y']) return null;
 
   // Real per-share average entry price and returns for the selected frequency —
   // mirrors CustomBacktestTiles' getRealData so both stay in sync when the toggle changes.
@@ -40,6 +40,12 @@ export function AlphaBanner({ backtestSummary, macroSummary }: AlphaBannerProps)
 
   const outperformed = alpha >= 0;
   const lowerEntry = enhAvgEntry <= stdAvgEntry;
+  const enhInvested = (isMonthly ? getField('monthlyEnhInvested5y') : getField('enhInvested5y')) * scale;
+  const stdInvested = (isMonthly ? getField('monthlyStdInvested5y') : getField('stdInvested5y')) * scale;
+  const lessCapital = enhInvested < stdInvested;
+  const headline = outperformed
+    ? (lessCapital ? 'deployed less capital and achieved higher returns' : 'achieved higher returns on the capital it deployed')
+    : (lessCapital ? 'deployed less capital but returned less' : 'deployed more capital for lower returns');
 
   return (
     <motion.div
@@ -94,7 +100,7 @@ export function AlphaBanner({ backtestSummary, macroSummary }: AlphaBannerProps)
               {formatSignedPercent(alpha)}
             </motion.div>
             <div style={{ fontSize: '12.5px', color: 'var(--text-2)', marginTop: '2px' }}>
-              {modelLabel} DCA {outperformed ? 'deployed less capital and achieved higher returns' : 'deployed more capital for lower returns'} — {lowerEntry ? 'by concentrating buys at better prices' : 'despite a higher average entry price than standard DCA'}
+              {modelLabel} DCA {headline} — {lowerEntry ? 'with a lower average entry price than standard DCA' : 'with a higher average entry price than standard DCA'}
             </div>
           </div>
         </div>
@@ -132,7 +138,7 @@ export function AlphaBanner({ backtestSummary, macroSummary }: AlphaBannerProps)
             fontWeight: '600',
             color: 'var(--teal)'
           }}>
-            <span style={{ color: 'var(--text-2)', fontWeight: '400', marginRight: '4px' }}>{extraValue >= 0 ? 'Extra value' : 'Value shortfall'}</span>{extraValue >= 0 ? '+' : '-'}${Math.abs(extraValue).toLocaleString()}
+            <span style={{ color: 'var(--text-2)', fontWeight: '400', marginRight: '4px' }}>{extraValue >= 0 ? 'Ending value ahead' : 'Ending value behind'}</span>{extraValue >= 0 ? '+' : '-'}${Math.abs(extraValue).toLocaleString()}
           </div>
         </div>
       </div>
