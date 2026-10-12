@@ -1,0 +1,16 @@
+# mlln.ai
+
+> mlln.ai backtests dollar cost averaging (DCA) on about 2,000 stocks and ETFs. It compares a plain fixed-amount DCA with an Enhanced DCA that buys more when the stock is oversold, using only information available on each date. Data is end of day and updates once each evening after the US market closes.
+
+## How the numbers are made
+- Standard DCA: the same dollar amount every week ($100) or month ($433), the baseline.
+- Enhanced DCA: the amount is scaled by a multiplier from price indicators (RSI, trend, drawdown, volatility, market fear index). Every signal uses only the prices available on its own date, so historic signals are not rewritten with hindsight.
+- Returns are shown for 1 month, 3 months, 1 year, 3 years and 5 years. A window is shown only when the asset has enough price history for it.
+- A backtest is not a forecast and not financial advice. Results depend on the period tested.
+
+## Pages
+- [Asset page for any ticker](https://mlln.ai/asset/aapl): backtest results, buy signal chart, current signal and FAQ. Replace aapl with the ticker.
+- [Daily signals](https://mlln.ai/asset/daily), [weekly signals](https://mlln.ai/asset/weekly), [monthly signals](https://mlln.ai/asset/monthly): every buy signal with the return since it was issued.
+- [DCA rank](https://mlln.ai/rank): all assets ranked by Enhanced DCA return and DCA suitability score.
+- [Sectors](https://mlln.ai/sectors): the same analysis grouped by sector.
+- [Sitemap](https://mlln.ai/sitemap.xml)
