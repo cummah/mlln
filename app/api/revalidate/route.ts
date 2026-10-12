@@ -11,8 +11,10 @@ export async function POST(request: NextRequest) {
   revalidatePath('/asset', 'layout')
   revalidatePath('/rank')
   revalidatePath('/portfolio')
+  revalidatePath('/watchlist')
   revalidatePath('/sectors', 'layout')
   revalidatePath('/sitemap.xml')
   revalidateTag('sectors')
+  revalidateTag('watchlist')
   return NextResponse.json({ revalidated: true, at: new Date().toISOString() })
 }
