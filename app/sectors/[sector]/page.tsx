@@ -2,14 +2,14 @@ import { notFound } from 'next/navigation'
 import { Metadata } from 'next'
 import nextDynamic from 'next/dynamic'
 import { getAllSectors, sectorToSlug, slugToSector } from '@/lib/sectors'
-import { getSectorStats, getSectorAssets } from '@/lib/sector-queries'
+import { getSectorStats } from '@/lib/sector-queries'
+import { SectorStatTiles } from '@/components/sectors/SectorStatTiles'
 import { SectorInsightText } from '@/components/sectors/SectorInsightText'
 import { getRelatedSectorsCount, getPeriodsToShow } from '@/lib/ui-settings'
 import { colors, spacing, typography, componentStyles } from '@/lib/designSystem'
 
 const SectorBreadcrumb = nextDynamic(() => import('@/components/sectors/SectorBreadcrumb').then(m => ({ default: m.SectorBreadcrumb })))
-const SectorPerformers = nextDynamic(() => import('@/components/sectors/SectorPerformers').then(m => ({ default: m.SectorPerformers })))
-const SectorAssetsTable = nextDynamic(() => import('@/components/sectors/SectorAssetsTable').then(m => ({ default: m.SectorAssetsTable })))
+const SectorSignalsTable = nextDynamic(() => import('@/components/sectors/SectorSignalsTable').then(m => ({ default: m.SectorSignalsTable })))
 const RelatedSectorsList = nextDynamic(() => import('@/components/sectors/RelatedSectorsList').then(m => ({ default: m.RelatedSectorsList })))
 
 // Built once a day and refreshed by the nightly job (/api/revalidate).
@@ -51,9 +51,8 @@ export default async function SectorPage({ params }: PageProps) {
     notFound()
   }
 
-  const [stats, sectorAssets, relatedCount] = await Promise.all([
+  const [stats, relatedCount] = await Promise.all([
     getSectorStats(params.sector),
-    getSectorAssets(params.sector),
     getRelatedSectorsCount(),
   ])
 
@@ -79,29 +78,7 @@ export default async function SectorPage({ params }: PageProps) {
             </p>
           </div>
 
-          {/* Stats Cards */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: spacing.lg }}>
-            <div style={componentStyles.statBox}>
-              <div style={componentStyles.statLabel}>Total Assets</div>
-              <div style={componentStyles.statValue}>
-                {stats.totalAssets}
-              </div>
-            </div>
-
-            <div style={componentStyles.statBox}>
-              <div style={componentStyles.statLabel}>In Buy Zone</div>
-              <div style={{ ...componentStyles.statValue, color: colors.green }}>
-                {stats.assetsInBuyZone}
-              </div>
-            </div>
-
-            <div style={componentStyles.statBox}>
-              <div style={componentStyles.statLabel}>1M Sector Return</div>
-              <div style={{ ...componentStyles.statValue, color: stats.sectorReturn1M === null ? colors.text2 : stats.sectorReturn1M > 0 ? colors.green : colors.red }}>
-                {stats.sectorReturn1M === null ? 'n/a' : `${stats.sectorReturn1M > 0 ? '+' : ''}${stats.sectorReturn1M.toFixed(2)}%`}
-              </div>
-            </div>
-          </div>
+          <SectorStatTiles stats={stats} />
         </div>
 
         {/* Insight Text */}
@@ -109,20 +86,12 @@ export default async function SectorPage({ params }: PageProps) {
           <SectorInsightText sector={params.sector} />
         </div>
 
-        {/* Performers */}
+        {/* Signals */}
         <div>
           <h2 style={{ fontSize: typography.fontSize['2xl'], fontWeight: 500, color: colors.text, marginBottom: spacing.lg, margin: 0 }}>
-            Performance Analysis
+            {sectorName} Signals
           </h2>
-          <SectorPerformers sector={params.sector} />
-        </div>
-
-        {/* Assets Table */}
-        <div>
-          <h2 style={{ fontSize: typography.fontSize['2xl'], fontWeight: 500, color: colors.text, marginBottom: spacing.lg, margin: 0 }}>
-            All {sectorName} Assets
-          </h2>
-          <SectorAssetsTable assets={sectorAssets} />
+          <SectorSignalsTable sector={params.sector} />
         </div>
 
         {/* Related Sectors */}

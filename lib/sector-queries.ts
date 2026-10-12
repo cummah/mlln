@@ -20,7 +20,8 @@ function getSignalStrength(mult: number): string {
 export interface SectorStats {
   totalAssets: number
   avgRsi: number | null
-  assetsInBuyZone: number
+  assetsInBuyZone: number // weekly reading at 4x or more today
+  assetsMildSignal: number // weekly reading above 1x but below 4x
   sectorReturn1M: number | null
 }
 
@@ -90,6 +91,9 @@ async function perChunk<T>(tickers: string[], run: (chunk: string[]) => PromiseL
 
 const round2 = (v: number) => Math.round(v * 100) / 100
 
+/** The sector tables only list buy signals at or above this multiplier. */
+const MIN_TABLE_MULT = 4
+
 const SIGNAL_LOOKBACK_DAYS = 182
 
 async function latestPriceDate(): Promise<string | null> {
@@ -140,15 +144,16 @@ async function getSectorStatsUncached(sector: string): Promise<SectorStats> {
   const sectorName = slugToSector(sector)
   const mem = await members(sectorName)
   const tickers = mem.map(m => m.ticker)
-  if (tickers.length === 0) return { totalAssets: 0, avgRsi: null, assetsInBuyZone: 0, sectorReturn1M: null }
+  if (tickers.length === 0) return { totalAssets: 0, avgRsi: null, assetsInBuyZone: 0, assetsMildSignal: 0, sectorReturn1M: null }
 
   const [readings, latest] = await Promise.all([
     weeklyReadings(tickers),
     perChunk<any>(tickers, c => getSupabaseClient().from('latest_prices').select('ticker, price_date, close').in('ticker', c)),
   ])
 
-  // In the buy zone: the model would buy more than the standard amount today
-  const inZone = Array.from(readings.values()).filter(r => r.mult > 1.0).length
+  // In the buy zone: the model would buy at least the table minimum today. Mild: more than standard, but less than that.
+  const inZone = Array.from(readings.values()).filter(r => r.mult >= MIN_TABLE_MULT).length
+  const mild = Array.from(readings.values()).filter(r => r.mult > 1.0 && r.mult < MIN_TABLE_MULT).length
   const rsis = Array.from(readings.values()).map(r => num(r.components?.rsi)).filter((x): x is number => x !== null)
 
   // Equal weighted return of the sector's assets over the last month of prices
@@ -175,6 +180,7 @@ async function getSectorStatsUncached(sector: string): Promise<SectorStats> {
     totalAssets: tickers.length,
     avgRsi: rsis.length ? Math.round(rsis.reduce((a, b) => a + b, 0) / rsis.length) : null,
     assetsInBuyZone: inZone,
+    assetsMildSignal: mild,
     sectorReturn1M,
   }
 }
@@ -194,6 +200,7 @@ async function getTopPerformersUncached(sector: string, period: '1M' | '3M'): Pr
     const ret = num(sums.get(m.ticker)?.[column])
     if (ret === null) continue // no result for this window, so it is left out, never shown as zero
     const sig = latest.get(m.ticker)
+    if (!sig || sig.mult < MIN_TABLE_MULT) continue
     out.push({
       ticker: m.ticker,
       name: m.name,
@@ -207,7 +214,7 @@ async function getTopPerformersUncached(sector: string, period: '1M' | '3M'): Pr
   return out.sort((a, b) => b.dcaReturnPct - a.dcaReturnPct).slice(0, 10)
 }
 
-/** Assets that received a weekly buy signal above the standard amount in the last 7 days. */
+/** Assets that received a weekly buy signal of 4x or more in the last 7 days. */
 async function getBuyOpportunitiesUncached(sector: string): Promise<OversoldAsset[]> {
   const sectorName = slugToSector(sector)
   const mem = await members(sectorName)
@@ -221,7 +228,7 @@ async function getBuyOpportunitiesUncached(sector: string): Promise<OversoldAsse
 
   const rows = await fetchAllPages<any>((from, to) =>
     getSupabaseClient().from('signal_feed').select('ticker, signal_date, mult, performance_pct, rsi_mult, ema_mult, dd_bonus, vix_bonus')
-      .eq('sector', sectorName).eq('freq', 'weekly').gt('mult', 1.0).gte('signal_date', shiftDate(asOf, -7))
+      .eq('sector', sectorName).eq('freq', 'weekly').gte('mult', MIN_TABLE_MULT).gte('signal_date', shiftDate(asOf, -7))
       .order('mult', { ascending: false }).order('ticker').range(from, to))
 
   const latestByTicker = new Map<string, any>()
@@ -258,36 +265,48 @@ async function getOversoldAssetsUncached(sector: string): Promise<OversoldAsset[
   return getBuyOpportunitiesUncached(sector)
 }
 
-/** The most recent buy signal of at least 1x for each asset, with the return since its fill price. */
+/** How many of the latest signal dates the signals table covers: 3 weeks for weekly, 3 months for monthly. */
+const SIGNAL_PERIODS = 3
+
+/** The latest SIGNAL_PERIODS distinct signal dates for a frequency, across all assets, newest first. */
+async function latestSignalDates(frequency: 'weekly' | 'monthly'): Promise<string[]> {
+  const dates: string[] = []
+  const PAGE = 1000
+  for (let offset = 0; offset < 20 * PAGE; offset += PAGE) {
+    const { data, error } = await getSupabaseClient().from('signal_feed').select('signal_date').eq('freq', frequency)
+      .order('signal_date', { ascending: false }).range(offset, offset + PAGE - 1)
+    if (error) throw new Error(error.message)
+    for (const r of (data as any[]) ?? []) {
+      if (!dates.includes(r.signal_date)) dates.push(r.signal_date)
+      if (dates.length > SIGNAL_PERIODS) return dates.slice(0, SIGNAL_PERIODS)
+    }
+    if (!data || data.length < PAGE) break
+  }
+  return dates.slice(0, SIGNAL_PERIODS)
+}
+
+/** Every buy signal of at least 1x in the sector on the latest signal dates for the frequency, one row per signal, with the return since its fill price. */
 export async function getRecentBuyZoneEntriesUncached(sector: string, frequency: 'weekly' | 'monthly' = 'weekly'): Promise<RecentBuyZoneEntry[]> {
   const sectorName = slugToSector(sector)
   const mem = await members(sectorName)
   if (mem.length === 0) return []
   const names = new Map(mem.map(m => [m.ticker, m.name]))
 
-  const { data: latestRow, error: lErr } = await getSupabaseClient().from('latest_prices').select('price_date').eq('ticker', 'SPY').limit(1)
-  if (lErr) throw new Error(lErr.message)
-  const asOf: string | undefined = (latestRow as any)?.[0]?.price_date
-  if (!asOf) return []
-  const from = shiftDate(asOf, frequency === 'weekly' ? -182 : -365)
+  const dates = await latestSignalDates(frequency)
+  if (dates.length === 0) return []
 
   const rows = await fetchAllPages<any>((a, b) =>
     getSupabaseClient().from('signal_feed').select('ticker, signal_date, mult, performance_pct')
-      .eq('sector', sectorName).eq('freq', frequency).gte('mult', 1.0).gte('signal_date', from)
+      .eq('sector', sectorName).eq('freq', frequency).gte('mult', 1.0).in('signal_date', dates)
       .order('signal_date', { ascending: false }).order('ticker').range(a, b))
 
-  const latestByTicker = new Map<string, any>()
-  for (const r of rows) if (!latestByTicker.has(r.ticker)) latestByTicker.set(r.ticker, r)
-
-  return Array.from(latestByTicker.values())
-    .map(r => ({
-      ticker: r.ticker as string,
-      name: names.get(r.ticker) ?? (r.ticker as string),
-      signalDate: r.signal_date as string,
-      signalMult: round2(Number(r.mult)),
-      currentReturn: r.performance_pct === null || r.performance_pct === undefined ? null : Number(r.performance_pct),
-    }))
-    .sort((a, b) => (b.currentReturn ?? -1e9) - (a.currentReturn ?? -1e9))
+  return rows.map(r => ({
+    ticker: r.ticker as string,
+    name: names.get(r.ticker) ?? (r.ticker as string),
+    signalDate: r.signal_date as string,
+    signalMult: round2(Number(r.mult)),
+    currentReturn: r.performance_pct === null || r.performance_pct === undefined ? null : Number(r.performance_pct),
+  }))
 }
 
 // ─── All assets ─────────────────────────────────────────────────────────────────────────────
@@ -326,7 +345,7 @@ async function getSectorAssetsUncached(sector: string): Promise<SectorAsset[]> {
 // ─── Cached exports ─────────────────────────────────────────────────────────────────────────
 
 // Bump when the shape of any cached result changes, so results saved in the old shape are never served
-const CACHE_VERSION = 'v3'
+const CACHE_VERSION = 'v6'
 
 const cached = <A extends unknown[], R>(fn: (...a: A) => Promise<R>, key: string) =>
   unstable_cache(fn, [CACHE_VERSION, key], { revalidate: CACHE_REVALIDATE, tags: [CACHE_TAG] })
