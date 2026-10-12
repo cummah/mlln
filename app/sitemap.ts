@@ -6,6 +6,7 @@ const SITE = 'https://mlln.ai'
 
 // Rebuilt once a day, and straight after the nightly job through the revalidate route
 export const revalidate = 86400
+export const dynamic = 'force-static'
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const supabase = getSupabaseClient()
