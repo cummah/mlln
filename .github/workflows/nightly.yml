@@ -49,4 +49,5 @@ jobs:
       # SITE_URL and REVALIDATE_SECRET secrets are set.
       - name: Refresh site cache
         if: success() && env.SITE_URL != ''
-        run: curl -fsS -X POST "$SITE_URL/api/revalidate" -H "x-revalidate-secret: $REVALIDATE_SECRET"
+        run: |
+          curl -fsS -X POST "$SITE_URL/api/revalidate" -H "x-revalidate-secret: $REVALIDATE_SECRET"
