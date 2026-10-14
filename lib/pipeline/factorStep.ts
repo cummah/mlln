@@ -86,8 +86,14 @@ export async function factorStep(calendar: string[], universe: string[]): Promis
   if (newDates.length === 0) return { fitDate: fit.fitDate, loadings: fit.loadings, zByDate, refit: false, newDays: 0 }
 
   // Closes for the new days and the day before the first one, for every ticker in the fit
-  const prices = await pagedSelect<any>('closes for new days', (from, to) =>
-    db.from('daily_prices').select('ticker, date, close').gte('date', lastDate).lte('date', D).order('date').order('ticker').range(from, to))
+  // Read by ticker, not by date. The table is indexed by ticker and date together, so a date-wide read scans far too much
+  // of it and hits the database statement timeout.
+  const fitTickers = Array.from(fit.loadings.keys())
+  const batches: string[][] = []
+  for (let i = 0; i < fitTickers.length; i += 100) batches.push(fitTickers.slice(i, i + 100))
+  const prices = (await pool(batches, 4, batch =>
+    pagedSelect<any>('closes for new days', (from, to) =>
+      db.from('daily_prices').select('ticker, date, close').in('ticker', batch).gte('date', lastDate).lte('date', D).order('ticker').order('date').range(from, to)))).flat()
   const closeOf = new Map<string, Map<string, number>>()
   for (const r of prices) {
     if (r.close == null) continue
