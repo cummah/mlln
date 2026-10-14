@@ -113,7 +113,7 @@ export function SignalExplorer({ data }: { data: FeedPayload }) {
           datePreset={datePreset} setDatePreset={setDatePreset} sectors={sectors} years={years} onReset={reset}
         />
 
-        <div style={{ display: 'grid', gap: '12px', minWidth: 0 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr)', gap: '12px', minWidth: 0 }}>
           <Results stats={stats} base={dBase} strategy={strategy} setStrategy={setStrategy} settings={settings} />
           <CohortChart data={chart} unit={settings.unit} />
           <SignalTable rows={rows} tickers={data.tickers} strategy={dStrategy} base={dBase} freq={freq} onSelect={setSelected} />

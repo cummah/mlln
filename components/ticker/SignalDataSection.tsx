@@ -56,7 +56,7 @@ export function SignalDataSection({ weeklyMajor, monthlyMajor, currentWeekly, cu
         </p>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px', marginBottom: '20px' }}>
+      <div className="rs-stack" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px', marginBottom: '20px' }}>
         {/* Weekly Card */}
         <div style={{
           background: 'var(--surface-elevated)',
@@ -181,7 +181,7 @@ export function SignalDataSection({ weeklyMajor, monthlyMajor, currentWeekly, cu
         <CurrentSignalTile weekly={currentWeekly} monthly={currentMonthly} />
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px' }}>
+      <div className="rs-stack" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px' }}>
         {/* Left Column - How Signal Works Button */}
         <button style={{
           display: 'flex',

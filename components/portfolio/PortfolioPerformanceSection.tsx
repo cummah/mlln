@@ -179,7 +179,7 @@ export function PortfolioPerformanceSection({
         </Panel>
 
         {/* Smaller tiles: Expected Return & Sharpe */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+        <div className="rs-span2" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
           <Panel title="Expected Return" hint="Portfolio's annualized expected return based on 5-year historical performance.">
             <div style={{
               fontSize: T.kpi,
@@ -225,7 +225,7 @@ export function PortfolioPerformanceSection({
         </div>
 
         {/* Smaller tiles: Volatility & Max Drawdown */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+        <div className="rs-span2" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
           <Panel title="Volatility" hint="Portfolio standard deviation over the 5-year period. Lower volatility = lower risk.">
             <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100px' }}>
               {portfolioMetrics?.volatility !== undefined ? (

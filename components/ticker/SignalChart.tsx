@@ -70,6 +70,8 @@ export function SignalChart({
       ...chartOptions,
       width: containerRef.current.clientWidth,
       height: height,
+      // Touch only: let a vertical swipe over the chart scroll the page instead of panning the chart.
+      handleScroll: { vertTouchDrag: false },
       layout: {
         ...chartOptions.layout,
         ...(isDarkMode ? chartOptionsDark.layout : {}),

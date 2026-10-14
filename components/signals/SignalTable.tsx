@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { exportTableToCSV } from '@/lib/csv-export'
 import { effective } from '@/lib/signals/model'
 import { dateCompact, fracPct, mult, NA, num, money, pct, tone } from '@/lib/signals/format'
@@ -72,11 +72,24 @@ const COLS: Col[] = [
 ]
 
 const css = `
-  .sig-wrap { container-type: inline-size; }
+  .sig-wrap { container-type: inline-size; overflow-x: auto; }
   .sig-wrap .c2, .sig-wrap .c3 { display: none; }
   @container (min-width: 700px) { .sig-wrap .c2 { display: table-cell; } }
   @container (min-width: 880px) { .sig-wrap .c3 { display: table-cell; } }
 `
+
+// Phones get a card per signal instead of a wide table. Starts false so server and first client render match.
+function useIsPhone() {
+  const [phone, setPhone] = useState(false)
+  useEffect(() => {
+    const mq = window.matchMedia('(max-width: 767px)')
+    const update = () => setPhone(mq.matches)
+    update()
+    mq.addEventListener('change', update)
+    return () => mq.removeEventListener('change', update)
+  }, [])
+  return phone
+}
 
 interface Props {
   rows: SigRow[]
@@ -94,6 +107,7 @@ export function SignalTable({ rows, tickers, strategy, base, freq, onSelect }: P
   const [pageSize, setPageSize] = useState(100)
   const [visible, setVisible] = useState<Set<string>>(new Set(COLS.filter(c => !c.off).map(c => c.key)))
   const [pickerOpen, setPickerOpen] = useState(false)
+  const phone = useIsPhone()
 
   const available = COLS.filter(c => !c.only || c.only === freq)
   const cols = available.filter(c => visible.has(c.key))
@@ -131,8 +145,17 @@ export function SignalTable({ rows, tickers, strategy, base, freq, onSelect }: P
     <div>
       <div style={{ display: 'flex', gap: '10px', marginBottom: '10px', alignItems: 'center', flexWrap: 'wrap' }}>
         <div style={{ position: 'relative' }}>
-          <button style={btn} onClick={() => setPickerOpen(!pickerOpen)}>Columns</button>
-          {pickerOpen && (
+          {phone ? (
+            <div style={{ display: 'flex', gap: '6px' }}>
+              <select aria-label="Sort by" value={sortKey} onChange={e => { setSortKey(e.target.value); setDesc(true); setPage(0) }} style={{ ...btn, fontWeight: 500 }}>
+                {available.filter(c => c.pri < 3 || c.key === sortKey).map(c => <option key={c.key} value={c.key}>Sort: {c.label}</option>)}
+              </select>
+              <button style={btn} aria-label={desc ? 'Descending' : 'Ascending'} onClick={() => { setDesc(!desc); setPage(0) }}>{desc ? '↓' : '↑'}</button>
+            </div>
+          ) : (
+            <button style={btn} onClick={() => setPickerOpen(!pickerOpen)}>Columns</button>
+          )}
+          {pickerOpen && !phone && (
             <div style={{ position: 'absolute', top: '100%', left: 0, marginTop: '8px', background: 'var(--surface-elevated)', border: '1px solid var(--border-elevated)', borderRadius: '8px', padding: '10px 12px', minWidth: '200px', maxHeight: '320px', overflowY: 'auto', zIndex: 50, boxShadow: 'var(--shadow-lg)' }}>
               {available.map(c => (
                 <label key={c.key} style={{ display: 'flex', gap: '8px', alignItems: 'center', padding: '5px 0', fontSize: '12px', cursor: 'pointer' }}>
@@ -147,10 +170,42 @@ export function SignalTable({ rows, tickers, strategy, base, freq, onSelect }: P
         <button style={btn} onClick={() => exportTableToCSV(sorted.map(x => Object.fromEntries(available.map(c => [c.key, c.csv(x)]))), available.map(c => ({ key: c.key, label: c.label })), `${freq}-signals.csv`)}>
           Export CSV
         </button>
-        <div style={{ fontSize: '12px', color: 'var(--text-3)', marginLeft: 'auto' }}>Click a row for the indicators behind it</div>
+        {!phone && <div style={{ fontSize: '12px', color: 'var(--text-3)', marginLeft: 'auto' }}>Click a row for the indicators behind it</div>}
       </div>
 
       <Card pad={0} style={{ overflow: 'hidden' }}>
+        {phone ? (
+          <div>
+            {slice.map(x => (
+              <div key={`${x.t.ticker}-${x.r.d}`} role="button" tabIndex={0} onClick={() => onSelect(x.r)}
+                onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onSelect(x.r) } }}
+                style={{ padding: '12px 14px', borderBottom: '1px solid var(--border)', cursor: 'pointer' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: '10px' }}>
+                  <div style={{ minWidth: 0 }}>
+                    <Link href={`/asset/${x.t.ticker.toLowerCase()}`} onClick={e => e.stopPropagation()} style={{ color: 'var(--teal)', textDecoration: 'none', fontWeight: 700, fontSize: '14px' }}>{x.t.ticker}</Link>
+                    <div style={{ fontSize: '11px', color: 'var(--text-2)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{x.t.name}</div>
+                  </div>
+                  <div style={{ textAlign: 'right', flexShrink: 0, fontFamily: 'DM Mono, monospace', fontSize: '13px', color: 'var(--text)' }}>
+                    {mult(x.r.m)}
+                    <div style={{ fontSize: '11px', color: 'var(--text-3)', fontFamily: 'inherit' }}>{dateCompact(x.r.d)}</div>
+                  </div>
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: '8px', marginTop: '8px', fontFamily: 'DM Mono, monospace', fontSize: '12px' }}>
+                  {(['pnl', 'ret', 'sold'] as const).map(k => {
+                    const c = COLS.find(col => col.key === k)!
+                    return (
+                      <div key={k}>
+                        <div style={{ fontSize: '10px', color: 'var(--text-3)', fontFamily: 'DM Sans, sans-serif', marginBottom: '1px' }}>{c.label}</div>
+                        {c.cell(x)}
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+            ))}
+            {slice.length === 0 && <div style={{ padding: '40px', textAlign: 'center', color: 'var(--text-2)' }}>No signals match these filters.</div>}
+          </div>
+        ) : (
         <div className="sig-wrap">
           <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12px' }}>
             <thead>
@@ -184,12 +239,13 @@ export function SignalTable({ rows, tickers, strategy, base, freq, onSelect }: P
             </tbody>
           </table>
         </div>
+        )}
 
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 14px', borderTop: '1px solid var(--border)', flexWrap: 'wrap', gap: '8px' }}>
           <div style={{ fontSize: '12px', color: 'var(--text-2)' }}>
             {sorted.length === 0 ? 0 : cur * pageSize + 1}-{Math.min((cur + 1) * pageSize, sorted.length)} of {sorted.length.toLocaleString()} signals
           </div>
-          <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+          <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
             <select value={pageSize} onChange={e => { setPageSize(Number(e.target.value)); setPage(0) }} style={{ padding: '6px 8px', background: 'var(--surface)', border: '1px solid var(--border-elevated)', borderRadius: '6px', color: 'var(--text)', fontSize: '12px' }}>
               {[50, 100, 250, 500].map(n => <option key={n} value={n}>{n} per page</option>)}
             </select>

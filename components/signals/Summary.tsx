@@ -1,6 +1,6 @@
 'use client'
 
-import type { ReactNode } from 'react'
+import type { CSSProperties, ReactNode } from 'react'
 import { ATR_MULTIPLIERS, RANGES, type FreqSettings } from '@/lib/signals/config'
 import { money, NA, num, pct, tone } from '@/lib/signals/format'
 import type { Cohort, Stats } from '@/lib/signals/model'
@@ -58,8 +58,8 @@ export function Results({ stats, base, strategy, setStrategy, settings }: Result
         )}
       </div>
 
-      <div style={{ padding: '4px 18px 6px' }}>
-        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+      <div style={{ padding: '4px 18px 6px', overflowX: 'auto' }}>
+        <table className="res-table" style={{ width: '100%', borderCollapse: 'collapse' }}>
           <thead>
             <tr>
               <th style={{ ...th, textAlign: 'left', paddingLeft: 0 }} />
@@ -162,6 +162,8 @@ export function CohortChart({ data, unit }: { data: Cohort[]; unit: string }) {
           </div>
         </div>
         <div style={{ fontSize: '12px', color: 'var(--text-3)', margin: '2px 0 14px' }}>Dollar weighted return to the latest close, for the signals issued in each {unit}.</div>
+        <div className="cohort-scroll" style={{ overflowX: 'auto' }}>
+        <div className="cohort-inner" style={{ '--n': data.length } as CSSProperties}>
         <div style={{ display: 'flex', alignItems: 'flex-end', gap: '8px', height: '112px' }}>
           {data.map(d => (
             <div key={d.key} title={`${d.label}: held ${pct(d.holdPct)}, sold ${pct(d.sellPct)}, ${d.signals} signals`} style={{ flex: 1, display: 'flex', alignItems: 'flex-end', gap: '2px', minWidth: 0 }}>
@@ -180,7 +182,18 @@ export function CohortChart({ data, unit }: { data: Cohort[]; unit: string }) {
             </div>
           ))}
         </div>
+        </div>
+        </div>
+        <style dangerouslySetInnerHTML={{ __html: cohortCss }} />
       </div>
     </Card>
   )
 }
+
+// Phones: each cohort keeps a readable width and the chart scrolls sideways inside its card.
+const cohortCss = `
+  @media (max-width: 767px) {
+    .cohort-inner { min-width: calc(var(--n) * 44px); }
+    .res-table { min-width: 460px; }
+  }
+`

@@ -24,7 +24,7 @@ export function BacktestNarrative({ ticker, name, data, sector, spyReturn5y }: B
       boxShadow: 'var(--inset-top), var(--shadow-md)'
     }}>
       {/* Header with Tabs */}
-      <div style={{ padding: '24px 28px', borderBottom: '1px solid var(--border)' }}>
+      <div className="rs-pad" style={{ padding: '24px 28px', borderBottom: '1px solid var(--border)' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '16px' }}>
           <div style={{ width: '3px', height: '36px', borderRadius: '2px', background: 'var(--teal)', flexShrink: 0 }} />
           <div>
@@ -66,9 +66,9 @@ export function BacktestNarrative({ ticker, name, data, sector, spyReturn5y }: B
       </div>
 
       {/* Content */}
-      <div style={{ padding: '24px 28px' }}>
+      <div className="rs-pad" style={{ padding: '24px 28px' }}>
         {activeTab === 'weekly' && (
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '28px' }}>
+          <div className="rs-stack" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '28px' }}>
             <div style={{ fontSize: '13.5px', color: 'var(--text-2)', lineHeight: '1.75', display: 'flex', flexDirection: 'column', gap: '12px' }}>
               <p>
                 Investing <strong style={{ color: 'var(--text)' }}>$100/week into {ticker} ({name})</strong> using standard
@@ -121,7 +121,7 @@ export function BacktestNarrative({ ticker, name, data, sector, spyReturn5y }: B
         )}
 
         {activeTab === 'monthly' && (
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '28px' }}>
+          <div className="rs-stack" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '28px' }}>
             <div style={{ fontSize: '13.5px', color: 'var(--text-2)', lineHeight: '1.75', display: 'flex', flexDirection: 'column', gap: '12px' }}>
               <p>
                 Investing <strong style={{ color: 'var(--text)' }}>$433/month into {ticker} ({name})</strong> using standard

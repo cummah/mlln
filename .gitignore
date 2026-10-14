@@ -38,3 +38,6 @@ next-env.d.ts
 
 # local alternate build folders
 .next-*/
+
+# responsive screenshot output
+/.responsive/

@@ -2,29 +2,40 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 
 export function GlobalNav() {
   const pathname = usePathname() || '';
 
   const isActive = (href: string) => pathname.startsWith(href);
 
+  // Below the md breakpoint the sidebar becomes an off-canvas drawer (see globals.css).
+  const [open, setOpen] = useState(false);
+  useEffect(() => setOpen(false), [pathname]);
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && setOpen(false);
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+  }, [open]);
+
   return (
-    <div style={{
-      width: '220px',
-      minWidth: '220px',
-      background: 'var(--surface)',
-      borderRight: '1px solid var(--border)',
-      display: 'flex',
-      flexDirection: 'column',
-      paddingTop: 0,
-      paddingBottom: 0,
-      paddingLeft: 0,
-      paddingRight: 0,
-      zIndex: 10,
-      height: '100vh',
-      overflow: 'hidden'
-    }}>
+    <>
+    <button
+      type="button"
+      className="gn-toggle"
+      aria-label={open ? 'Close menu' : 'Open menu'}
+      aria-expanded={open}
+      onClick={() => setOpen(o => !o)}
+    >
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+        <line x1="4" y1="7" x2="20" y2="7" />
+        <line x1="4" y1="12" x2="20" y2="12" />
+        <line x1="4" y1="17" x2="20" y2="17" />
+      </svg>
+    </button>
+    <div className="gn-backdrop" data-open={open} onClick={() => setOpen(false)} />
+    <div className="gn" data-open={open}>
       {/* Logo */}
       <div style={{
         padding: '20px 18px',
@@ -249,6 +260,7 @@ export function GlobalNav() {
         </div>
       </div>
     </div>
+    </>
   );
 }
 

@@ -77,7 +77,7 @@ export function DashboardTopbar({ breadcrumb = 'Asset Details' }: DashboardTopba
   };
 
   return (
-    <div style={{
+    <div className="app-topbar" style={{
       position: 'sticky',
       top: 0,
       zIndex: 5,
@@ -89,14 +89,14 @@ export function DashboardTopbar({ breadcrumb = 'Asset Details' }: DashboardTopba
       alignItems: 'center',
       justifyContent: 'space-between'
     }}>
-      <div style={{ fontSize: '12px', color: 'var(--text-2)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+      <div className="tb-crumb" style={{ fontSize: '12px', color: 'var(--text-2)', display: 'flex', alignItems: 'center', gap: '6px' }}>
         <a href="/dashboard" style={{ color: 'var(--text-2)', textDecoration: 'none', cursor: 'pointer' }} onMouseEnter={(e) => (e.currentTarget as HTMLAnchorElement).style.color = 'var(--teal)'} onMouseLeave={(e) => (e.currentTarget as HTMLAnchorElement).style.color = 'var(--text-2)'}>Assets</a>
         <span>›</span>
         <span style={{ color: 'var(--text)' }}>{breadcrumb}</span>
       </div>
 
       {/* Search Bar */}
-      <div ref={searchRef} style={{ position: 'relative', flex: 1, maxWidth: '350px', margin: '0 24px' }}>
+      <div ref={searchRef} className="tb-search" style={{ position: 'relative', flex: 1, maxWidth: '350px', margin: '0 24px' }}>
         <div style={{ position: 'relative' }}>
           <input
             type="text"
@@ -232,7 +232,7 @@ export function DashboardTopbar({ breadcrumb = 'Asset Details' }: DashboardTopba
       </div>
 
       <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-        <button style={{
+        <button className="tb-share" style={{
           background: 'var(--surface2)',
           border: '1px solid var(--border-elevated)',
           color: 'var(--text-2)',

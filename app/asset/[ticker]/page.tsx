@@ -113,7 +113,7 @@ export default async function TickerPage({ params }: PageProps) {
       {summary && has5y && <StructuredData ticker={ticker} data={summary} spyReturn5y={spyReturn5y} />}
 
       {/* Main Content */}
-      <div style={{ padding: '28px', display: 'flex', flexDirection: 'column', gap: '20px', maxWidth: '1200px', marginLeft: 'auto', marginRight: 'auto' }}>
+      <div className="rs-page" style={{ padding: '28px', display: 'flex', flexDirection: 'column', gap: '20px', maxWidth: '1200px', marginLeft: 'auto', marginRight: 'auto' }}>
 
         {/* Sector Breadcrumb */}
         {asset.sector && (
@@ -214,12 +214,12 @@ export default async function TickerPage({ params }: PageProps) {
         {summary && has5y && <FAQSection ticker={ticker} name={summary.name} data={summary} sector={asset.sector} spyReturn5y={spyReturn5y} />}
 
         {/* How Enhanced DCA Works - Full Width */}
-        <div style={{ background: 'var(--surface-elevated)', border: '1px solid var(--border-elevated)', borderRadius: '14px', padding: '24px 28px', boxShadow: 'var(--inset-top), var(--shadow-md)' }}>
+        <div className="rs-pad" style={{ background: 'var(--surface-elevated)', border: '1px solid var(--border-elevated)', borderRadius: '14px', padding: '24px 28px', boxShadow: 'var(--inset-top), var(--shadow-md)' }}>
           <div style={{ fontSize: '11px', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--text-3)', marginBottom: '16px' }}>
             How Enhanced DCA works
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '24px' }}>
+          <div className="rs-stack" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '24px' }}>
             <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
               <div style={{ width: '28px', height: '28px', borderRadius: '8px', background: 'var(--green-dim)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#28d97e" strokeWidth="2.5">

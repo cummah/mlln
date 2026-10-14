@@ -9,7 +9,7 @@ interface KeyFindingsProps {
 
 export function KeyFindings({ ticker, name, data }: KeyFindingsProps) {
   return (
-    <section aria-label="Key findings" style={{
+    <section aria-label="Key findings" className="rs-pad" style={{
       background: 'var(--surface-elevated)',
       border: '1px solid var(--border-elevated)',
       borderRadius: '14px',
@@ -19,7 +19,7 @@ export function KeyFindings({ ticker, name, data }: KeyFindingsProps) {
       <h3 style={{ fontSize: '13.5px', fontWeight: '600', color: 'var(--text-2)', textTransform: 'uppercase', letterSpacing: '0.07em', margin: '0 0 14px 0' }}>
         {ticker} DCA Results: Key Findings
       </h3>
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '28px', alignItems: 'start' }}>
+      <div className="rs-stack" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '28px', alignItems: 'start' }}>
         {/* Left Column: Text Content */}
         <div style={{ fontSize: '14px', color: 'var(--text-2)', lineHeight: '1.75', display: 'flex', flexDirection: 'column', gap: '12px' }}>
           <p style={{ margin: 0 }}>

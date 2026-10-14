@@ -2,7 +2,7 @@
 
 export function SectorsTopbar() {
   return (
-    <div style={{
+    <div className="app-topbar" style={{
       position: 'sticky',
       top: 0,
       zIndex: 5,
@@ -14,11 +14,11 @@ export function SectorsTopbar() {
       alignItems: 'center',
       justifyContent: 'space-between'
     }}>
-      <div style={{ fontSize: '12px', color: 'var(--text-2)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+      <div className="tb-crumb" style={{ fontSize: '12px', color: 'var(--text-2)', display: 'flex', alignItems: 'center', gap: '6px' }}>
         <span style={{ color: 'var(--text)' }}>Sectors</span>
       </div>
       <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-        <button style={{
+        <button className="tb-share" style={{
           background: 'var(--surface2)',
           border: '1px solid var(--border-elevated)',
           color: 'var(--text-2)',

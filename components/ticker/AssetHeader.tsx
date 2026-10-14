@@ -57,7 +57,7 @@ export function AssetHeader({ asset, score, updatedAt }: AssetHeaderProps) {
 
           {/* Meta */}
           <div>
-            <h1 style={{ fontSize: '28px', fontWeight: '700', letterSpacing: '-0.5px', lineHeight: '1', margin: 0, marginBottom: '8px' }}>
+            <h1 className="rs-h1" style={{ fontSize: '28px', fontWeight: '700', letterSpacing: '-0.5px', lineHeight: '1', margin: 0, marginBottom: '8px' }}>
               {asset.ticker} DCA Backtest — Dollar Cost Averaging Results
             </h1>
             <div style={{ fontSize: '13.5px', color: 'var(--text-2)', marginTop: '8px' }}>
@@ -72,7 +72,7 @@ export function AssetHeader({ asset, score, updatedAt }: AssetHeaderProps) {
         </div>
 
         {/* DCA Score */}
-        <div style={{ textAlign: 'right' }}>
+        <div className="rs-score" style={{ textAlign: 'right' }}>
           <div style={{ fontSize: '11px', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.07em', color: 'var(--text-3)', marginBottom: '4px' }}>
             DCA Score
           </div>

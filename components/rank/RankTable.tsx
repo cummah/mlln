@@ -93,7 +93,7 @@ export function RankTable({ data }: { data: RankData }) {
   const head = (key: SortKey, label: string, align: 'left' | 'right' = 'right', hint?: string) => {
     const active = sortKey === key
     return (
-      <th key={key} title={hint} onClick={() => { if (active) setDesc(!desc); else { setSortKey(key); setDesc(key !== 'rank' && key !== 'ticker' && key !== 'sector') } setPage(0) }}
+      <th key={key} className={key === 'sector' || key === 'std' ? 'rk-hide' : undefined} title={hint} onClick={() => { if (active) setDesc(!desc); else { setSortKey(key); setDesc(key !== 'rank' && key !== 'ticker' && key !== 'sector') } setPage(0) }}
         style={{ padding: '11px 14px', textAlign: align, fontWeight: 600, color: active ? 'var(--text)' : 'var(--text-2)', whiteSpace: 'nowrap', cursor: 'pointer', userSelect: 'none' }}>
         {label}{active ? (desc ? ' ↓' : ' ↑') : ''}
       </th>
@@ -152,7 +152,8 @@ export function RankTable({ data }: { data: RankData }) {
       </div>
 
       <Card pad={0} style={{ overflow: 'hidden' }}>
-        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
+        <div style={{ overflowX: 'auto' }}>
+        <table className="rk-table" style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
           <thead>
             <tr style={{ borderBottom: '1px solid var(--border)', background: 'var(--surface2)' }}>
               {head('rank', '#', 'left', 'Position by DCA score across every asset')}
@@ -174,9 +175,9 @@ export function RankTable({ data }: { data: RankData }) {
                     <Link href={`/asset/${r.ticker.toLowerCase()}`} style={{ color: 'var(--teal)', fontWeight: 600, textDecoration: 'none' }} className="hover:underline">{r.ticker}</Link>
                     <div style={{ fontSize: '11px', color: 'var(--text-2)', marginTop: '2px', maxWidth: '240px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{r.name}</div>
                   </td>
-                  <td style={{ padding: '10px 14px', color: 'var(--text-2)', whiteSpace: 'nowrap' }}>{r.sector}</td>
+                  <td className="rk-hide" style={{ padding: '10px 14px', color: 'var(--text-2)', whiteSpace: 'nowrap' }}>{r.sector}</td>
                   <td style={{ padding: '10px 14px', textAlign: 'right' }}><ScorePill score={r.dca} /></td>
-                  <td style={{ padding: '10px 14px', textAlign: 'right', fontFamily: 'DM Mono, monospace', color: tone(c.std) }}>{pct(c.std)}</td>
+                  <td className="rk-hide" style={{ padding: '10px 14px', textAlign: 'right', fontFamily: 'DM Mono, monospace', color: tone(c.std) }}>{pct(c.std)}</td>
                   <td style={{ padding: '10px 14px', textAlign: 'right', fontFamily: 'DM Mono, monospace', color: tone(c.enh) }}>{pct(c.enh)}</td>
                   <td style={{ padding: '10px 14px', textAlign: 'right', fontFamily: 'DM Mono, monospace', fontWeight: 600, color: tone(c.alpha) }}>{pct(c.alpha)}</td>
                 </tr>
@@ -185,6 +186,7 @@ export function RankTable({ data }: { data: RankData }) {
             {slice.length === 0 && <tr><td colSpan={7} style={{ padding: '40px', textAlign: 'center', color: 'var(--text-2)' }}>No assets match these filters.</td></tr>}
           </tbody>
         </table>
+        </div>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 14px', borderTop: '1px solid var(--border)', flexWrap: 'wrap', gap: '8px' }}>
           <div style={{ fontSize: '12px', color: 'var(--text-2)' }}>{shown.length === 0 ? 0 : cur * pageSize + 1}-{Math.min((cur + 1) * pageSize, shown.length)} of {shown.length.toLocaleString()} assets · n/a means the asset has too little history for this window</div>
           <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
@@ -194,7 +196,17 @@ export function RankTable({ data }: { data: RankData }) {
           </div>
         </div>
       </Card>
-      <style dangerouslySetInnerHTML={{ __html: sliderCss }} />
+      <style dangerouslySetInnerHTML={{ __html: sliderCss + rankCss }} />
     </div>
   )
 }
+
+// Phones: drop the Sector and Standard columns so the score and returns stay on screen.
+const rankCss = `
+  @media (max-width: 767px) {
+    .rk-hide { display: none; }
+    .rk-table th, .rk-table td { padding-left: 8px !important; padding-right: 8px !important; }
+    .rk-table { font-size: 12px !important; }
+    .rk-table td div { max-width: 78px !important; }
+  }
+`

@@ -224,3 +224,94 @@ a {
     transform: none;
   }
 }
+
+/* ── Global shell (sidebar) ─────────────────────────────────────────────────
+   Desktop values are identical to the previous inline styles. Below 768px the
+   sidebar becomes an off-canvas drawer opened by .gn-toggle. */
+.gn {
+  width: 220px;
+  min-width: 220px;
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  z-index: 10;
+  height: 100vh;
+  overflow: hidden;
+}
+.gn-toggle,
+.gn-backdrop {
+  display: none;
+}
+
+@media (max-width: 767px) {
+  .h-screen { height: 100vh; height: 100dvh; }
+
+  .gn {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    height: auto;
+    width: 260px;
+    min-width: 0;
+    max-width: 85vw;
+    z-index: 40;
+    transform: translateX(-100%);
+    visibility: hidden;
+    transition: transform 0.2s ease, visibility 0s linear 0.2s;
+  }
+  .gn[data-open='true'] {
+    transform: translateX(0);
+    visibility: visible;
+    transition: transform 0.2s ease;
+  }
+  .gn-backdrop {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 35;
+    background: rgba(0, 0, 0, 0.55);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease;
+  }
+  .gn-backdrop[data-open='true'] {
+    opacity: 1;
+    pointer-events: auto;
+  }
+  .gn-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: fixed;
+    top: 6px;
+    left: 8px;
+    z-index: 30;
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--surface2);
+    color: var(--text);
+    cursor: pointer;
+  }
+
+  /* Topbar: clear the menu button, drop non-essential items. */
+  .app-topbar {
+    padding: 8px 12px 8px 56px !important;
+    justify-content: flex-end !important;
+    min-height: 52px;
+  }
+  .app-topbar .tb-crumb,
+  .app-topbar .tb-share { display: none !important; }
+  .app-topbar .tb-search { margin: 0 8px 0 0 !important; max-width: none !important; }
+
+  /* Shared phone utilities for pages built with inline styles. */
+  .rs-page { padding: 14px !important; gap: 14px !important; }
+  .rs-pad { padding: 16px !important; }
+  .rs-stack { grid-template-columns: minmax(0, 1fr) !important; gap: 16px !important; }
+  .rs-h1 { font-size: 22px !important; line-height: 1.15 !important; }
+  .rs-score { text-align: left !important; }
+  .rs-span2 { grid-column: 1 / -1; }
+}
