@@ -349,7 +349,7 @@ const nasdaqAssets: Asset[] = [
 const etfAssets: Asset[] = [
   { ticker: 'SPY', name: 'SPDR S&P 500 ETF', sector: 'Financials' },
   { ticker: 'QQQ', name: 'Invesco QQQ Trust', sector: 'Financials' },
-  { ticker: 'DIA', name: 'SPDR Dow Jones Industrial Average ETF', sector: 'Financials' },
+  { ticker: 'DIA', name: 'SPDR Dow Jones Industrial Average ETF', sector: 'Other' },
   { ticker: 'IWM', name: 'iShares Russell 2000 ETF', sector: 'Financials' },
   { ticker: 'EEM', name: 'iShares MSCI Emerging Markets ETF', sector: 'Financials' },
   { ticker: 'EWJ', name: 'iShares MSCI Japan ETF', sector: 'Financials' },
@@ -580,16 +580,16 @@ const additionalEtfs: Asset[] = [
   { ticker: 'FBGRX', name: 'Fidelity Blue Chip Growth Fund', sector: 'Financials' },
   { ticker: 'JMSDX', name: 'Janus Mid Cap Value Fund', sector: 'Financials' },
   { ticker: 'PRWCX', name: 'T. Rowe Price US Value Fund', sector: 'Financials' },
-  { ticker: 'VFIAX', name: 'Vanguard Fidelity Index Fund', sector: 'Financials' },
-  { ticker: 'VSMAX', name: 'Vanguard Small-Cap Value ETF', sector: 'Financials' },
-  { ticker: 'VCIT', name: 'Vanguard Intermediate-Term Corporate Bond ETF', sector: 'Financials' },
+  { ticker: 'VFIAX', name: 'Vanguard 500 Index Fund Admiral Shares', sector: 'Other' },
+  { ticker: 'VSMAX', name: 'Vanguard Small-Cap Index Fund Admiral Shares', sector: 'Other' },
+  { ticker: 'VCIT', name: 'Vanguard Intermediate-Term Corporate Bond ETF', sector: 'Other' },
   { ticker: 'VCSH', name: 'Vanguard Short-Term Corporate Bond ETF', sector: 'Financials' },
   { ticker: 'VGSH', name: 'Vanguard Short-Term Treasury ETF', sector: 'Financials' },
   { ticker: 'BIL', name: 'SPDR Bloomberg 1-3 Month T-Bill ETF', sector: 'Financials' },
   { ticker: 'SHY', name: 'iShares 1-3 Year Treasury Bond ETF', sector: 'Financials' },
   { ticker: 'IEF', name: 'iShares 7-10 Year Treasury Bond ETF', sector: 'Financials' },
   { ticker: 'TLH', name: 'iShares 10-20 Year Treasury Bond ETF', sector: 'Financials' },
-  { ticker: 'VGIT', name: 'Vanguard Intermediate-Term Treasury ETF', sector: 'Financials' },
+  { ticker: 'VGIT', name: 'Vanguard Intermediate-Term Treasury ETF', sector: 'Other' },
   { ticker: 'VCEB', name: 'Vanguard Emerging Markets Corporate Bond ETF', sector: 'Financials' },
   { ticker: 'VWOB', name: 'Vanguard Emerging Markets Government Bond ETF', sector: 'Financials' },
   { ticker: 'BNDX', name: 'Vanguard Total International Bond ETF', sector: 'Financials' },
@@ -597,7 +597,7 @@ const additionalEtfs: Asset[] = [
   { ticker: 'SPHD', name: 'Invesco S&P 500 High Dividend Low Volatility ETF', sector: 'Financials' },
   { ticker: 'NOBL', name: 'ProShares S&P 500 Dividend Aristocrats ETF', sector: 'Financials' },
   { ticker: 'VIG', name: 'Vanguard Dividend Appreciation ETF', sector: 'Financials' },
-  { ticker: 'XMPT', name: 'Xtreme Financial Corp', sector: 'Financials' },
+  { ticker: 'XMPT', name: 'VanEck CEF Municipal Income ETF', sector: 'Other' },
 ]
 
 // Major indices
