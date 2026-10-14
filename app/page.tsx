@@ -9,6 +9,7 @@ import { SignalBars } from '@/components/home/SignalBars'
 import { EdcaCompare } from '@/components/home/EdcaCompare'
 import { SectorHighlights } from '@/components/home/SectorHighlights'
 import { Pricing } from '@/components/home/Pricing'
+import { MobileMenu } from '@/components/home/MobileMenu'
 
 export const metadata: Metadata = {
   title: 'Enhanced DCA | Buy more when it is cheap, less when it is not | mlln.ai',
@@ -71,6 +72,11 @@ const CSS = `
 .lp-hero { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: center; }
 .lp-two { display: grid; grid-template-columns: 1fr 1.15fr; gap: 56px; align-items: center; }
 .lp-nav-links { display: flex; gap: 24px; align-items: center; }
+.lp-menu { display: none; position: relative; }
+.lp-menu-btn { display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 8px; border: 1px solid var(--border-medium); background: var(--surface2); color: var(--text); cursor: pointer; }
+.lp-menu-panel { position: absolute; top: calc(100% + 10px); right: 0; width: 230px; max-height: 70vh; overflow-y: auto; padding: 6px; border-radius: 12px; background: var(--surface-elevated); border: 1px solid var(--border-elevated); box-shadow: var(--shadow-lg); display: flex; flex-direction: column; }
+.lp-menu-item { padding: 11px 12px; border-radius: 8px; font-size: 14px; font-weight: 500; color: var(--text-2); text-decoration: none; }
+.lp-menu-item:hover, .lp-menu-item:active { background: var(--surface2); color: var(--text); }
 .lp-btn { display: inline-flex; align-items: center; justify-content: center; padding: 12px 22px; border-radius: 10px; font-size: 14px; font-weight: 600; text-decoration: none; transition: background 0.2s, box-shadow 0.2s, transform 0.2s; }
 .lp-btn:hover { transform: translateY(-2px); }
 .lp-btn-primary { background: var(--teal); color: var(--bg); }
@@ -98,6 +104,9 @@ const CSS = `
   .lp-grid3 { grid-template-columns: 1fr; }
   .lp-hero, .lp-two, .lp-compare { grid-template-columns: 1fr !important; gap: 32px; }
   .lp-nav-links .lp-link { display: none; }
+  .lp-header .lp-wrap { gap: 10px; }
+  .lp-nav-links { margin-left: auto; }
+  .lp-menu { display: block; }
 }
 @media (prefers-reduced-motion: reduce) {
   .lp-gradient-text, .lp-orb, .lp-marquee-track, .lp-pulse { animation: none; }
@@ -154,6 +163,7 @@ export default async function HomePage() {
               Get started
             </Link>
           </nav>
+          <MobileMenu />
         </div>
       </header>
 

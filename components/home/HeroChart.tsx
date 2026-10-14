@@ -1,7 +1,6 @@
 'use client'
 
 import { useMemo, useState } from 'react'
-import { motion, useReducedMotion } from 'framer-motion'
 import { dateCompact, pct } from '@/lib/signals/format'
 import type { YtdData, YtdKey } from '@/lib/watchlist-ytd'
 
@@ -21,9 +20,19 @@ function niceStep(range: number): number {
 
 const monthShort = (d: string) => new Date(d + 'T12:00:00Z').toLocaleDateString('en-US', { month: 'short', timeZone: 'UTC' })
 
+// The lines are fully drawn in the HTML. The draw-in is a desktop-only CSS flourish, so a phone (or a slow
+// or failed script) always shows the chart instead of an empty plot.
+const drawCss = `
+  @media (min-width: 901px) and (prefers-reduced-motion: no-preference) {
+    .hero-line { stroke-dasharray: 1; animation: hero-draw 1.9s ease-in-out both; }
+    .hero-area { animation: hero-fade 1s ease-out 1.4s both; }
+  }
+  @keyframes hero-draw { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }
+  @keyframes hero-fade { from { opacity: 0; } to { opacity: 1; } }
+`
+
 /** The Top 10 Watchlist since January: return on money invested, drawn in as the card scrolls into view. */
 export function HeroChart({ ytd }: { ytd: YtdData }) {
-  const reduce = useReducedMotion()
   const [hover, setHover] = useState<number | null>(null)
   const n = ytd.dates.length
   const last = n - 1
@@ -63,6 +72,7 @@ export function HeroChart({ ytd }: { ytd: YtdData }) {
 
   return (
     <div>
+      <style dangerouslySetInnerHTML={{ __html: drawCss }} />
       <svg
         viewBox={`0 0 ${W} ${H}`}
         width="100%"
@@ -90,30 +100,22 @@ export function HeroChart({ ytd }: { ytd: YtdData }) {
         ))}
 
         {area && (
-          <motion.path
-            d={area}
-            fill="url(#hero-area)"
-            initial={reduce ? false : { opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            viewport={{ once: true }}
-            transition={{ duration: 1, delay: 1.4 }}
-          />
+          <path d={area} fill="url(#hero-area)" className="hero-area" />
         )}
 
         {/* Benchmarks first, Enhanced DCA last so it draws on top */}
         {[2, 1, 0].map(k => (
-          <motion.path
+          <path
             key={LINES[k].key}
             d={paths[k]}
+            pathLength={1}
             fill="none"
             stroke={LINES[k].color}
             strokeWidth={k === 0 ? 2.5 : 1.75}
             strokeLinejoin="round"
             strokeLinecap="round"
-            initial={reduce ? false : { pathLength: 0 }}
-            whileInView={{ pathLength: 1 }}
-            viewport={{ once: true }}
-            transition={{ duration: 1.9, ease: 'easeInOut', delay: (2 - k) * 0.18 }}
+            className="hero-line"
+            style={{ animationDelay: `${(2 - k) * 0.18}s` }}
           />
         ))}
 
