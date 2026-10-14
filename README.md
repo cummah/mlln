@@ -1,40 +1,51 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# mlln.ai
 
-## Getting Started
+Dollar cost averaging backtests and daily buy signals for about 2,000 stocks and ETFs. A plain fixed-amount DCA is compared with an
+Enhanced DCA that scales each buy by a multiplier from price indicators. Next.js 14 (app router) on Vercel, data in Supabase.
 
-First, run the development server:
+## How the data flows
+
+End-of-day data, loaded once each evening after the US market closes.
+
+1. **Prices.** `scripts/nightly.ts` fetches new daily bars from Yahoo Finance into `daily_prices`.
+2. **Signals.** Every indicator is a pure function of the trailing 756 bars, so a historic signal is exactly what it would have been on
+   that date. The engine is in `lib/engine`, the database side in `lib/pipeline`. Results go to `buy_signals`, `exit_events`
+   and `current_signal`. The `signal_feed` view joins them for the pages.
+3. **Integrity checks.** Price coverage, VIX freshness, value ranges, mass-zero columns and entry fills are checked before anything is
+   written. If one fails the job exits non-zero and writes nothing.
+4. **Summary.** `scripts/summary.ts` rebuilds `backtest_summary` (1m, 3m, 1y, 3y, 5y windows) and the DCA suitability score.
+5. **Site refresh.** The workflow calls `/api/revalidate`, and every data page is rebuilt from the new rows.
+
+The pages never query the database per visit. They are rendered once a day (`force-static`) and refreshed by step 5.
+
+The workflow is `.github/workflows/nightly.yml`: 03:30 UTC Tuesday to Saturday, or run it by hand from the Actions tab.
+
+## Setup
 
 ```bash
+npm ci
+cp .env.local.example .env.local   # fill in the values
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Schema changes are SQL files in `supabase/migrations`, applied by pasting them into the Supabase SQL editor. `supabase/schema.sql`
+holds the two base tables (`assets`, `daily_prices`).
 
-You can start editing the page by modifying `pages/index.tsx`. The page auto-updates as you edit the file.
+## Commands
 
-[API routes](https://nextjs.org/docs/api-routes/introduction) can be accessed on [http://localhost:3000/api/hello](http://localhost:3000/api/hello). This endpoint can be edited in `pages/api/hello.ts`.
+| Command | What it does |
+|---|---|
+| `npm run nightly` | The whole nightly job: prices, factors, signals, checks, write |
+| `npm run nightly:dry` | The same, but derives and checks without writing signals |
+| `npm run backfill` | Rebuild all history from stored prices (long) |
+| `npm run summary` | Rebuild the per-ticker summary table |
+| `npm run test` | Selftests: engine, factor model, pipeline, signals, summary |
+| `npm run assets:*` | Maintain the `assets` list (seed, sync index members, sectors, mark inactive) |
 
-The `pages/api` directory is mapped to `/api/*`. Files in this directory are treated as [API routes](https://nextjs.org/docs/api-routes/introduction) instead of React pages.
+## Rules worth knowing
 
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+- Never read `daily_prices` by date across many tickers. The table is indexed by ticker and date together, so a date-wide read
+  hits the database statement timeout. Read by ticker.
+- Zero means zero. A missing value is `null` and the page shows a dash or "n/a", never a made-up zero.
+- `/portfolio` layout is deliberately frozen.
+- A GitHub workflow file with a YAML error is rejected silently as a failed run with no jobs. Check it with a YAML parser before pushing.
