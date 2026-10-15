@@ -3,7 +3,9 @@
 import Link from 'next/link'
 import { useEffect, useMemo, useState } from 'react'
 import { dateCompact } from '@/lib/signals/format'
+import { LockedCell } from '@/components/gating/LockedCell'
 import type { DemoWatchlist, WatchFreq, WatchRow } from '@/lib/watchlist'
+import type { Entitlement } from '@/types'
 import { SignalCell } from '@/components/sectors/SignalCell'
 import { SortTh, sortBy, useSort } from '@/components/sectors/sorting'
 import { YtdSection } from './YtdSection'
@@ -23,6 +25,22 @@ const round2 = (v: number) => Math.round(v * 100) / 100
 
 const monthLabel = (ym: string) =>
   new Date(`${ym}-15T12:00:00Z`).toLocaleDateString('en-US', { month: 'short', timeZone: 'UTC' }) + " '" + ym.slice(2, 4)
+
+const canAccessTicker = (ticker: string, entitlement: Entitlement): boolean => {
+  if (entitlement.tier >= 2) return true
+  if (entitlement.tier === 1) return entitlement.assets.has(ticker)
+  return false
+}
+
+const MaskedCell = ({ onUnlock }: { onUnlock?: () => void }) => (
+  <span
+    onClick={onUnlock}
+    style={{ color: 'var(--text-2)', cursor: onUnlock ? 'pointer' : 'default', textDecoration: onUnlock ? 'underline' : 'none' }}
+    title={onUnlock ? 'Click to upgrade' : undefined}
+  >
+    ••••
+  </span>
+)
 
 const pill = (active: boolean) => ({
   padding: '5px 12px',
@@ -79,6 +97,8 @@ export function WatchlistView({ data }: { data: DemoWatchlist }) {
     monthly: String(data.baseAmount.monthly),
   })
   const [bought, setBought] = useState<Record<string, boolean>>({})
+  const [entitlement, setEntitlement] = useState<Entitlement>({ tier: 0, assets: new Set() })
+  const [showUpgrade, setShowUpgrade] = useState(false)
   const sort = useSort<SortKey>('amount', 'desc', ['ticker'])
 
   const word = FREQ_WORD[freq]
@@ -91,6 +111,21 @@ export function WatchlistView({ data }: { data: DemoWatchlist }) {
   useEffect(() => {
     try { setBought(JSON.parse(localStorage.getItem(boughtKey) ?? '{}')) } catch { setBought({}) }
   }, [boughtKey])
+
+  useEffect(() => {
+    fetch('/api/user/entitlement')
+      .then(res => res.json())
+      .then(data => {
+        setEntitlement({
+          tier: data.tier,
+          assets: new Set(data.assets || []),
+        })
+      })
+      .catch(err => {
+        console.error('Failed to fetch entitlement:', err)
+        setEntitlement({ tier: 0, assets: new Set() })
+      })
+  }, [])
 
   const toggleBought = (ticker: string) => {
     const next = { ...bought, [ticker]: !bought[ticker] }
@@ -218,10 +253,11 @@ export function WatchlistView({ data }: { data: DemoWatchlist }) {
                 <tbody>
                   {sorted.map(l => {
                     const done = !!bought[l.row.ticker]
+                    const isLocked = !canAccessTicker(l.row.ticker, entitlement)
                     return (
                       <tr key={l.row.ticker} style={{ borderBottom: '1px solid var(--border)', opacity: done ? 0.55 : 1 }}>
                         <td style={{ padding: '12px 8px', textAlign: 'center' }}>
-                          <input type="checkbox" checked={done} onChange={() => toggleBought(l.row.ticker)} aria-label={`Mark ${l.row.ticker} as bought`} style={{ cursor: 'pointer' }} />
+                          <input type="checkbox" checked={done} onChange={() => toggleBought(l.row.ticker)} aria-label={`Mark ${l.row.ticker} as bought`} style={{ cursor: 'pointer' }} disabled={isLocked} />
                         </td>
                         <td style={{ padding: '12px 8px' }}>
                           <Link href={`/asset/${l.row.ticker.toLowerCase()}`}>
@@ -230,9 +266,15 @@ export function WatchlistView({ data }: { data: DemoWatchlist }) {
                           </Link>
                         </td>
                         <td style={{ padding: '12px 8px', color: 'var(--text-2)' }}>{dateCompact(l.date)}</td>
-                        <td style={{ textAlign: 'right', padding: '12px 8px' }}><SignalCell mult={l.mult} /></td>
-                        <td style={{ textAlign: 'right', padding: '12px 8px', fontWeight: 600, color: 'var(--text)' }}>{usd(l.amount)}</td>
-                        <td style={{ textAlign: 'right', padding: '12px 8px', color: 'var(--text-2)' }}>{l.shares === null ? '-' : l.shares.toFixed(l.shares >= 0.01 ? 3 : 5)}</td>
+                        <td style={{ textAlign: 'right', padding: '12px 8px' }}>
+                          {isLocked ? <MaskedCell onUnlock={() => setShowUpgrade(true)} /> : <SignalCell mult={l.mult} />}
+                        </td>
+                        <td style={{ textAlign: 'right', padding: '12px 8px', fontWeight: 600, color: 'var(--text)' }}>
+                          {isLocked ? <MaskedCell onUnlock={() => setShowUpgrade(true)} /> : usd(l.amount)}
+                        </td>
+                        <td style={{ textAlign: 'right', padding: '12px 8px', color: 'var(--text-2)' }}>
+                          {isLocked ? <MaskedCell onUnlock={() => setShowUpgrade(true)} /> : (l.shares === null ? '-' : l.shares.toFixed(l.shares >= 0.01 ? 3 : 5))}
+                        </td>
                         <td style={{ textAlign: 'right', padding: '12px 8px', fontWeight: 600, color: l.ret === null ? 'var(--text-3)' : l.ret >= 0 ? 'var(--green)' : 'var(--red)' }}>
                           {l.ret === null ? 'pending' : `${l.ret >= 0 ? '+' : ''}${l.ret.toFixed(1)}%`}
                         </td>
@@ -254,6 +296,21 @@ export function WatchlistView({ data }: { data: DemoWatchlist }) {
 
       {data.ytd && <YtdSection ytd={data.ytd} monthlyBase={monthlyBase} startDate={data.startDate} />}
 
+      {showUpgrade && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100 }}>
+          <div style={{ background: 'var(--surface-elevated)', border: '1px solid var(--border-elevated)', borderRadius: '12px', padding: '24px', maxWidth: '400px', boxShadow: 'var(--shadow-lg)' }}>
+            <h2 style={{ fontSize: '18px', fontWeight: 700, color: 'var(--text)', margin: '0 0 8px 0' }}>Upgrade to view latest allocation</h2>
+            <p style={{ fontSize: '13px', color: 'var(--text-2)', margin: '0 0 16px 0', lineHeight: 1.5 }}>
+              The latest period allocation is only available to premium subscribers. Upgrade your plan to see the most recent buying recommendations.
+            </p>
+            <div style={{ display: 'flex', gap: '8px' }}>
+              <button onClick={() => setShowUpgrade(false)} style={{ flex: 1, padding: '10px 16px', background: 'var(--surface)', border: '1px solid var(--border-elevated)', borderRadius: '8px', fontSize: '13px', fontWeight: 600, color: 'var(--text)', cursor: 'pointer' }}>Close</button>
+              <Link href="/pricing" onClick={() => setShowUpgrade(false)} style={{ flex: 1, padding: '10px 16px', background: 'var(--teal)', border: 'none', borderRadius: '8px', fontSize: '13px', fontWeight: 600, color: '#040e18', cursor: 'pointer', textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>View plans</Link>
+            </div>
+          </div>
+        </div>
+      )}
+
       {data.months.length > 0 && (
         <div style={card}>
           <h2 style={{ fontSize: '20px', fontWeight: 500, color: 'var(--text)', margin: '0 0 6px 0' }}>Monthly allocation since {dateCompact(data.startDate)}</h2>
@@ -271,32 +328,44 @@ export function WatchlistView({ data }: { data: DemoWatchlist }) {
                 </tr>
               </thead>
               <tbody>
-                {grid.rows.map(r => (
+                {grid.rows.map(r => {
+                  const isLatestLocked = data.months.length > 0 && !canAccessTicker(r.row.ticker, entitlement)
+                  return (
                   <tr key={r.row.ticker} style={{ borderBottom: '1px solid var(--border)' }}>
                     <td style={{ padding: '10px 8px' }}>
                       <Link href={`/asset/${r.row.ticker.toLowerCase()}`} style={{ fontWeight: 500, color: 'var(--teal)' }}>{r.row.ticker}</Link>
                     </td>
                     {r.byMonth.map((v, i) => {
                       const mult = r.row.history[data.months[i]]
+                      const isLatestMonth = i === 0
+                      const isLocked = isLatestMonth && isLatestLocked
                       return (
                         <td
                           key={data.months[i]}
                           title={mult === undefined ? 'No signal this month' : `${mult.toFixed(2)}×`}
-                          style={{ textAlign: 'right', padding: '10px 8px', color: v > 0 ? 'var(--text)' : 'var(--text-3)', background: v > 0 ? 'var(--teal-dim)' : 'transparent' }}
+                          style={{ textAlign: 'right', padding: '10px 8px', color: v > 0 ? 'var(--text)' : 'var(--text-3)', background: v > 0 ? 'var(--teal-dim)' : 'transparent', cursor: isLocked ? 'pointer' : 'default' }}
+                          onClick={() => isLocked && setShowUpgrade(true)}
                         >
-                          {v > 0 ? usdWhole.format(v) : '-'}
+                          {isLocked ? <MaskedCell onUnlock={() => setShowUpgrade(true)} /> : (v > 0 ? usdWhole.format(v) : '-')}
                         </td>
                       )
                     })}
                     <td style={{ textAlign: 'right', padding: '10px 8px', fontWeight: 600, color: 'var(--text)' }}>{r.total > 0 ? usdWhole.format(r.total) : '-'}</td>
                     <td style={{ textAlign: 'right', padding: '10px 8px', color: 'var(--text-2)' }}>{r.bought} of {data.months.length}</td>
                   </tr>
-                ))}
+                  )
+                })}
                 <tr>
                   <td style={{ padding: '10px 8px', fontWeight: 600, color: 'var(--text)' }}>Total</td>
-                  {grid.monthTotals.map((v, i) => (
-                    <td key={data.months[i]} style={{ textAlign: 'right', padding: '10px 8px', fontWeight: 600, color: 'var(--text)' }}>{v > 0 ? usdWhole.format(v) : '-'}</td>
-                  ))}
+                  {grid.monthTotals.map((v, i) => {
+                    const isLatestMonth = i === 0
+                    const isLocked = isLatestMonth && data.months.length > 0 && !canAccessTicker('', entitlement)
+                    return (
+                      <td key={data.months[i]} style={{ textAlign: 'right', padding: '10px 8px', fontWeight: 600, color: 'var(--text)', cursor: isLocked ? 'pointer' : 'default' }} onClick={() => isLocked && setShowUpgrade(true)}>
+                        {isLocked ? <MaskedCell onUnlock={() => setShowUpgrade(true)} /> : (v > 0 ? usdWhole.format(v) : '-')}
+                      </td>
+                    )
+                  })}
                   <td style={{ textAlign: 'right', padding: '10px 8px', fontWeight: 700, color: 'var(--teal)' }}>{usdWhole.format(grid.grand)}</td>
                   <td />
                 </tr>
