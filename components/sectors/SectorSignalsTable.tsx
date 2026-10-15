@@ -4,7 +4,9 @@ import Link from 'next/link'
 import { useEffect, useMemo, useState } from 'react'
 import { Skeleton } from '@/components/ui/Skeleton'
 import { dateCompact } from '@/lib/signals/format'
+import { LockedCell } from '@/components/gating/LockedCell'
 import type { RecentBuyZoneEntry } from '@/lib/sector-queries'
+import type { Entitlement } from '@/types'
 import { SignalCell } from './SignalCell'
 import { SortTh, sortBy, useSort } from './sorting'
 
@@ -46,17 +48,44 @@ export function SectorSignalsTable({ sector }: { sector: string }) {
   const [data, setData] = useState<SignalsData | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [entitlement, setEntitlement] = useState<Entitlement>({ tier: 0, assets: new Set() })
+  const [latestDate, setLatestDate] = useState<string | null>(null)
+  const [showUpgrade, setShowUpgrade] = useState(false)
   const sort = useSort<SortKey>('date', 'desc', ['ticker'])
 
   useEffect(() => {
     let live = true
     fetch(`/api/sectors/${sector}/signals`)
       .then(async r => { if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.json() })
-      .then(j => { if (live) setData(j) })
+      .then(j => {
+        if (live) {
+          setData(j)
+          // Determine latest date from all signals
+          const allDates = [...(j.weekly ?? []), ...(j.monthly ?? [])].map(r => r.signalDate)
+          if (allDates.length > 0) {
+            setLatestDate(allDates.sort().reverse()[0])
+          }
+        }
+      })
       .catch(e => { if (live) setError(String(e.message ?? e)) })
       .finally(() => { if (live) setLoading(false) })
     return () => { live = false }
   }, [sector])
+
+  useEffect(() => {
+    fetch('/api/user/entitlement')
+      .then(res => res.json())
+      .then(data => {
+        setEntitlement({
+          tier: data.tier,
+          assets: new Set(data.assets || []),
+        })
+      })
+      .catch(err => {
+        console.error('Failed to fetch entitlement:', err)
+        setEntitlement({ tier: 0, assets: new Set() })
+      })
+  }, [])
 
   const limit = data?.settings?.tableRowsLimit ?? DEFAULT_LIMIT
   const periods = frequency === 'weekly' ? 'weeks' : 'months'
@@ -135,13 +164,24 @@ export function SectorSignalsTable({ sector }: { sector: string }) {
                   </tr>
                 </thead>
                 <tbody>
-                  {shown.map(r => (
+                  {shown.map(r => {
+                    const isLatestPeriod = latestDate && (frequency === 'weekly'
+                      ? r.signalDate === latestDate
+                      : r.signalDate.slice(0, 7) === latestDate.slice(0, 7))
+                    const canAccess = entitlement.tier >= 2 || (entitlement.tier === 1 && entitlement.assets.has(r.ticker))
+                    const isLocked = isLatestPeriod && !canAccess
+
+                    return (
                     <tr key={`${r.ticker}-${r.signalDate}`} style={{ borderBottom: '1px solid var(--border)' }}>
                       <td style={{ padding: '12px 8px' }}>
-                        <Link href={`/asset/${r.ticker.toLowerCase()}`}>
-                          <div style={{ fontWeight: '500', color: 'var(--teal)', cursor: 'pointer' }}>{r.ticker}</div>
-                          <div style={{ fontSize: '12px', color: 'var(--text-2)' }}>{r.name}</div>
-                        </Link>
+                        {isLocked ? (
+                          <LockedCell onUpgradeClick={() => setShowUpgrade(true)} />
+                        ) : (
+                          <Link href={`/asset/${r.ticker.toLowerCase()}`}>
+                            <div style={{ fontWeight: '500', color: 'var(--teal)', cursor: 'pointer' }}>{r.ticker}</div>
+                            <div style={{ fontSize: '12px', color: 'var(--text-2)' }}>{r.name}</div>
+                          </Link>
+                        )}
                       </td>
                       <td style={{ padding: '12px 8px', color: 'var(--text-2)' }}>{dateCompact(r.signalDate)}</td>
                       <td style={{ textAlign: 'right', padding: '12px 8px' }}><SignalCell mult={r.signalMult} /></td>
@@ -149,7 +189,8 @@ export function SectorSignalsTable({ sector }: { sector: string }) {
                         {r.currentReturn === null ? 'pending' : `${r.currentReturn >= 0 ? '+' : ''}${r.currentReturn.toFixed(1)}%`}
                       </td>
                     </tr>
-                  ))}
+                    )
+                  })}
                 </tbody>
               </table>
             </div>
@@ -164,6 +205,21 @@ export function SectorSignalsTable({ sector }: { sector: string }) {
           </>
         )}
       </div>
+
+      {showUpgrade && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100 }}>
+          <div style={{ background: 'var(--surface-elevated)', border: '1px solid var(--border-elevated)', borderRadius: '12px', padding: '24px', maxWidth: '400px', boxShadow: 'var(--shadow-lg)' }}>
+            <h2 style={{ fontSize: '18px', fontWeight: 700, color: 'var(--text)', margin: '0 0 8px 0' }}>Upgrade to view latest signals</h2>
+            <p style={{ fontSize: '13px', color: 'var(--text-2)', margin: '0 0 16px 0', lineHeight: 1.5 }}>
+              The latest signal period is only available to premium subscribers. Upgrade your plan to see the most recent buy signals.
+            </p>
+            <div style={{ display: 'flex', gap: '8px' }}>
+              <button onClick={() => setShowUpgrade(false)} style={{ flex: 1, padding: '10px 16px', background: 'var(--surface)', border: '1px solid var(--border-elevated)', borderRadius: '8px', fontSize: '13px', fontWeight: 600, color: 'var(--text)', cursor: 'pointer' }}>Close</button>
+              <Link href="/pricing" onClick={() => setShowUpgrade(false)} style={{ flex: 1, padding: '10px 16px', background: 'var(--teal)', border: 'none', borderRadius: '8px', fontSize: '13px', fontWeight: 600, color: '#040e18', cursor: 'pointer', textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>View plans</Link>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
