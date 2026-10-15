@@ -23,16 +23,26 @@ const TIER_NAMES: Record<UserTier, string> = {
   3: 'Tier 3 (Pro)'
 };
 
+interface Tier0User {
+  user_id: string;
+  email: string;
+  tier: number;
+  created_at: string;
+}
+
 export default function AdminPermissionsPage() {
   const supabase = createClient();
   const [permissions, setPermissions] = useState<Map<string, boolean>>(new Map());
+  const [tier0Users, setTier0Users] = useState<Tier0User[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const [updatingUser, setUpdatingUser] = useState<string | null>(null);
 
   useEffect(() => {
     loadPermissions();
+    loadTier0Users();
   }, []);
 
   const loadPermissions = async () => {
@@ -55,6 +65,55 @@ export default function AdminPermissionsPage() {
       console.error(err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const loadTier0Users = async () => {
+    try {
+      const { data, error: fetchError } = await supabase
+        .from('profiles')
+        .select('user_id, created_at, tier')
+        .eq('tier', 0);
+
+      if (fetchError) throw fetchError;
+
+      // Fetch user emails from auth
+      const usersWithEmails = await Promise.all(
+        (data || []).map(async (profile) => {
+          const { data: authUser } = await supabase.auth.admin.getUserById(profile.user_id);
+          return {
+            user_id: profile.user_id,
+            email: authUser?.user?.email || 'unknown',
+            tier: profile.tier,
+            created_at: profile.created_at
+          };
+        })
+      );
+
+      setTier0Users(usersWithEmails as Tier0User[]);
+    } catch (err) {
+      console.error('Failed to load tier 0 users:', err);
+    }
+  };
+
+  const updateUserTier = async (userId: string, newTier: number) => {
+    setUpdatingUser(userId);
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .update({ tier: newTier })
+        .eq('user_id', userId);
+
+      if (error) throw error;
+
+      setSuccess('User tier updated successfully!');
+      loadTier0Users();
+      setTimeout(() => setSuccess(null), 3000);
+    } catch (err) {
+      setError('Failed to update user tier');
+      console.error(err);
+    } finally {
+      setUpdatingUser(null);
     }
   };
 
@@ -279,6 +338,122 @@ export default function AdminPermissionsPage() {
         >
           Reload
         </button>
+      </div>
+
+      {/* Tier 0 Users Management */}
+      <div style={{ marginTop: '64px' }}>
+        <h2 style={{ fontSize: '24px', fontWeight: '700', marginBottom: '8px', color: 'var(--text)' }}>
+          Free Tier Users (Marketing List)
+        </h2>
+        <p style={{ color: 'var(--text-2)', marginBottom: '24px', fontSize: '14px' }}>
+          Users who signed up for free portfolio access. Manage or upgrade their tiers.
+        </p>
+
+        {tier0Users.length === 0 ? (
+          <div style={{
+            padding: '40px',
+            textAlign: 'center',
+            background: 'var(--surface)',
+            borderRadius: '12px',
+            color: 'var(--text-2)',
+            border: '1px solid var(--border)'
+          }}>
+            No free tier users yet
+          </div>
+        ) : (
+          <div style={{
+            overflowX: 'auto',
+            background: 'var(--surface)',
+            border: '1px solid var(--border)',
+            borderRadius: '12px'
+          }}>
+            <table style={{
+              width: '100%',
+              borderCollapse: 'collapse',
+              fontSize: '14px'
+            }}>
+              <thead>
+                <tr style={{ borderBottom: '1px solid var(--border)' }}>
+                  <th style={{
+                    padding: '16px',
+                    textAlign: 'left',
+                    fontWeight: '600',
+                    color: 'var(--text)',
+                    background: 'var(--surface2)'
+                  }}>
+                    Email
+                  </th>
+                  <th style={{
+                    padding: '16px',
+                    textAlign: 'left',
+                    fontWeight: '600',
+                    color: 'var(--text)',
+                    background: 'var(--surface2)'
+                  }}>
+                    Created
+                  </th>
+                  <th style={{
+                    padding: '16px',
+                    textAlign: 'left',
+                    fontWeight: '600',
+                    color: 'var(--text)',
+                    background: 'var(--surface2)'
+                  }}>
+                    Actions
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {tier0Users.map(user => (
+                  <tr key={user.user_id} style={{ borderBottom: '1px solid var(--border)' }}>
+                    <td style={{ padding: '16px', color: 'var(--text)' }}>
+                      {user.email}
+                    </td>
+                    <td style={{ padding: '16px', color: 'var(--text-2)', fontSize: '12px' }}>
+                      {new Date(user.created_at).toLocaleDateString()}
+                    </td>
+                    <td style={{ padding: '16px' }}>
+                      <div style={{ display: 'flex', gap: '8px' }}>
+                        {[1, 2, 3].map(tier => (
+                          <button
+                            key={tier}
+                            onClick={() => updateUserTier(user.user_id, tier)}
+                            disabled={updatingUser === user.user_id}
+                            style={{
+                              padding: '6px 12px',
+                              borderRadius: '6px',
+                              border: '1px solid var(--border)',
+                              background: 'transparent',
+                              color: 'var(--text-2)',
+                              fontSize: '12px',
+                              cursor: updatingUser === user.user_id ? 'not-allowed' : 'pointer',
+                              opacity: updatingUser === user.user_id ? 0.6 : 1,
+                              transition: 'all 0.2s'
+                            }}
+                            onMouseEnter={(e) => {
+                              if (updatingUser !== user.user_id) {
+                                e.currentTarget.style.background = 'var(--teal)';
+                                e.currentTarget.style.color = 'white';
+                                e.currentTarget.style.borderColor = 'var(--teal)';
+                              }
+                            }}
+                            onMouseLeave={(e) => {
+                              e.currentTarget.style.background = 'transparent';
+                              e.currentTarget.style.color = 'var(--text-2)';
+                              e.currentTarget.style.borderColor = 'var(--border)';
+                            }}
+                          >
+                            Tier {tier}
+                          </button>
+                        ))}
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
     </div>
   );

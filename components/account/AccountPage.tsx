@@ -3,9 +3,14 @@
 import { useEffect, useState } from 'react';
 import { createClient } from '@/lib/supabase/browser';
 import { useRouter } from 'next/navigation';
-import type { User, UserProfile } from '@/types';
+import type { UserProfile } from '@/types';
 
-export default function AccountPage({ user }: { user: User }) {
+interface AccountUser {
+  id: string;
+  email?: string;
+}
+
+export default function AccountPage({ user }: { user: AccountUser }) {
   const router = useRouter();
   const supabase = createClient();
   const [profile, setProfile] = useState<UserProfile | null>(null);

@@ -9,7 +9,7 @@ export async function GET() {
     const entitlement = await getEntitlement()
 
     // Convert Set to array for JSON serialization
-    const response: Entitlement & { assets: string[] } = {
+    const response: Omit<Entitlement, 'assets'> & { assets: string[] } = {
       tier: entitlement.tier,
       assets: Array.from(entitlement.assets),
     }

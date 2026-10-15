@@ -4,7 +4,11 @@ import { useState } from 'react';
 import { createClient } from '@/lib/supabase/browser';
 import { useRouter } from 'next/navigation';
 
-export default function SignupForm() {
+interface SignupFormProps {
+  showLabel?: boolean;
+}
+
+export default function SignupForm({ showLabel = false }: SignupFormProps) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -42,7 +46,7 @@ export default function SignupForm() {
         setError(error.message);
       } else {
         // Redirect to account page after successful signup
-        // The profile will be auto-created by the trigger
+        // The profile will be auto-created by the trigger with tier 0
         router.push('/account');
       }
     } catch (err) {
@@ -54,6 +58,19 @@ export default function SignupForm() {
 
   return (
     <form onSubmit={handleSignup} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+      {showLabel && (
+        <div style={{
+          marginBottom: '8px',
+          fontSize: '12px',
+          fontWeight: '600',
+          color: 'var(--text-2)',
+          textTransform: 'uppercase',
+          letterSpacing: '0.5px'
+        }}>
+          Sign up free
+        </div>
+      )}
+
       <input
         type="email"
         placeholder="your@email.com"

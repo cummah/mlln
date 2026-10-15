@@ -29,7 +29,7 @@ export interface Entitlement {
   assets: Set<string>; // ticker set for tier 1, empty for tier 0, ignored for tier 2/3
 }
 
-export interface User {
+export interface AuthUser {
   id: string;
   email: string;
   email_confirmed_at: string | null;

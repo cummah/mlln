@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import SignupForm from '@/components/auth/SignupForm';
+import TierSelector from '@/components/auth/TierSelector';
 
 export default async function SignupPage() {
   const supabase = await createClient();
@@ -21,7 +22,7 @@ export default async function SignupPage() {
     }}>
       <div style={{
         width: '100%',
-        maxWidth: '400px'
+        maxWidth: '500px'
       }}>
         <div style={{
           marginBottom: '32px',
@@ -43,7 +44,23 @@ export default async function SignupPage() {
           </p>
         </div>
 
-        <SignupForm />
+        <div style={{
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '32px'
+        }}>
+          <SignupForm showLabel />
+
+          <div style={{
+            textAlign: 'center',
+            color: 'var(--text-2)',
+            fontSize: '12px'
+          }}>
+            or upgrade to a paid plan
+          </div>
+
+          <TierSelector />
+        </div>
       </div>
     </div>
   );

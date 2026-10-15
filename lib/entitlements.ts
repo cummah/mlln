@@ -68,13 +68,13 @@ export async function getTierPermissions(): Promise<Map<`${GatingSection}:${User
 
     if (error) throw error;
 
-    const map = new Map<`${GatingSection}:${UserTier}`, boolean>();
+    const map = new Map<string, boolean>();
     (data || []).forEach(row => {
-      const key = `${row.section}:${row.tier}` as const;
+      const key = `${row.section}:${row.tier}`;
       map.set(key, row.can_view_latest_signal);
     });
 
-    return map;
+    return map as Map<`${GatingSection}:${UserTier}`, boolean>;
   } catch (err) {
     console.error('[getTierPermissions] Error:', err);
     // Safe default: block everything for tier 0/1, allow for tier 2/3
