@@ -60,17 +60,18 @@ export function SectorSignalsTable({ sector }: { sector: string }) {
       .then(j => {
         if (live) {
           setData(j)
-          // Determine latest date from all signals
-          const allDates = [...(j.weekly ?? []), ...(j.monthly ?? [])].map(r => r.signalDate)
-          if (allDates.length > 0) {
-            setLatestDate(allDates.sort().reverse()[0])
+          // Determine latest date for current frequency from its signals
+          const currentFreqData = frequency === 'weekly' ? (j.weekly ?? []) : (j.monthly ?? [])
+          const dates = currentFreqData.map((r: RecentBuyZoneEntry) => r.signalDate)
+          if (dates.length > 0) {
+            setLatestDate(dates.sort().reverse()[0])
           }
         }
       })
       .catch(e => { if (live) setError(String(e.message ?? e)) })
       .finally(() => { if (live) setLoading(false) })
     return () => { live = false }
-  }, [sector])
+  }, [sector, frequency])
 
   useEffect(() => {
     fetch('/api/user/entitlement')
