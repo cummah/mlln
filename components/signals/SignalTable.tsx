@@ -122,6 +122,7 @@ export function SignalTable({ rows, tickers, strategy, base, freq, onSelect, lat
   const [pageSize, setPageSize] = useState(100)
   const [visible, setVisible] = useState<Set<string>>(new Set(COLS.filter(c => !c.off).map(c => c.key)))
   const [pickerOpen, setPickerOpen] = useState(false)
+  const [showUpgrade, setShowUpgrade] = useState(false)
   const phone = useIsPhone()
 
   const available = COLS.filter(c => !c.only || c.only === freq)
@@ -204,7 +205,7 @@ export function SignalTable({ rows, tickers, strategy, base, freq, onSelect, lat
                   <div style={{ minWidth: 0 }}>
                     {isLatestAndLocked(x, latestDate, entitlement) ? (
                       <div style={{ fontSize: '14px', fontWeight: 700 }}>
-                        <LockedCell />
+                        <LockedCell onUpgradeClick={() => setShowUpgrade(true)} />
                       </div>
                     ) : (
                       <Link href={`/asset/${x.t.ticker.toLowerCase()}`} onClick={e => e.stopPropagation()} style={{ color: 'var(--teal)', textDecoration: 'none', fontWeight: 700, fontSize: '14px' }}>{x.t.ticker}</Link>
@@ -261,7 +262,7 @@ export function SignalTable({ rows, tickers, strategy, base, freq, onSelect, lat
                     const locked = c.key === 'ticker' && isLatestAndLocked(x, latestDate, entitlement)
                     return (
                       <td key={c.key} className={cls(c)} style={{ padding: pad, textAlign: c.align, whiteSpace: 'nowrap', color: 'var(--text-2)', fontFamily: c.align === 'right' ? 'DM Mono, monospace' : undefined }}>
-                        {locked ? <LockedCell /> : c.cell(x)}
+                        {locked ? <LockedCell onUpgradeClick={() => setShowUpgrade(true)} /> : c.cell(x)}
                       </td>
                     )
                   })}
@@ -291,6 +292,21 @@ export function SignalTable({ rows, tickers, strategy, base, freq, onSelect, lat
         </div>
       </Card>
       <style dangerouslySetInnerHTML={{ __html: css }} />
+
+      {showUpgrade && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100 }}>
+          <div style={{ background: 'var(--surface-elevated)', border: '1px solid var(--border-elevated)', borderRadius: '12px', padding: '24px', maxWidth: '400px', boxShadow: 'var(--shadow-lg)' }}>
+            <h2 style={{ fontSize: '18px', fontWeight: 700, color: 'var(--text)', margin: '0 0 8px 0' }}>Upgrade to view latest signals</h2>
+            <p style={{ fontSize: '13px', color: 'var(--text-2)', margin: '0 0 16px 0', lineHeight: 1.5 }}>
+              The latest signal period is only available to premium subscribers. Upgrade your plan to see the most recent buy signals.
+            </p>
+            <div style={{ display: 'flex', gap: '8px' }}>
+              <button onClick={() => setShowUpgrade(false)} style={{ flex: 1, padding: '10px 16px', background: 'var(--surface)', border: '1px solid var(--border-elevated)', borderRadius: '8px', fontSize: '13px', fontWeight: 600, color: 'var(--text)', cursor: 'pointer' }}>Close</button>
+              <Link href="/pricing" onClick={() => setShowUpgrade(false)} style={{ flex: 1, padding: '10px 16px', background: 'var(--teal)', border: 'none', borderRadius: '8px', fontSize: '13px', fontWeight: 600, color: '#040e18', cursor: 'pointer', textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>View plans</Link>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
