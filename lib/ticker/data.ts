@@ -4,6 +4,7 @@ import type { AssetData, OHLCData, Signal } from '@/types'
 
 export interface CurrentReading {
   asOf: string
+  signalDate: string
   mult: number
   isEvaluationBar: boolean
 }
@@ -71,7 +72,11 @@ export async function getTickerPageData(rawTicker: string): Promise<TickerPageDa
   }
   const cur = (freq: 'weekly' | 'monthly'): CurrentReading | null => {
     const r = ((currentRows.data as any[]) ?? []).find(x => x.freq === freq)
-    return r ? { asOf: r.as_of, mult: Number(r.mult), isEvaluationBar: !!r.components?.isEvaluationBar } : null
+    if (!r) return null
+    const mult = Number(r.mult)
+    const signalRow = all.filter(x => x.freq === freq && Number(x.mult) === mult).pop()
+    const signalDate = signalRow?.signal_date || r.as_of
+    return { asOf: r.as_of, signalDate, mult, isEvaluationBar: !!r.components?.isEvaluationBar }
   }
 
   return {

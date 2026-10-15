@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import type { CurrentReading, MajorBuy } from '@/lib/ticker/data';
 import { CurrentSignalTile } from './CurrentSignalTile';
 import { formatCurrency } from '@/lib/formatters';
@@ -33,6 +34,10 @@ export function SignalDataSection({ weeklyMajor, monthlyMajor, currentWeekly, cu
   const weeklyPerf = weeklyMajor && weeklyMajor.performance !== null ? { ...weeklyMajor, performance: weeklyMajor.performance as number, currentValue: weeklyMajor.currentValue as number } : null;
   const monthlyPerf = monthlyMajor && monthlyMajor.performance !== null ? { ...monthlyMajor, performance: monthlyMajor.performance as number, currentValue: monthlyMajor.currentValue as number } : null;
 
+  const avgPerf = weeklyPerf && monthlyPerf ? (weeklyPerf.performance + monthlyPerf.performance) / 2 : weeklyPerf?.performance ?? monthlyPerf?.performance ?? null;
+  const heading = avgPerf !== null ? (avgPerf >= 0 ? 'Alpha you missed while unsubscribed' : 'Performance snapshot while unsubscribed') : 'Recent buy signals';
+  const description = avgPerf !== null ? (avgPerf >= 0 ? 'Our Pro members bought these signals. Here\'s what the returns look like — and what was left on the table.' : 'Our Pro members bought these signals. Here\'s how they performed — a real look at what happened in the market.') : 'Our Pro members acted on these signals. Here\'s what happened.';
+
   return (
     <div>
       <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
@@ -49,10 +54,10 @@ export function SignalDataSection({ weeklyMajor, monthlyMajor, currentWeekly, cu
 
       <div style={{ marginBottom: '20px' }}>
         <h2 style={{ fontSize: '18px', fontWeight: '700', color: 'var(--text)', margin: '0 0 6px 0', letterSpacing: '-0.3px' }}>
-          Alpha you missed while unsubscribed
+          {heading}
         </h2>
         <p style={{ fontSize: '13px', color: 'var(--text-2)', margin: 0, lineHeight: '1.6' }}>
-          Our Pro members bought these signals. Here's what the returns look like — and what was left on the table.
+          {description}
         </p>
       </div>
 
@@ -183,32 +188,35 @@ export function SignalDataSection({ weeklyMajor, monthlyMajor, currentWeekly, cu
 
       <div className="rs-stack" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px' }}>
         {/* Left Column - How Signal Works Button */}
-        <button style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          gap: '8px',
-          padding: '10px 16px',
-          background: 'var(--surface)',
-          border: '1px solid var(--border-elevated)',
-          borderRadius: '10px',
-          fontSize: '12px',
-          fontWeight: '600',
-          color: 'var(--text)',
-          cursor: 'pointer',
-          transition: 'all 0.15s',
-          boxShadow: 'var(--shadow-xs)'
-        }}
-        onMouseEnter={(e) => e.currentTarget.style.background = 'var(--surface2)'}
-        onMouseLeave={(e) => e.currentTarget.style.background = 'var(--surface)'}
-        >
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <circle cx="12" cy="12" r="10" />
-            <line x1="12" y1="8" x2="12" y2="16" />
-            <line x1="8" y1="12" x2="16" y2="12" />
-          </svg>
-          How the signal works
-        </button>
+        <Link href="/methodology" style={{ textDecoration: 'none' }}>
+          <button style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '8px',
+            padding: '10px 16px',
+            background: 'var(--surface)',
+            border: '1px solid var(--border-elevated)',
+            borderRadius: '10px',
+            fontSize: '12px',
+            fontWeight: '600',
+            color: 'var(--text)',
+            cursor: 'pointer',
+            transition: 'all 0.15s',
+            boxShadow: 'var(--shadow-xs)',
+            width: '100%'
+          }}
+          onMouseEnter={(e) => e.currentTarget.style.background = 'var(--surface2)'}
+          onMouseLeave={(e) => e.currentTarget.style.background = 'var(--surface)'}
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <circle cx="12" cy="12" r="10" />
+              <line x1="12" y1="8" x2="12" y2="16" />
+              <line x1="8" y1="12" x2="16" y2="12" />
+            </svg>
+            How the signal works
+          </button>
+        </Link>
 
         {/* Middle Column - Info Text */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -218,36 +226,39 @@ export function SignalDataSection({ weeklyMajor, monthlyMajor, currentWeekly, cu
         </div>
 
         {/* Right Column - Get Signal Button */}
-        <button style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          gap: '8px',
-          padding: '10px 16px',
-          background: 'var(--teal)',
-          border: '1px solid var(--teal)',
-          borderRadius: '10px',
-          fontSize: '12px',
-          fontWeight: '600',
-          color: '#000',
-          cursor: 'pointer',
-          transition: 'all 0.15s'
-        }}
-        onMouseEnter={(e) => {
-          e.currentTarget.style.background = 'rgba(0, 196, 167, 0.9)';
-          e.currentTarget.style.borderColor = 'rgba(0, 196, 167, 0.9)';
-        }}
-        onMouseLeave={(e) => {
-          e.currentTarget.style.background = 'var(--teal)';
-          e.currentTarget.style.borderColor = 'var(--teal)';
-        }}
-        >
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
-            <path d="M13.73 21a2 2 0 0 1-3.46 0" />
-          </svg>
-          Get the next signal
-        </button>
+        <Link href="/#pricing" style={{ textDecoration: 'none' }}>
+          <button style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '8px',
+            padding: '10px 16px',
+            background: 'var(--teal)',
+            border: '1px solid var(--teal)',
+            borderRadius: '10px',
+            fontSize: '12px',
+            fontWeight: '600',
+            color: '#000',
+            cursor: 'pointer',
+            transition: 'all 0.15s',
+            width: '100%'
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.background = 'rgba(0, 196, 167, 0.9)';
+            e.currentTarget.style.borderColor = 'rgba(0, 196, 167, 0.9)';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.background = 'var(--teal)';
+            e.currentTarget.style.borderColor = 'var(--teal)';
+          }}
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+              <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+            </svg>
+            Get the next signal
+          </button>
+        </Link>
       </div>
     </div>
   );

@@ -188,7 +188,7 @@ export function GlobalNav() {
         gap: '8px'
       }}>
         <a
-          href="/upgrade"
+          href="/#pricing"
           style={{
             display: 'flex',
             alignItems: 'center',
@@ -213,7 +213,7 @@ export function GlobalNav() {
             (e.currentTarget as HTMLAnchorElement).style.boxShadow = 'none';
           }}
         >
-          Upgrade to Pro
+          Pricing
         </a>
 
         <div style={{
