@@ -35,6 +35,7 @@ export interface FeedPayload {
   tickers: TickerInfo[]
   rows: SigRow[]
   asOf: string | null // date of the newest stored close
+  latestDate: string | null // latest signal date (for gating UI)
   pricesRunAt: string | null
   signalsRunAt: string | null
   signalsStatus: string | null // ok, partial or failed

@@ -98,6 +98,10 @@ export async function getFeed(freq: Freq): Promise<FeedPayload> {
   const tickers: TickerInfo[] = []
   const idx = new Map<string, number>()
   const rows: SigRow[] = []
+
+  // Find the latest signal date to mask it
+  const latestDate = raw.length > 0 ? raw[0].signal_date : null
+
   for (const r of raw) {
     let i = idx.get(r.ticker)
     if (i === undefined) {
@@ -113,6 +117,7 @@ export async function getFeed(freq: Freq): Promise<FeedPayload> {
         alpha: freq === 'monthly' ? (s?.monthly_alpha_5y ?? null) : (s?.alpha_5y ?? null),
       })
     }
+
     rows.push({
       i,
       d: r.signal_date,
@@ -139,6 +144,7 @@ export async function getFeed(freq: Freq): Promise<FeedPayload> {
     tickers,
     rows,
     asOf,
+    latestDate,
     pricesRunAt: step('prices')?.finished_at ?? null,
     signalsRunAt: step('signals')?.finished_at ?? step('backfill')?.finished_at ?? null,
     signalsStatus: step('signals')?.status ?? step('backfill')?.status ?? null,

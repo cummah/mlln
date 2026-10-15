@@ -5,10 +5,15 @@ import Link from 'next/link'
 import { motion, useReducedMotion } from 'framer-motion'
 import { RANK_WINDOWS, type RankWindow } from '@/lib/rank/config'
 import { pct } from '@/lib/signals/format'
-import type { TopAsset, UniverseStats } from '@/lib/home-data'
+import type { AssetGroup, HomeData, UniverseStats } from '@/lib/home-data'
 import { CountUp } from './Motion'
 
 const WORDS: Record<RankWindow, string> = { '1y': '1 year', '3y': '3 years', '5y': '5 years' }
+const GROUPS: { key: AssetGroup; label: string }[] = [
+  { key: 'all', label: 'All assets' },
+  { key: 'stock', label: 'Stocks' },
+  { key: 'etf', label: 'ETFs' },
+]
 const STD = '#3987e5'
 const ENH = '#0fa38b'
 
@@ -30,13 +35,15 @@ function Bar({ value, max, color, delay }: { value: number | null; max: number; 
 }
 
 /** Standard DCA against Enhanced DCA on the top ranked assets, with the whole-universe average beside it. */
-export function EdcaCompare({ top, universe }: { top: TopAsset[]; universe: UniverseStats }) {
+export function EdcaCompare({ top, universe }: { top: HomeData['top']; universe: UniverseStats }) {
   const [win, setWin] = useState<RankWindow>('3y')
-  const max = Math.max(1, ...top.flatMap(a => [a.cells[win].std ?? 0, a.cells[win].enh ?? 0]))
+  const rows = top[win]
+  const max = Math.max(1, ...rows.flatMap(a => [a.cells[win].std ?? 0, a.cells[win].enh ?? 0]))
   const avg = universe.avgAlpha[win]
   const beat = universe.beatShare[win]
 
   return (
+    <div>
     <div style={{ display: 'grid', gridTemplateColumns: '1.6fr 1fr', gap: '20px' }} className="lp-compare">
       <div style={{ background: 'var(--surface-elevated)', border: '1px solid var(--border-elevated)', borderRadius: '16px', padding: '22px 24px', boxShadow: 'var(--shadow-md), var(--inset-top)' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px', marginBottom: '18px' }}>
@@ -63,7 +70,7 @@ export function EdcaCompare({ top, universe }: { top: TopAsset[]; universe: Univ
         </div>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-          {top.map((a, i) => {
+          {rows.map((a, i) => {
             const c = a.cells[win]
             return (
               <Link key={a.ticker} href={`/asset/${a.ticker}`} style={{ textDecoration: 'none', display: 'grid', gridTemplateColumns: '64px 1fr 86px', gap: '14px', alignItems: 'center' }}>
@@ -84,7 +91,7 @@ export function EdcaCompare({ top, universe }: { top: TopAsset[]; universe: Univ
           })}
         </div>
         <div style={{ marginTop: '18px', paddingTop: '12px', borderTop: '1px solid var(--border)', fontSize: '11px', color: 'var(--text-3)', lineHeight: 1.5 }}>
-          Monthly plan, return on money invested over {WORDS[win]}. The eight top-ranked assets by DCA score, so these are the best historical fits, not a typical result. Backtests do not predict the future.
+          Monthly plan, return on money invested over {WORDS[win]}. The ten assets with the highest standard DCA return, so these are the strongest for plain DCA, not a typical result. Backtests do not predict the future.
         </div>
       </div>
 
@@ -107,6 +114,21 @@ export function EdcaCompare({ top, universe }: { top: TopAsset[]; universe: Univ
           See every asset ranked →
         </Link>
       </div>
+    </div>
+    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px', marginTop: '20px' }}>
+      {GROUPS.map(g => {
+        const st = universe.beat[win][g.key]
+        const share = st.total ? Math.round((st.beats / st.total) * 100) : null
+        return (
+          <div key={g.key} style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '16px', padding: '20px 24px' }}>
+            <div style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--text-3)' }}>{g.label}: beat standard DCA</div>
+            <div style={{ fontSize: '40px', fontWeight: 700, letterSpacing: '-0.03em', marginTop: '10px', color: 'var(--text)' }}>{share === null ? 'n/a' : `${share}%`}</div>
+            <div style={{ fontSize: '14px', color: 'var(--text-2)', marginTop: '2px' }}>{st.beats.toLocaleString('en-US')} of {st.total.toLocaleString('en-US')}</div>
+            <div style={{ fontSize: '11px', color: 'var(--text-3)', marginTop: '4px' }}>of assets with a {WORDS[win]} result</div>
+          </div>
+        )
+      })}
+    </div>
     </div>
   )
 }

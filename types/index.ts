@@ -3,6 +3,38 @@ export type Frequency = 'weekly' | 'monthly';
 export type SignalStrength = 'strong_dip' | 'moderate_dip' | 'mild_dip' | 'mild_opportunity' | 'neutral' | 'overbought';
 export type UserPlan = 'free' | 'pro' | 'quant' | null;
 
+// Auth and subscriptions
+export type UserTier = 0 | 1 | 2 | 3;
+export type GatingSection = 'asset_page' | 'rank' | 'sectors' | 'watchlist' | 'weekly_signals' | 'monthly_signals';
+
+export interface UserProfile {
+  user_id: string;
+  tier: UserTier;
+  tradingview_enabled: boolean;
+  billing_provider: string | null;
+  billing_customer_id: string | null;
+  current_period_end: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface TierPermissions {
+  section: GatingSection;
+  tier: UserTier;
+  can_view_latest_signal: boolean;
+}
+
+export interface Entitlement {
+  tier: UserTier;
+  assets: Set<string>; // ticker set for tier 1, empty for tier 0, ignored for tier 2/3
+}
+
+export interface User {
+  id: string;
+  email: string;
+  email_confirmed_at: string | null;
+}
+
 export interface OHLCData {
   time: string; // 'YYYY-MM-DD'
   open: number;

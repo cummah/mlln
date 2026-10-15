@@ -16,12 +16,20 @@ export interface TopAsset {
   cells: Record<RankWindow, Cell> // monthly plan, per window
 }
 
+export interface BeatStat {
+  beats: number
+  total: number // assets with a monthly result in that window
+}
+
+export type AssetGroup = 'all' | 'stock' | 'etf'
+
 export interface UniverseStats {
   count: number
   stocks: number
   etfs: number
   avgAlpha: Record<RankWindow, number | null> // enhanced minus standard, in points, over every asset with a result
   beatShare: Record<RankWindow, number | null> // share of those assets where enhanced beat standard, 0 to 1
+  beat: Record<RankWindow, Record<AssetGroup, BeatStat>> // the same counts split by asset type
 }
 
 export interface SectorHighlight {
@@ -35,30 +43,40 @@ export interface SectorHighlight {
 
 export interface HomeData {
   watchlist: DemoWatchlist
-  top: TopAsset[]
+  top: Record<RankWindow, TopAsset[]> // best standard DCA returns, per window
   universe: UniverseStats
   sectors: SectorHighlight[]
 }
 
-const TOP_COUNT = 8
+const TOP_COUNT = 10
 
 const mean = (xs: number[]) => (xs.length ? xs.reduce((a, b) => a + b, 0) / xs.length : null)
 
 export async function getHomeData(): Promise<HomeData> {
   const [watchlist, rank, sectorNames] = await Promise.all([getDemoWatchlist(), getRankData(), getAllSectors()])
 
-  // Ranked by DCA score already. Only assets with a full monthly result in every window can be charted side by side.
-  const top: TopAsset[] = rank.rows
-    .filter(r => RANK_WINDOWS.every(w => r.monthly[w].std !== null && r.monthly[w].enh !== null))
-    .slice(0, TOP_COUNT)
-    .map(r => ({ ticker: r.ticker, name: r.name, sector: r.sector, rank: r.rank, dca: r.dca, cells: r.monthly }))
+  // The ten best standard DCA returns in each window, with the enhanced result beside each.
+  const top = {} as HomeData['top']
+  for (const w of RANK_WINDOWS) {
+    top[w] = rank.rows
+      .filter(r => r.monthly[w].std !== null && r.monthly[w].enh !== null)
+      .sort((x, y) => (y.monthly[w].std as number) - (x.monthly[w].std as number))
+      .slice(0, TOP_COUNT)
+      .map(r => ({ ticker: r.ticker, name: r.name, sector: r.sector, rank: r.rank, dca: r.dca, cells: r.monthly }))
+  }
 
   const avgAlpha = {} as UniverseStats['avgAlpha']
   const beatShare = {} as UniverseStats['beatShare']
+  const beat = {} as UniverseStats['beat']
   for (const w of RANK_WINDOWS) {
     const alphas = rank.rows.map(r => r.monthly[w].alpha).filter((a): a is number => a !== null)
     avgAlpha[w] = mean(alphas)
     beatShare[w] = alphas.length ? alphas.filter(a => a > 0).length / alphas.length : null
+    beat[w] = {} as Record<AssetGroup, BeatStat>
+    for (const g of ['all', 'stock', 'etf'] as AssetGroup[]) {
+      const ga = rank.rows.filter(r => g === 'all' || r.assetType === g).map(r => r.monthly[w].alpha).filter((a): a is number => a !== null)
+      beat[w][g] = { beats: ga.filter(a => a > 0).length, total: ga.length }
+    }
   }
 
   const stats = await Promise.all(sectorNames.map(async name => ({ name, s: await getSectorStats(sectorToSlug(name)) })))
@@ -80,5 +98,6 @@ export async function getHomeData(): Promise<HomeData> {
       etfs: rank.rows.filter(r => r.assetType === 'etf').length,
       avgAlpha,
       beatShare,
+      beat,
     }, sectors }
 }
