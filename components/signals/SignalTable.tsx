@@ -110,9 +110,19 @@ const canAccess = (ticker: string, entitlement: Entitlement): boolean => {
   return false
 }
 
-const isLatestAndLocked = (row: TRow, latestDate: string | null, entitlement: Entitlement): boolean => {
+const isLatestAndLocked = (row: TRow, latestDate: string | null, entitlement: Entitlement, freq: Freq): boolean => {
   if (!latestDate) return false
-  return row.r.d === latestDate && !canAccess(row.t.ticker, entitlement)
+  const canAccessTicker = canAccess(row.t.ticker, entitlement)
+
+  // For monthly: gate all signals in the same month as latestDate
+  if (freq === 'monthly') {
+    const latestMonth = latestDate.slice(0, 7) // YYYY-MM
+    const rowMonth = row.r.d.slice(0, 7)
+    return rowMonth === latestMonth && !canAccessTicker
+  }
+
+  // For daily/weekly: gate only the exact latestDate
+  return row.r.d === latestDate && !canAccessTicker
 }
 
 export function SignalTable({ rows, tickers, strategy, base, freq, onSelect, latestDate, entitlement }: Props) {
@@ -184,7 +194,7 @@ export function SignalTable({ rows, tickers, strategy, base, freq, onSelect, lat
           )}
         </div>
         <button style={btn} onClick={() => {
-          const unlockedRows = sorted.filter(x => !isLatestAndLocked(x, latestDate, entitlement))
+          const unlockedRows = sorted.filter(x => !isLatestAndLocked(x, latestDate, entitlement, freq))
           exportTableToCSV(unlockedRows.map(x => Object.fromEntries(available.map(c => [c.key, c.csv(x)]))), available.map(c => ({ key: c.key, label: c.label })), `${freq}-signals.csv`)
         }}>
           Export CSV
@@ -196,14 +206,14 @@ export function SignalTable({ rows, tickers, strategy, base, freq, onSelect, lat
         {phone ? (
           <div>
             {slice.map(x => {
-              const locked = isLatestAndLocked(x, latestDate, entitlement)
+              const locked = isLatestAndLocked(x, latestDate, entitlement, freq)
               return (
               <div key={`${x.t.ticker}-${x.r.d}`} role="button" tabIndex={locked ? -1 : 0} onClick={() => !locked && onSelect(x.r)}
                 onKeyDown={e => { if (!locked && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); onSelect(x.r) } }}
                 style={{ padding: '12px 14px', borderBottom: '1px solid var(--border)', cursor: locked ? 'default' : 'pointer' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: '10px' }}>
                   <div style={{ minWidth: 0 }}>
-                    {isLatestAndLocked(x, latestDate, entitlement) ? (
+                    {isLatestAndLocked(x, latestDate, entitlement, freq) ? (
                       <div style={{ fontSize: '14px', fontWeight: 700 }}>
                         <LockedCell onUpgradeClick={() => setShowUpgrade(true)} />
                       </div>
@@ -252,14 +262,14 @@ export function SignalTable({ rows, tickers, strategy, base, freq, onSelect, lat
             </thead>
             <tbody>
               {slice.map((x, i) => {
-                const locked = isLatestAndLocked(x, latestDate, entitlement)
+                const locked = isLatestAndLocked(x, latestDate, entitlement, freq)
                 return (
                 <tr key={`${x.t.ticker}-${x.r.d}`} onClick={() => !locked && onSelect(x.r)}
                   style={{ borderBottom: '1px solid var(--border)', background: i % 2 ? 'rgba(255,255,255,0.02)' : 'transparent', cursor: locked ? 'default' : 'pointer' }}
                   onMouseEnter={e => !locked && (e.currentTarget.style.background = 'var(--surface2)')}
                   onMouseLeave={e => (e.currentTarget.style.background = i % 2 ? 'rgba(255,255,255,0.02)' : 'transparent')}>
                   {cols.map(c => {
-                    const locked = c.key === 'ticker' && isLatestAndLocked(x, latestDate, entitlement)
+                    const locked = c.key === 'ticker' && isLatestAndLocked(x, latestDate, entitlement, freq)
                     return (
                       <td key={c.key} className={cls(c)} style={{ padding: pad, textAlign: c.align, whiteSpace: 'nowrap', color: 'var(--text-2)', fontFamily: c.align === 'right' ? 'DM Mono, monospace' : undefined }}>
                         {locked ? <LockedCell onUpgradeClick={() => setShowUpgrade(true)} /> : c.cell(x)}
