@@ -337,7 +337,7 @@ export function WatchlistView({ data }: { data: DemoWatchlist }) {
                     </td>
                     {r.byMonth.map((v, i) => {
                       const mult = r.row.history[data.months[i]]
-                      const isLatestMonth = i === 0
+                      const isLatestMonth = i === data.months.length - 1
                       const isLocked = isLatestMonth && isLatestLocked
                       return (
                         <td
@@ -358,7 +358,7 @@ export function WatchlistView({ data }: { data: DemoWatchlist }) {
                 <tr>
                   <td style={{ padding: '10px 8px', fontWeight: 600, color: 'var(--text)' }}>Total</td>
                   {grid.monthTotals.map((v, i) => {
-                    const isLatestMonth = i === 0
+                    const isLatestMonth = i === data.months.length - 1
                     const isLocked = isLatestMonth && data.months.length > 0 && !canAccessTicker('', entitlement)
                     return (
                       <td key={data.months[i]} style={{ textAlign: 'right', padding: '10px 8px', fontWeight: 600, color: 'var(--text)', cursor: isLocked ? 'pointer' : 'default' }} onClick={() => isLocked && setShowUpgrade(true)}>
