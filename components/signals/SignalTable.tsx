@@ -6,7 +6,9 @@ import { exportTableToCSV } from '@/lib/csv-export'
 import { effective } from '@/lib/signals/model'
 import { dateCompact, fracPct, mult, NA, num, money, pct, tone } from '@/lib/signals/format'
 import type { Effective, Freq, SigRow, Strategy, TickerInfo } from '@/lib/signals/types'
+import type { Entitlement } from '@/types'
 import { Card } from './ui'
+import { LockedCell } from '@/components/gating/LockedCell'
 
 export interface TRow {
   r: SigRow
@@ -98,9 +100,11 @@ interface Props {
   base: number
   freq: Freq
   onSelect: (r: SigRow) => void
+  latestDate: string | null
+  entitlement: Entitlement
 }
 
-export function SignalTable({ rows, tickers, strategy, base, freq, onSelect }: Props) {
+export function SignalTable({ rows, tickers, strategy, base, freq, onSelect, latestDate, entitlement }: Props) {
   const [sortKey, setSortKey] = useState('date')
   const [desc, setDesc] = useState(true)
   const [page, setPage] = useState(0)
