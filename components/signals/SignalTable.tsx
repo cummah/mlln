@@ -104,6 +104,17 @@ interface Props {
   entitlement: Entitlement
 }
 
+const canAccess = (ticker: string, entitlement: Entitlement): boolean => {
+  if (entitlement.tier >= 2) return true
+  if (entitlement.tier === 1) return entitlement.assets.has(ticker)
+  return false
+}
+
+const isLatestAndLocked = (row: TRow, latestDate: string | null, entitlement: Entitlement): boolean => {
+  if (!latestDate) return false
+  return row.r.d === latestDate && !canAccess(row.t.ticker, entitlement)
+}
+
 export function SignalTable({ rows, tickers, strategy, base, freq, onSelect, latestDate, entitlement }: Props) {
   const [sortKey, setSortKey] = useState('date')
   const [desc, setDesc] = useState(true)
@@ -171,7 +182,10 @@ export function SignalTable({ rows, tickers, strategy, base, freq, onSelect, lat
             </div>
           )}
         </div>
-        <button style={btn} onClick={() => exportTableToCSV(sorted.map(x => Object.fromEntries(available.map(c => [c.key, c.csv(x)]))), available.map(c => ({ key: c.key, label: c.label })), `${freq}-signals.csv`)}>
+        <button style={btn} onClick={() => {
+          const unlockedRows = sorted.filter(x => !isLatestAndLocked(x, latestDate, entitlement))
+          exportTableToCSV(unlockedRows.map(x => Object.fromEntries(available.map(c => [c.key, c.csv(x)]))), available.map(c => ({ key: c.key, label: c.label })), `${freq}-signals.csv`)
+        }}>
           Export CSV
         </button>
         {!phone && <div style={{ fontSize: '12px', color: 'var(--text-3)', marginLeft: 'auto' }}>Click a row for the indicators behind it</div>}
@@ -180,13 +194,21 @@ export function SignalTable({ rows, tickers, strategy, base, freq, onSelect, lat
       <Card pad={0} style={{ overflow: 'hidden' }}>
         {phone ? (
           <div>
-            {slice.map(x => (
-              <div key={`${x.t.ticker}-${x.r.d}`} role="button" tabIndex={0} onClick={() => onSelect(x.r)}
-                onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onSelect(x.r) } }}
-                style={{ padding: '12px 14px', borderBottom: '1px solid var(--border)', cursor: 'pointer' }}>
+            {slice.map(x => {
+              const locked = isLatestAndLocked(x, latestDate, entitlement)
+              return (
+              <div key={`${x.t.ticker}-${x.r.d}`} role="button" tabIndex={locked ? -1 : 0} onClick={() => !locked && onSelect(x.r)}
+                onKeyDown={e => { if (!locked && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); onSelect(x.r) } }}
+                style={{ padding: '12px 14px', borderBottom: '1px solid var(--border)', cursor: locked ? 'default' : 'pointer' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: '10px' }}>
                   <div style={{ minWidth: 0 }}>
-                    <Link href={`/asset/${x.t.ticker.toLowerCase()}`} onClick={e => e.stopPropagation()} style={{ color: 'var(--teal)', textDecoration: 'none', fontWeight: 700, fontSize: '14px' }}>{x.t.ticker}</Link>
+                    {isLatestAndLocked(x, latestDate, entitlement) ? (
+                      <div style={{ fontSize: '14px', fontWeight: 700 }}>
+                        <LockedCell />
+                      </div>
+                    ) : (
+                      <Link href={`/asset/${x.t.ticker.toLowerCase()}`} onClick={e => e.stopPropagation()} style={{ color: 'var(--teal)', textDecoration: 'none', fontWeight: 700, fontSize: '14px' }}>{x.t.ticker}</Link>
+                    )}
                     <div style={{ fontSize: '11px', color: 'var(--text-2)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{x.t.name}</div>
                   </div>
                   <div style={{ textAlign: 'right', flexShrink: 0, fontFamily: 'DM Mono, monospace', fontSize: '13px', color: 'var(--text)' }}>
@@ -206,7 +228,8 @@ export function SignalTable({ rows, tickers, strategy, base, freq, onSelect, lat
                   })}
                 </div>
               </div>
-            ))}
+            )
+            })}
             {slice.length === 0 && <div style={{ padding: '40px', textAlign: 'center', color: 'var(--text-2)' }}>No signals match these filters.</div>}
           </div>
         ) : (
@@ -227,16 +250,24 @@ export function SignalTable({ rows, tickers, strategy, base, freq, onSelect, lat
               </tr>
             </thead>
             <tbody>
-              {slice.map((x, i) => (
-                <tr key={`${x.t.ticker}-${x.r.d}`} onClick={() => onSelect(x.r)}
-                  style={{ borderBottom: '1px solid var(--border)', background: i % 2 ? 'rgba(255,255,255,0.02)' : 'transparent', cursor: 'pointer' }}
-                  onMouseEnter={e => (e.currentTarget.style.background = 'var(--surface2)')}
+              {slice.map((x, i) => {
+                const locked = isLatestAndLocked(x, latestDate, entitlement)
+                return (
+                <tr key={`${x.t.ticker}-${x.r.d}`} onClick={() => !locked && onSelect(x.r)}
+                  style={{ borderBottom: '1px solid var(--border)', background: i % 2 ? 'rgba(255,255,255,0.02)' : 'transparent', cursor: locked ? 'default' : 'pointer' }}
+                  onMouseEnter={e => !locked && (e.currentTarget.style.background = 'var(--surface2)')}
                   onMouseLeave={e => (e.currentTarget.style.background = i % 2 ? 'rgba(255,255,255,0.02)' : 'transparent')}>
-                  {cols.map(c => (
-                    <td key={c.key} className={cls(c)} style={{ padding: pad, textAlign: c.align, whiteSpace: 'nowrap', color: 'var(--text-2)', fontFamily: c.align === 'right' ? 'DM Mono, monospace' : undefined }}>{c.cell(x)}</td>
-                  ))}
+                  {cols.map(c => {
+                    const locked = c.key === 'ticker' && isLatestAndLocked(x, latestDate, entitlement)
+                    return (
+                      <td key={c.key} className={cls(c)} style={{ padding: pad, textAlign: c.align, whiteSpace: 'nowrap', color: 'var(--text-2)', fontFamily: c.align === 'right' ? 'DM Mono, monospace' : undefined }}>
+                        {locked ? <LockedCell /> : c.cell(x)}
+                      </td>
+                    )
+                  })}
                 </tr>
-              ))}
+              )
+              })}
               {slice.length === 0 && (
                 <tr><td colSpan={cols.length} style={{ padding: '40px', textAlign: 'center', color: 'var(--text-2)' }}>No signals match these filters.</td></tr>
               )}

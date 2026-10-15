@@ -11,6 +11,7 @@ import { SignalDrawer } from './SignalDrawer'
 import { SignalTable } from './SignalTable'
 import { CohortChart, Results } from './Summary'
 import { sliderCss } from './ui'
+import type { Entitlement } from '@/types'
 
 const TABS: { key: Freq; label: string }[] = [
   { key: 'daily', label: 'Daily' },
@@ -32,7 +33,24 @@ export function SignalExplorer({ data }: { data: FeedPayload }) {
   const [datePreset, setDatePreset] = useState<number | null>(null)
   const [selected, setSelected] = useState<SigRow | null>(null)
   const [now, setNow] = useState<number | null>(null)
+  const [entitlement, setEntitlement] = useState<Entitlement>({ tier: 0, assets: new Set() })
+
   useEffect(() => setNow(Date.now()), [])
+
+  useEffect(() => {
+    fetch('/api/user/entitlement')
+      .then(res => res.json())
+      .then(data => {
+        setEntitlement({
+          tier: data.tier,
+          assets: new Set(data.assets || []),
+        })
+      })
+      .catch(err => {
+        console.error('Failed to fetch entitlement:', err)
+        setEntitlement({ tier: 0, assets: new Set() })
+      })
+  }, [])
 
   const sectors = useMemo(() => Array.from(new Set(data.tickers.map(t => t.sector))).sort(), [data.tickers])
   const years = useMemo(() => Array.from(new Set(data.rows.map(r => Number(r.d.slice(0, 4))))).sort((a, b) => b - a), [data.rows])
@@ -116,7 +134,7 @@ export function SignalExplorer({ data }: { data: FeedPayload }) {
         <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr)', gap: '12px', minWidth: 0 }}>
           <Results stats={stats} base={dBase} strategy={strategy} setStrategy={setStrategy} settings={settings} />
           <CohortChart data={chart} unit={settings.unit} />
-          <SignalTable rows={rows} tickers={data.tickers} strategy={dStrategy} base={dBase} freq={freq} onSelect={setSelected} />
+          <SignalTable rows={rows} tickers={data.tickers} strategy={dStrategy} base={dBase} freq={freq} onSelect={setSelected} latestDate={data.latestDate} entitlement={entitlement} />
         </div>
       </div>
 
