@@ -35,13 +35,22 @@ export async function POST(req: Request) {
     }
 
     // Set pending tier for the newly created user
+    // First try to update, if it fails try to insert (in case profile doesn't exist yet)
     const { error: updateError } = await supabase
       .from('profiles')
       .update({ pending_tier: tier })
       .eq('user_id', authData.user.id);
 
     if (updateError) {
-      return NextResponse.json({ error: 'Failed to set tier' }, { status: 500 });
+      // If update fails, try to create the profile
+      const { error: insertError } = await supabase
+        .from('profiles')
+        .insert([{ user_id: authData.user.id, tier: 0, pending_tier: tier }]);
+
+      if (insertError) {
+        console.error('Profile creation error:', insertError);
+        return NextResponse.json({ error: 'Failed to create account profile' }, { status: 500 });
+      }
     }
 
     const checkoutUrl = TIER_URLS[tier];
