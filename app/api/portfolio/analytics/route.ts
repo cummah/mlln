@@ -1,6 +1,8 @@
 import { getSupabaseClient } from '@/lib/supabase'
 import type { NextRequest } from 'next/server'
 
+export const dynamic = 'force-dynamic'
+
 interface AnalyticsResponse {
   correlationMatrix: number[][]
   volatility: Record<string, number>
