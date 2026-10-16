@@ -51,53 +51,82 @@ export default function SignupPage() {
   return (
     <div style={{
       minHeight: '100vh',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
       background: 'var(--bg)',
-      padding: '20px'
+      padding: '60px 20px'
     }}>
       <div style={{
-        width: '100%',
-        maxWidth: '500px'
+        maxWidth: '1200px',
+        margin: '0 auto'
       }}>
+        {/* Header */}
         <div style={{
-          marginBottom: '32px',
-          textAlign: 'center'
+          textAlign: 'center',
+          marginBottom: '60px'
         }}>
           <h1 style={{
-            fontSize: '28px',
+            fontSize: '42px',
             fontWeight: '800',
-            marginBottom: '8px',
-            color: 'var(--text)'
+            marginBottom: '16px',
+            color: 'var(--text)',
+            letterSpacing: '-0.02em'
           }}>
-            Join mlln
+            Choose your plan
           </h1>
           <p style={{
             color: 'var(--text-2)',
-            fontSize: '14px'
+            fontSize: '16px',
+            maxWidth: '600px',
+            margin: '0 auto',
+            lineHeight: '1.6'
           }}>
-            Create an account to get started with DCA signals
+            Start free with portfolio tracking, or upgrade to unlock full DCA signal analysis across thousands of assets.
           </p>
         </div>
 
+        {/* Free tier option */}
         <div style={{
+          background: 'var(--surface)',
+          border: '1px solid var(--border)',
+          borderRadius: '12px',
+          padding: '24px',
+          marginBottom: '48px',
           display: 'flex',
-          flexDirection: 'column',
-          gap: '32px'
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          gap: '24px'
         }}>
-          <SignupForm showLabel />
-
-          <div style={{
-            textAlign: 'center',
-            color: 'var(--text-2)',
-            fontSize: '12px'
-          }}>
-            or upgrade to a paid plan
+          <div>
+            <h3 style={{
+              fontSize: '18px',
+              fontWeight: '600',
+              color: 'var(--text)',
+              margin: '0 0 8px 0'
+            }}>
+              Free
+            </h3>
+            <p style={{
+              fontSize: '14px',
+              color: 'var(--text-2)',
+              margin: '0'
+            }}>
+              Save & track your portfolio
+            </p>
           </div>
-
-          <TierSelector initialTier={selectedTierFromUrl} />
+          <SignupForm showLabel={false} />
         </div>
+
+        {/* Divider */}
+        <div style={{
+          textAlign: 'center',
+          marginBottom: '48px',
+          color: 'var(--text-2)',
+          fontSize: '14px'
+        }}>
+          ─ or upgrade for advanced features ─
+        </div>
+
+        {/* Paid tiers */}
+        <TierSelector initialTier={selectedTierFromUrl} />
       </div>
     </div>
   );
