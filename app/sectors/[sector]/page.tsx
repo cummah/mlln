@@ -12,9 +12,8 @@ const SectorBreadcrumb = nextDynamic(() => import('@/components/sectors/SectorBr
 const SectorSignalsTable = nextDynamic(() => import('@/components/sectors/SectorSignalsTable').then(m => ({ default: m.SectorSignalsTable })))
 const RelatedSectorsList = nextDynamic(() => import('@/components/sectors/RelatedSectorsList').then(m => ({ default: m.RelatedSectorsList })))
 
-// Built once a day and refreshed by the nightly job (/api/revalidate).
-export const revalidate = 86400
-export const dynamic = 'force-static'
+// Render on-demand to avoid build timeouts
+export const dynamic = 'force-dynamic'
 
 interface PageProps {
   params: {
