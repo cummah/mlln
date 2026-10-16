@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { createClient } from '@/lib/supabase/browser';
 import { useRouter } from 'next/navigation';
+import { usePendingTierUpgrade } from '@/lib/hooks/usePendingTierUpgrade';
 import type { UserProfile } from '@/types';
 
 interface AccountUser {
@@ -10,46 +11,61 @@ interface AccountUser {
   email?: string;
 }
 
+const TIER_NAMES: Record<number, string> = {
+  0: 'Free',
+  1: 'Essential',
+  2: 'Premium',
+  3: 'Pro',
+};
+
 export default function AccountPage({ user }: { user: AccountUser }) {
   const router = useRouter();
   const supabase = createClient();
+  const { upgraded, newTier } = usePendingTierUpgrade();
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [assets, setAssets] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [newAsset, setNewAsset] = useState('');
   const [adding, setAdding] = useState(false);
+  const [success, setSuccess] = useState<string | null>(null);
+
+  const loadData = async () => {
+    try {
+      const { data: profileData } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('user_id', user.id)
+        .single();
+
+      setProfile(profileData as UserProfile);
+
+      if (profileData?.tier === 1) {
+        const { data: assetsData } = await supabase
+          .from('user_assets')
+          .select('ticker')
+          .eq('user_id', user.id);
+        setAssets((assetsData || []).map(a => a.ticker));
+      }
+    } catch (err) {
+      setError('Failed to load profile');
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const loadData = async () => {
-      try {
-        // Fetch profile
-        const { data: profileData } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('user_id', user.id)
-          .single();
-
-        setProfile(profileData as UserProfile);
-
-        // Fetch assets (only for tier 1)
-        if (profileData?.tier === 1) {
-          const { data: assetsData } = await supabase
-            .from('user_assets')
-            .select('ticker')
-            .eq('user_id', user.id);
-          setAssets((assetsData || []).map(a => a.ticker));
-        }
-      } catch (err) {
-        setError('Failed to load profile');
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     loadData();
   }, [user.id, supabase]);
+
+  useEffect(() => {
+    if (upgraded && newTier) {
+      setSuccess(`Welcome to ${TIER_NAMES[newTier]}! Your account has been upgraded.`);
+      loadData();
+      setTimeout(() => setSuccess(null), 5000);
+    }
+  }, [upgraded, newTier]);
 
   const handleAddAsset = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -130,6 +146,21 @@ export default function AccountPage({ user }: { user: AccountUser }) {
 
   return (
     <div style={{ padding: '40px 20px', maxWidth: '800px', margin: '0 auto' }}>
+      {success && (
+        <div style={{
+          padding: '16px',
+          borderRadius: '8px',
+          background: 'rgba(0, 200, 180, 0.1)',
+          color: 'var(--teal)',
+          border: '1px solid rgba(0, 200, 180, 0.3)',
+          marginBottom: '24px',
+          fontSize: '14px',
+          fontWeight: '600'
+        }}>
+          ✓ {success}
+        </div>
+      )}
+
       <div style={{ marginBottom: '40px' }}>
         <h1 style={{ fontSize: '32px', fontWeight: '800', marginBottom: '24px', color: 'var(--text)' }}>
           Account
