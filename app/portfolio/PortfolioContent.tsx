@@ -13,6 +13,8 @@ import { PortfolioPerformanceSection } from '@/components/portfolio/PortfolioPer
 import { PortfolioRecommendations } from '@/components/portfolio/PortfolioRecommendations';
 import { EdgeCTATile } from '@/components/portfolio/EdgeCTATile';
 import { Panel, Skeleton, T, MONO, RADIUS, tickerColors } from '@/components/portfolio/ui';
+import { createClient } from '@/lib/supabase/browser';
+import SavePortfolioModal from '@/components/portfolio/SavePortfolioModal';
 
 const MAX_ASSETS = 20;
 const PERIODS: Period[] = ['1y', '3y', '5y'];
@@ -105,6 +107,7 @@ export function PortfolioContent({
   initialTickers: string[];
   initialSummaries: BacktestSummary[];
 }) {
+  const supabase = createClient();
   const [allocations, setAllocations] = useState<Allocation[]>(() => equalSplit(initialTickers));
   const [summaries, setSummaries] = useState<Record<string, BacktestSummary>>(() =>
     Object.fromEntries(initialSummaries.map((s) => [s.ticker, s]))
@@ -120,9 +123,9 @@ export function PortfolioContent({
   const [analyticsLoading, setAnalyticsLoading] = useState(false);
   const [analyticsError, setAnalyticsError] = useState<string | null>(null);
   const [analyticsAttempt, setAnalyticsAttempt] = useState(0);
-  // State, not a ref: it has to land in the same render as the restored
-  // allocations, or the URL-writing effect below runs once with stale state.
   const [restored, setRestored] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [showSaveModal, setShowSaveModal] = useState(false);
   const searchRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const listboxId = 'portfolio-asset-options';
@@ -173,6 +176,15 @@ export function PortfolioContent({
   useEffect(() => {
     setActiveIndex(0);
   }, [query]);
+
+  // Check if user is authenticated
+  useEffect(() => {
+    const checkAuth = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      setIsAuthenticated(!!user);
+    };
+    checkAuth();
+  }, [supabase]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -413,6 +425,28 @@ export function PortfolioContent({
             <span style={{ fontSize: T.label, color: 'var(--text-2)', whiteSpace: 'nowrap' }}>/ month</span>
           </div>
         </Panel>
+
+        {!isAuthenticated && (
+          <button
+            onClick={() => setShowSaveModal(true)}
+            style={{
+              width: '100%',
+              padding: '12px 16px',
+              borderRadius: '8px',
+              border: 'none',
+              background: 'var(--teal)',
+              color: 'var(--bg)',
+              fontSize: '14px',
+              fontWeight: '600',
+              cursor: 'pointer',
+              transition: 'opacity 0.2s'
+            }}
+            onMouseEnter={(e) => (e.currentTarget.style.opacity = '0.9')}
+            onMouseLeave={(e) => (e.currentTarget.style.opacity = '1')}
+          >
+            Save Portfolio
+          </button>
+        )}
 
         <Panel
           title="Allocation"
@@ -785,6 +819,12 @@ export function PortfolioContent({
           </>
         )}
       </div>
+
+      <SavePortfolioModal
+        isOpen={showSaveModal}
+        onClose={() => setShowSaveModal(false)}
+        portfolio={{ tickers: allocations.map(a => a.ticker), allocations: Object.fromEntries(allocations.map(a => [a.ticker, a.pct])) }}
+      />
     </div>
   );
 }
