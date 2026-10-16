@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import UpgradeModal from './UpgradeModal';
 
 const TIERS = [
@@ -9,8 +9,18 @@ const TIERS = [
   { id: 3, name: 'Pro', button: 'Get Pro Access' },
 ];
 
-export default function TierSelector() {
+interface TierSelectorProps {
+  initialTier?: number | null;
+}
+
+export default function TierSelector({ initialTier }: TierSelectorProps) {
   const [selectedTier, setSelectedTier] = useState<number | null>(null);
+
+  useEffect(() => {
+    if (initialTier && [1, 2, 3].includes(initialTier)) {
+      setSelectedTier(initialTier);
+    }
+  }, [initialTier]);
 
   return (
     <>

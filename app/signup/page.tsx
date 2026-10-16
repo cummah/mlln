@@ -1,14 +1,51 @@
-import { redirect } from 'next/navigation';
-import { createClient } from '@/lib/supabase/server';
+'use client';
+
+import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { createClient } from '@/lib/supabase/browser';
 import SignupForm from '@/components/auth/SignupForm';
 import TierSelector from '@/components/auth/TierSelector';
 
-export default async function SignupPage() {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+export default function SignupPage() {
+  const router = useRouter();
+  const supabase = createClient();
+  const [loading, setLoading] = useState(true);
+  const [selectedTierFromUrl, setSelectedTierFromUrl] = useState<number | null>(null);
 
-  if (user) {
-    redirect('/account');
+  useEffect(() => {
+    const checkAuth = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        router.push('/account');
+        return;
+      }
+
+      // Extract tier from URL params (from pricing page)
+      const params = new URLSearchParams(window.location.search);
+      const plan = params.get('plan');
+      if (plan && ['1', '2', '3'].includes(plan)) {
+        setSelectedTierFromUrl(parseInt(plan));
+      }
+
+      setLoading(false);
+    };
+
+    checkAuth();
+  }, [router, supabase]);
+
+  if (loading) {
+    return (
+      <div style={{
+        minHeight: '100vh',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        background: 'var(--bg)',
+        color: 'var(--text-2)'
+      }}>
+        Loading...
+      </div>
+    );
   }
 
   return (
@@ -59,7 +96,7 @@ export default async function SignupPage() {
             or upgrade to a paid plan
           </div>
 
-          <TierSelector />
+          <TierSelector initialTier={selectedTierFromUrl} />
         </div>
       </div>
     </div>
