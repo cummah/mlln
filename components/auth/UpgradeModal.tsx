@@ -21,6 +21,7 @@ export default function UpgradeModal({ tier, tierName, isOpen, onClose }: Upgrad
   const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showVerification, setShowVerification] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -52,8 +53,11 @@ export default function UpgradeModal({ tier, tierName, isOpen, onClose }: Upgrad
         return;
       }
 
-      // Redirect to Revolut checkout
-      window.location.href = data.checkoutUrl;
+      // Show verification message
+      setShowVerification(true);
+      setEmail('');
+      setPassword('');
+      setConfirmPassword('');
     } catch (err) {
       setError('An error occurred. Please try again.');
     } finally {
@@ -94,18 +98,55 @@ export default function UpgradeModal({ tier, tierName, isOpen, onClose }: Upgrad
             color: 'var(--text)',
             margin: '0 0 8px 0'
           }}>
-            Get {tierName} Access
+            {showVerification ? 'Verify your email' : `Get ${tierName} Access`}
           </h2>
           <p style={{
             fontSize: '14px',
             color: 'var(--text-2)',
             margin: 0
           }}>
-            Create your account to get started
+            {showVerification ? 'Check your inbox for a verification link' : 'Create your account to get started'}
           </p>
         </div>
 
-        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+        {showVerification ? (
+          <div style={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '16px'
+          }}>
+            <div style={{
+              padding: '16px',
+              borderRadius: '8px',
+              background: 'rgba(0, 200, 180, 0.1)',
+              color: 'var(--teal)',
+              border: '1px solid rgba(0, 200, 180, 0.3)',
+              fontSize: '14px',
+              lineHeight: '1.6'
+            }}>
+              <strong>Account created!</strong> We've sent a verification link to <strong>{email}</strong>. Click it to activate your account, then you'll be ready to upgrade to {tierName}.
+            </div>
+            <button
+              onClick={onClose}
+              style={{
+                padding: '12px',
+                borderRadius: '8px',
+                border: 'none',
+                background: 'var(--teal)',
+                color: 'var(--bg)',
+                fontSize: '14px',
+                fontWeight: '600',
+                cursor: 'pointer',
+                transition: 'opacity 0.2s'
+              }}
+              onMouseEnter={(e) => (e.currentTarget.style.opacity = '0.9')}
+              onMouseLeave={(e) => (e.currentTarget.style.opacity = '1')}
+            >
+              Got it, close
+            </button>
+          </div>
+        ) : (
+          <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
           <input
             type="email"
             placeholder="your@email.com"
@@ -213,6 +254,7 @@ export default function UpgradeModal({ tier, tierName, isOpen, onClose }: Upgrad
             </div>
           )}
         </form>
+        )}
       </div>
     </div>
   );
