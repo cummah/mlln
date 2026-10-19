@@ -72,9 +72,9 @@ const CSS = `
 .lp-hero { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: center; }
 .lp-two { display: grid; grid-template-columns: 1fr 1.15fr; gap: 56px; align-items: center; }
 .lp-nav-links { display: flex; gap: 24px; align-items: center; }
-.lp-menu { display: none; position: relative; }
-.lp-menu-btn { display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 8px; border: 1px solid var(--border-medium); background: var(--surface2); color: var(--text); cursor: pointer; }
-.lp-menu-panel { position: absolute; top: calc(100% + 10px); right: 0; width: 230px; max-height: 70vh; overflow-y: auto; padding: 6px; border-radius: 12px; background: var(--surface-elevated); border: 1px solid var(--border-elevated); box-shadow: var(--shadow-lg); display: flex; flex-direction: column; }
+.lp-menu { display: none; position: fixed; top: 6px; left: 8px; z-index: 30; }
+.lp-menu-btn { display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 8px; border: 1px solid var(--border); background: var(--surface2); color: var(--text); cursor: pointer; }
+.lp-menu-panel { position: fixed; top: 56px; left: 8px; width: 230px; max-height: calc(100vh - 70px); overflow-y: auto; padding: 6px; border-radius: 12px; background: var(--surface-elevated); border: 1px solid var(--border-elevated); box-shadow: var(--shadow-lg); display: flex; flex-direction: column; z-index: 30; }
 .lp-menu-item { padding: 11px 12px; border-radius: 8px; font-size: 14px; font-weight: 500; color: var(--text-2); text-decoration: none; }
 .lp-menu-item:hover, .lp-menu-item:active { background: var(--surface2); color: var(--text); }
 .lp-btn { display: inline-flex; align-items: center; justify-content: center; padding: 12px 22px; border-radius: 10px; font-size: 14px; font-weight: 600; text-decoration: none; transition: background 0.2s, box-shadow 0.2s, transform 0.2s; }
@@ -103,10 +103,9 @@ const CSS = `
 @media (max-width: 900px) {
   .lp-grid3 { grid-template-columns: 1fr; }
   .lp-hero, .lp-two, .lp-compare { grid-template-columns: 1fr !important; gap: 32px; }
-  .lp-nav-links .lp-link { display: none; }
-  .lp-header .lp-wrap { gap: 10px; }
-  .lp-nav-links { margin-left: auto; }
-  .lp-menu { display: block; }
+  .lp-nav-links { display: none !important; }
+  .lp-header .lp-wrap { gap: 10px; padding-left: 56px; }
+  .lp-menu { display: flex; }
 }
 @media (prefers-reduced-motion: reduce) {
   .lp-gradient-text, .lp-orb, .lp-marquee-track, .lp-pulse { animation: none; }
@@ -152,6 +151,7 @@ export default async function HomePage() {
 
       <header className="lp-header">
         <div className="lp-wrap" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: '64px' }}>
+          <MobileMenu />
           <Link href="/" style={{ fontSize: '22px', fontWeight: 800, letterSpacing: '-0.02em', color: colors.text, textDecoration: 'none' }}>
             ml<span style={{ color: colors.teal }}>ln</span>
           </Link>
@@ -159,11 +159,10 @@ export default async function HomePage() {
             <Link href="/methodology" className="lp-link">Methodology</Link>
             <Link href="/asset/monthly" className="lp-link">Signals</Link>
             <a href="#pricing" className="lp-link">Pricing</a>
-            <Link href="/auth/sign-up" className="lp-btn lp-btn-primary" style={{ padding: '8px 16px', fontSize: '13px' }}>
+            <Link href="/signup" className="lp-btn lp-btn-primary" style={{ padding: '8px 16px', fontSize: '13px' }}>
               Get started
             </Link>
           </nav>
-          <MobileMenu />
         </div>
       </header>
 

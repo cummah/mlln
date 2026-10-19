@@ -10,7 +10,7 @@ export default function SignupPage() {
   const router = useRouter();
   const supabase = createClient();
   const [loading, setLoading] = useState(true);
-  const [selectedTierFromUrl, setSelectedTierFromUrl] = useState<number | null>(null);
+  const [selectedTierFromUrl, setSelectedTierFromUrl] = useState<string | null>(null);
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -23,8 +23,8 @@ export default function SignupPage() {
       // Extract tier from URL params (from pricing page)
       const params = new URLSearchParams(window.location.search);
       const plan = params.get('plan');
-      if (plan && ['1', '2', '3'].includes(plan)) {
-        setSelectedTierFromUrl(parseInt(plan));
+      if (plan && ['watchlist', 'full', 'pro'].includes(plan)) {
+        setSelectedTierFromUrl(plan as any);
       }
 
       setLoading(false);

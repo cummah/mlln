@@ -3,16 +3,16 @@
 import { useState } from 'react';
 
 interface UpgradeModalProps {
-  tier: number;
+  tier?: string;
   tierName: string;
   isOpen: boolean;
   onClose: () => void;
 }
 
-const TIER_NAMES: Record<number, string> = {
-  1: 'Essential',
-  2: 'Premium',
-  3: 'Pro',
+const TIER_MAP: Record<string, number> = {
+  'watchlist': 1,
+  'full': 2,
+  'pro': 3,
 };
 
 export default function UpgradeModal({ tier, tierName, isOpen, onClose }: UpgradeModalProps) {
@@ -40,10 +40,11 @@ export default function UpgradeModal({ tier, tierName, isOpen, onClose }: Upgrad
     setLoading(true);
 
     try {
+      const tierNum = tier ? TIER_MAP[tier] : 2;
       const response = await fetch('/api/auth/signup-with-tier', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password, tier }),
+        body: JSON.stringify({ email, password, tier: tierNum }),
       });
 
       const data = await response.json();

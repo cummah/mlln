@@ -1,9 +1,10 @@
 'use client'
 
 import Link from 'next/link'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 
 const LINKS: { href: string; label: string }[] = [
+  { href: '/methodology', label: 'Methodology' },
   { href: '/asset/daily', label: 'Daily signals' },
   { href: '/asset/weekly', label: 'Weekly signals' },
   { href: '/asset/monthly', label: 'Monthly signals' },
@@ -11,7 +12,6 @@ const LINKS: { href: string; label: string }[] = [
   { href: '/rank', label: 'Rank' },
   { href: '/watchlist', label: 'Watchlist' },
   { href: '/portfolio', label: 'Portfolio' },
-  { href: '/methodology', label: 'Methodology' },
   { href: '/score-criteria', label: 'Score criteria' },
   { href: '#pricing', label: 'Pricing' },
   { href: '/privacy', label: 'Privacy' },
@@ -20,19 +20,16 @@ const LINKS: { href: string; label: string }[] = [
 /** Hamburger and dropdown for the landing page header. Hidden on wide screens, where the inline links show. */
 export function MobileMenu() {
   const [open, setOpen] = useState(false)
-  const ref = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     if (!open) return
     const onKey = (e: KeyboardEvent) => e.key === 'Escape' && setOpen(false)
-    const onDown = (e: PointerEvent) => { if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false) }
     document.addEventListener('keydown', onKey)
-    document.addEventListener('pointerdown', onDown)
-    return () => { document.removeEventListener('keydown', onKey); document.removeEventListener('pointerdown', onDown) }
+    return () => document.removeEventListener('keydown', onKey)
   }, [open])
 
   return (
-    <div ref={ref} className="lp-menu">
+    <div className="lp-menu">
       <button type="button" className="lp-menu-btn" aria-label={open ? 'Close menu' : 'Open menu'} aria-expanded={open} onClick={() => setOpen(o => !o)}>
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
           {open ? <><line x1="6" y1="6" x2="18" y2="18" /><line x1="18" y1="6" x2="6" y2="18" /></> : <><line x1="4" y1="7" x2="20" y2="7" /><line x1="4" y1="12" x2="20" y2="12" /><line x1="4" y1="17" x2="20" y2="17" /></>}
@@ -43,6 +40,7 @@ export function MobileMenu() {
           {LINKS.map(l => (
             <Link key={l.href} href={l.href} className="lp-menu-item" onClick={() => setOpen(false)}>{l.label}</Link>
           ))}
+          <Link href="/signup" className="lp-menu-item" onClick={() => setOpen(false)} style={{ background: 'var(--teal)', color: 'var(--bg)', fontWeight: 600, marginTop: '6px' }}>Get started</Link>
         </nav>
       )}
     </div>

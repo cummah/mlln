@@ -3,34 +3,62 @@
 import { useEffect, useState } from 'react';
 import UpgradeModal from './UpgradeModal';
 
+const LAUNCH_DISCOUNT = 0.5;
+
 const TIERS = [
   {
-    id: 1,
-    name: 'Essential',
-    features: ['Custom watchlist (20 assets)', 'Weekly & monthly signals', 'DCA scores & backtests']
+    id: 'watchlist',
+    name: 'Watchlist',
+    tagline: 'For investors who know what they own.',
+    monthly: 12,
+    features: [
+      'Custom watchlist of up to 20 assets',
+      'Weekly and monthly Enhanced DCA signals',
+      'How much to buy this period, per asset',
+      'Watchlist YTD vs standard DCA and SPY',
+    ],
+    cta: 'Start with Watchlist',
   },
   {
-    id: 2,
-    name: 'Premium',
-    features: ['All 2,000+ stocks & ETFs', 'Weekly & monthly signals', 'Sector views & ranking table', 'Full backtests'],
-    highlight: true
+    id: 'full',
+    name: 'Full access',
+    tagline: 'For investors who want to find the best places to put money.',
+    monthly: 29,
+    features: [
+      'All 2,000+ stocks and ETFs',
+      'Weekly and monthly Enhanced DCA signals',
+      'Sector views and the full ranking table',
+      'Backtests and DCA scores for every asset',
+      'Unlimited watchlists',
+    ],
+    cta: 'Get Full access',
+    highlight: true,
   },
   {
-    id: 3,
+    id: 'pro',
     name: 'Pro',
-    features: ['Everything in Premium', 'Advanced analytics', 'Custom portfolios', 'API access']
+    tagline: 'Active Traders and Investors.',
+    monthly: 49,
+    features: [
+      'Everything in Full access',
+      'Institutional grade TradingView indicators and strategies',
+      'Use them across any asset and timeframe',
+    ],
+    cta: 'Get Pro',
   },
 ];
 
+const gbp = (n: number) => `£${n.toLocaleString('en-GB')}`;
+
 interface TierSelectorProps {
-  initialTier?: number | null;
+  initialTier?: string | null;
 }
 
 export default function TierSelector({ initialTier }: TierSelectorProps) {
-  const [selectedTier, setSelectedTier] = useState<number | null>(null);
+  const [selectedTier, setSelectedTier] = useState<string | null>(null);
 
   useEffect(() => {
-    if (initialTier && [1, 2, 3].includes(initialTier)) {
+    if (initialTier && ['watchlist', 'full', 'pro'].includes(initialTier)) {
       setSelectedTier(initialTier);
     }
   }, [initialTier]);
@@ -39,129 +67,124 @@ export default function TierSelector({ initialTier }: TierSelectorProps) {
     <>
       <div style={{
         display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
         gap: '20px',
         marginBottom: '24px'
       }}>
-        {TIERS.map((tier) => (
-          <div
-            key={tier.id}
-            style={{
-              background: tier.highlight ? 'var(--surface-elevated)' : 'var(--surface)',
-              border: `1px solid ${tier.highlight ? 'var(--teal-mid)' : 'var(--border)'}`,
-              borderRadius: '12px',
-              padding: '24px',
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '16px',
-              position: 'relative',
-              transition: 'transform 0.2s, box-shadow 0.2s'
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.transform = 'translateY(-4px)';
-              e.currentTarget.style.boxShadow = 'var(--shadow-glow-teal)';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.transform = 'translateY(0)';
-              e.currentTarget.style.boxShadow = tier.highlight ? 'var(--shadow-glow-teal)' : 'none';
-            }}
-          >
-            {tier.highlight && (
-              <div style={{
-                position: 'absolute',
-                top: '-10px',
-                left: '24px',
-                background: 'var(--teal)',
-                color: 'var(--bg)',
-                fontSize: '10px',
-                fontWeight: '700',
-                letterSpacing: '0.08em',
-                textTransform: 'uppercase',
-                padding: '4px 10px',
-                borderRadius: '999px'
-              }}>
-                Most popular
-              </div>
-            )}
+        {TIERS.map((tier) => {
+          const fullMonthly = tier.monthly / (1 - LAUNCH_DISCOUNT);
+          const yearly = tier.monthly * 12;
+          const fullYearly = fullMonthly * 12;
 
-            <div>
-              <h3 style={{
-                fontSize: '18px',
-                fontWeight: '600',
-                color: 'var(--text)',
-                margin: '0 0 8px 0'
-              }}>
-                {tier.name}
-              </h3>
-            </div>
-
-            <ul style={{
-              listStyle: 'none',
-              margin: '0',
-              padding: '0',
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '10px'
-            }}>
-              {tier.features.map((feature) => (
-                <li
-                  key={feature}
-                  style={{
-                    display: 'flex',
-                    gap: '8px',
-                    fontSize: '13px',
-                    color: 'var(--text-2)',
-                    lineHeight: '1.5'
-                  }}
-                >
-                  <span style={{
-                    color: 'var(--teal)',
-                    flexShrink: 0,
-                    marginTop: '2px'
-                  }}>✓</span>
-                  <span>{feature}</span>
-                </li>
-              ))}
-            </ul>
-
-            <button
-              onClick={() => setSelectedTier(tier.id)}
+          return (
+            <div
+              key={tier.id}
               style={{
-                width: '100%',
-                padding: '12px 16px',
-                borderRadius: '8px',
-                border: tier.highlight ? 'none' : '1px solid var(--border)',
-                background: tier.highlight ? 'var(--teal)' : 'transparent',
-                color: tier.highlight ? 'var(--bg)' : 'var(--teal)',
-                fontSize: '14px',
-                fontWeight: '600',
-                cursor: 'pointer',
-                transition: 'all 0.2s',
-                marginTop: 'auto'
+                background: tier.highlight ? 'var(--surface-elevated)' : 'var(--surface)',
+                border: `1px solid ${tier.highlight ? 'var(--teal-mid)' : 'var(--border)'}`,
+                borderRadius: '16px',
+                padding: '28px 26px',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '18px',
+                position: 'relative',
+                boxShadow: tier.highlight ? 'var(--shadow-glow-teal)' : 'none',
+                transition: 'transform 0.2s, box-shadow 0.2s'
               }}
               onMouseEnter={(e) => {
-                if (!tier.highlight) {
-                  e.currentTarget.style.background = 'var(--teal)';
-                  e.currentTarget.style.color = 'var(--bg)';
-                  e.currentTarget.style.borderColor = 'var(--teal)';
-                } else {
-                  e.currentTarget.style.opacity = '0.9';
-                }
+                e.currentTarget.style.transform = 'translateY(-4px)';
               }}
               onMouseLeave={(e) => {
-                if (!tier.highlight) {
-                  e.currentTarget.style.background = 'transparent';
-                  e.currentTarget.style.color = 'var(--teal)';
-                  e.currentTarget.style.borderColor = 'var(--border)';
-                } else {
-                  e.currentTarget.style.opacity = '1';
-                }
+                e.currentTarget.style.transform = 'translateY(0)';
               }}
             >
-              Get {tier.name}
-            </button>
-          </div>
-        ))}
+              {tier.highlight && (
+                <div style={{
+                  position: 'absolute',
+                  top: '-11px',
+                  left: '26px',
+                  background: 'var(--teal)',
+                  color: 'var(--bg)',
+                  fontSize: '10px',
+                  fontWeight: 700,
+                  letterSpacing: '0.08em',
+                  textTransform: 'uppercase',
+                  padding: '4px 10px',
+                  borderRadius: '999px'
+                }}>
+                  Most popular
+                </div>
+              )}
+
+              <div>
+                <div style={{ fontSize: '16px', fontWeight: 600, color: 'var(--text)' }}>{tier.name}</div>
+                <div style={{ fontSize: '13px', color: 'var(--text-2)', marginTop: '4px', minHeight: '38px', lineHeight: 1.45 }}>{tier.tagline}</div>
+              </div>
+
+              <div>
+                <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px' }}>
+                  <span style={{ fontSize: '40px', fontWeight: 700, letterSpacing: '-0.03em', color: 'var(--text)' }}>{gbp(tier.monthly)}</span>
+                  <span style={{ fontSize: '14px', color: 'var(--text-2)' }}>/month</span>
+                  <span style={{ fontSize: '15px', color: 'var(--text-3)', textDecoration: 'line-through', marginLeft: 'auto' }}>{gbp(fullMonthly)}</span>
+                </div>
+                <div style={{ fontSize: '12.5px', color: 'var(--text-2)', marginTop: '6px' }}>
+                  Billed annually at <strong style={{ color: 'var(--text)' }}>{gbp(yearly)}</strong>{' '}
+                  <span style={{ color: 'var(--text-3)', textDecoration: 'line-through' }}>{gbp(fullYearly)}</span>
+                </div>
+                <div style={{ display: 'inline-block', marginTop: '10px', fontSize: '11px', fontWeight: 600, color: 'var(--green)', background: 'var(--green-dim)', padding: '3px 9px', borderRadius: '999px' }}>
+                  50% launch discount · save {gbp(fullYearly - yearly)}
+                </div>
+              </div>
+
+              <button
+                onClick={() => setSelectedTier(tier.id)}
+                style={{
+                  width: '100%',
+                  padding: '12px 16px',
+                  borderRadius: '8px',
+                  border: tier.highlight ? 'none' : '1px solid var(--border)',
+                  background: tier.highlight ? 'var(--teal)' : 'transparent',
+                  color: tier.highlight ? 'var(--bg)' : 'var(--teal)',
+                  fontSize: '14px',
+                  fontWeight: '600',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s'
+                }}
+                onMouseEnter={(e) => {
+                  if (!tier.highlight) {
+                    e.currentTarget.style.background = 'var(--teal)';
+                    e.currentTarget.style.color = 'var(--bg)';
+                    e.currentTarget.style.borderColor = 'var(--teal)';
+                  } else {
+                    e.currentTarget.style.opacity = '0.9';
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (!tier.highlight) {
+                    e.currentTarget.style.background = 'transparent';
+                    e.currentTarget.style.color = 'var(--teal)';
+                    e.currentTarget.style.borderColor = 'var(--border)';
+                  } else {
+                    e.currentTarget.style.opacity = '1';
+                  }
+                }}
+              >
+                {tier.cta}
+              </button>
+
+              <ul style={{ listStyle: 'none', margin: 0, padding: 0, display: 'flex', flexDirection: 'column', gap: '11px' }}>
+                {tier.features.map(f => (
+                  <li key={f} style={{ display: 'flex', gap: '10px', fontSize: '13.5px', lineHeight: 1.5, color: 'var(--text-2)' }}>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--teal)" strokeWidth="3" style={{ flexShrink: 0, marginTop: '3px' }}>
+                      <path d="M20 6L9 17l-5-5" />
+                    </svg>
+                    <span>{f}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          );
+        })}
       </div>
 
       {/* Payment methods - shown once */}

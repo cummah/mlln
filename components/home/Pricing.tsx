@@ -118,7 +118,7 @@ function PriceCard({ tier, i }: { tier: Tier; i: number }) {
         </div>
       </div>
 
-      <Link href={`/signup?plan=${tier.id}&billing=annual`} className={`lp-btn ${tier.highlight ? 'lp-btn-primary' : 'lp-btn-ghost'}`}>
+      <Link href={`/signup?plan=${tier.id}`} className={`lp-btn ${tier.highlight ? 'lp-btn-primary' : 'lp-btn-ghost'}`}>
         {tier.cta}
       </Link>
 
