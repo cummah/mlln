@@ -1,37 +1,50 @@
 import { createServerClient } from '@supabase/ssr';
+import type { EmailOtpType } from '@supabase/supabase-js';
 import { NextRequest, NextResponse } from 'next/server';
 
 export async function GET(request: NextRequest) {
-  const requestUrl = new URL(request.url);
-  const code = requestUrl.searchParams.get('code');
+  const { searchParams, origin } = new URL(request.url);
+  const code = searchParams.get('code');
+  const tokenHash = searchParams.get('token_hash');
+  const type = searchParams.get('type') as EmailOtpType | null;
 
-  if (code) {
-    // Create response object for setting cookies
-    const response = NextResponse.redirect(new URL('/', requestUrl.origin));
+  // Only allow same-site relative redirects
+  const nextParam = searchParams.get('next') ?? '/account';
+  const next = nextParam.startsWith('/') && !nextParam.startsWith('//') ? nextParam : '/account';
 
-    const supabase = createServerClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-        cookies: {
-          getAll() {
-            return request.cookies.getAll();
-          },
-          setAll(cookiesToSet: Array<{ name: string; value: string; options?: any }>) {
-            cookiesToSet.forEach(({ name, value, options }) => {
-              response.cookies.set(name, value, options);
-            });
-          },
-        },
-      }
-    );
-
-    // Exchange the code for a session
-    await supabase.auth.exchangeCodeForSession(code);
-
-    return response;
+  if (!code && !(tokenHash && type)) {
+    return NextResponse.redirect(new URL('/login', origin));
   }
 
-  // If there's no code, redirect to login
-  return NextResponse.redirect(new URL('/login', requestUrl.origin));
+  const response = NextResponse.redirect(new URL(next, origin));
+
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        getAll() {
+          return request.cookies.getAll();
+        },
+        setAll(cookiesToSet: Array<{ name: string; value: string; options?: any }>) {
+          cookiesToSet.forEach(({ name, value, options }) => {
+            response.cookies.set(name, value, options);
+          });
+        },
+      },
+    }
+  );
+
+  const { error } = code
+    ? await supabase.auth.exchangeCodeForSession(code)
+    : await supabase.auth.verifyOtp({ type: type!, token_hash: tokenHash! });
+
+  if (error) {
+    console.error('Auth callback failed:', error.message);
+    // Typically: link opened in a different browser than signup (PKCE verifier
+    // cookie missing), or link expired/already used. Send them to login.
+    return NextResponse.redirect(new URL('/login?error=verification_failed', origin));
+  }
+
+  return response;
 }

@@ -14,6 +14,7 @@ export default function SignupForm({ showLabel = false }: SignupFormProps) {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [sent, setSent] = useState(false);
   const router = useRouter();
   const supabase = createClient();
 
@@ -35,21 +36,23 @@ export default function SignupForm({ showLabel = false }: SignupFormProps) {
 
     try {
       const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
-      console.log('Signup redirect URL:', siteUrl);
-      const { error } = await supabase.auth.signUp({
+      const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
-          emailRedirectTo: `${siteUrl}/auth/callback`,
+          emailRedirectTo: `${siteUrl}/auth/callback?next=/account`,
         },
       });
 
       if (error) {
         setError(error.message);
-      } else {
-        // Redirect to account page after successful signup
+      } else if (data.session) {
+        // Email confirmation disabled: already signed in.
         // The profile will be auto-created by the trigger with tier 0
         router.push('/account');
+      } else {
+        // Confirmation required: no session yet, /account would bounce to /login.
+        setSent(true);
       }
     } catch (err) {
       setError('An error occurred. Please try again.');
@@ -57,6 +60,14 @@ export default function SignupForm({ showLabel = false }: SignupFormProps) {
       setLoading(false);
     }
   };
+
+  if (sent) {
+    return (
+      <div style={{ padding: '16px', textAlign: 'center', color: 'var(--text)', fontSize: '14px' }}>
+        Check <strong>{email}</strong> for a verification link. Open it in this same browser to finish signing up.
+      </div>
+    );
+  }
 
   return (
     <form onSubmit={handleSignup} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>

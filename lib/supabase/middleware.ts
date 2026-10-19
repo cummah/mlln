@@ -2,6 +2,15 @@ import { type NextRequest, NextResponse } from 'next/server';
 import { createServerClient } from '@supabase/ssr';
 
 export async function updateSession(request: NextRequest) {
+  // If Supabase falls back to the Site URL (redirect URL not allow-listed), the
+  // verification code lands on the homepage. Forward it to the callback.
+  const { pathname, searchParams } = request.nextUrl;
+  if (pathname === '/' && searchParams.has('code')) {
+    const url = request.nextUrl.clone();
+    url.pathname = '/auth/callback';
+    return NextResponse.redirect(url);
+  }
+
   let supabaseResponse = NextResponse.next({
     request,
   });
