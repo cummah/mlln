@@ -34,11 +34,13 @@ export default function SignupForm({ showLabel = false }: SignupFormProps) {
     setLoading(true);
 
     try {
+      const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
+      console.log('Signup redirect URL:', siteUrl);
       const { error } = await supabase.auth.signUp({
         email,
         password,
         options: {
-          emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/auth/callback`,
+          emailRedirectTo: `${siteUrl}/auth/callback`,
         },
       });
 
