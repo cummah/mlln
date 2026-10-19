@@ -32,15 +32,27 @@ export default function AccountPage({ user }: { user: AccountUser }) {
 
   const loadData = async () => {
     try {
-      const { data: profileData } = await supabase
+      const { data: profileData, error: fetchError } = await supabase
         .from('profiles')
         .select('*')
         .eq('user_id', user.id)
         .single();
 
-      setProfile(profileData as UserProfile);
+      let profile = profileData as UserProfile;
 
-      if (profileData?.tier === 1) {
+      // If profile doesn't exist, create it
+      if (fetchError && profile === null) {
+        const { data: newProfile } = await supabase
+          .from('profiles')
+          .insert([{ user_id: user.id, tier: 0 }])
+          .select()
+          .single();
+        profile = newProfile as UserProfile;
+      }
+
+      setProfile(profile);
+
+      if (profile?.tier === 1) {
         const { data: assetsData } = await supabase
           .from('user_assets')
           .select('ticker')
