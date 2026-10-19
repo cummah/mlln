@@ -2,11 +2,13 @@ import { createServerClient } from '@supabase/ssr';
 import { NextRequest, NextResponse } from 'next/server';
 
 export async function GET(request: NextRequest) {
-  const { searchParams } = new URL(request.url);
-  const code = searchParams.get('code');
+  const requestUrl = new URL(request.url);
+  const code = requestUrl.searchParams.get('code');
 
   if (code) {
-    let response = NextResponse.next();
+    // Create response object for setting cookies
+    const response = NextResponse.redirect(new URL('/', requestUrl.origin));
+
     const supabase = createServerClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
@@ -16,25 +18,20 @@ export async function GET(request: NextRequest) {
             return request.cookies.getAll();
           },
           setAll(cookiesToSet: Array<{ name: string; value: string; options?: any }>) {
-            cookiesToSet.forEach(({ name, value, options }) =>
-              response.cookies.set(name, value, options)
-            );
+            cookiesToSet.forEach(({ name, value, options }) => {
+              response.cookies.set(name, value, options);
+            });
           },
         },
       }
     );
 
-    const { error } = await supabase.auth.exchangeCodeForSession(code);
+    // Exchange the code for a session
+    await supabase.auth.exchangeCodeForSession(code);
 
-    if (error) {
-      console.error('Exchange code error:', error);
-      return NextResponse.redirect(new URL('/login', request.url));
-    }
-
-    console.log('Successfully exchanged code for session');
-
-    return NextResponse.redirect(new URL('/account', request.url));
+    return response;
   }
 
-  return NextResponse.redirect(new URL('/login', request.url));
+  // If there's no code, redirect to login
+  return NextResponse.redirect(new URL('/login', requestUrl.origin));
 }
