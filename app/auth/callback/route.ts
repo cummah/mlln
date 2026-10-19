@@ -27,8 +27,11 @@ export async function GET(request: NextRequest) {
     const { error } = await supabase.auth.exchangeCodeForSession(code);
 
     if (error) {
+      console.error('Exchange code error:', error);
       return NextResponse.redirect(new URL('/login', request.url));
     }
+
+    console.log('Successfully exchanged code for session');
 
     return NextResponse.redirect(new URL('/account', request.url));
   }
