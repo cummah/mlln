@@ -30,11 +30,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.redirect(new URL('/login', request.url));
     }
 
-    response = NextResponse.redirect(new URL('/account', request.url), {
-      request,
-    });
-
-    return response;
+    return NextResponse.redirect(new URL('/account', request.url));
   }
 
   return NextResponse.redirect(new URL('/login', request.url));
