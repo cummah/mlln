@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 import { createClient } from '@/lib/supabase/browser';
-import { useRouter } from 'next/navigation';
 
 export default function LoginForm() {
   const [email, setEmail] = useState('');
@@ -10,7 +9,6 @@ export default function LoginForm() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
-  const router = useRouter();
   const supabase = createClient();
 
   const handleEmailPassword = async (e: React.FormEvent) => {
@@ -31,7 +29,8 @@ export default function LoginForm() {
           setError(error.message);
         }
       } else {
-        router.push('/account');
+        // Full navigation so the server renders with the new session cookies
+        window.location.href = '/account';
       }
     } catch (err) {
       setError('An error occurred. Please try again.');
