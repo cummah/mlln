@@ -1,24 +1,41 @@
-import { createClient } from '@/lib/supabase/server';
+import { createServerClient } from '@supabase/ssr';
 import { NextRequest, NextResponse } from 'next/server';
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const code = searchParams.get('code');
 
-  console.log('=== Callback Route ===');
-  console.log('Code present:', code ? 'yes' : 'no');
-
   if (code) {
-    const supabase = await createClient();
+    let response = NextResponse.next();
+    const supabase = createServerClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        cookies: {
+          getAll() {
+            return request.cookies.getAll();
+          },
+          setAll(cookiesToSet: Array<{ name: string; value: string; options?: any }>) {
+            cookiesToSet.forEach(({ name, value, options }) =>
+              response.cookies.set(name, value, options)
+            );
+          },
+        },
+      }
+    );
+
     const { error } = await supabase.auth.exchangeCodeForSession(code);
 
     if (error) {
-      console.log('Session error:', error.message);
       return NextResponse.redirect(new URL('/login', request.url));
     }
-    console.log('Session exchanged successfully');
+
+    response = NextResponse.redirect(new URL('/account', request.url), {
+      request,
+    });
+
+    return response;
   }
 
-  console.log('Redirecting to /account');
-  return NextResponse.redirect(new URL('/account', request.url));
+  return NextResponse.redirect(new URL('/login', request.url));
 }
