@@ -36,12 +36,8 @@ alter table profiles enable row level security;
 alter table user_assets enable row level security;
 alter table tier_permissions enable row level security;
 
--- RLS: users can read/update their own profile
+-- RLS: users can read their own profile (read-only)
 create policy "users_read_own_profile" on profiles for select using (auth.uid() = user_id);
-create policy "users_update_own_profile" on profiles for update using (auth.uid() = user_id) with check (auth.uid() = user_id and tier = (select tier from profiles where user_id = auth.uid()));
-
--- RLS: users can read tier (not write)
-alter policy "users_update_own_profile" on profiles for update using (false);
 
 -- RLS: users can read/update their own assets
 create policy "users_read_own_assets" on user_assets for select using (auth.uid() = user_id);
