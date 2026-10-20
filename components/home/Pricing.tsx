@@ -118,8 +118,9 @@ function PriceCard({ tier, i }: { tier: Tier; i: number }) {
         </div>
       </div>
 
-      <Link href={`/signup?plan=${tier.id}`} className={`lp-btn ${tier.highlight ? 'lp-btn-primary' : 'lp-btn-ghost'}`}>
-        {tier.cta}
+      {/* All tiers link to the same signup, tier selection happens on account page */}
+      <Link href="/signup" className={`lp-btn ${tier.highlight ? 'lp-btn-primary' : 'lp-btn-ghost'}`}>
+        Get Started
       </Link>
 
       <ul style={{ listStyle: 'none', margin: 0, padding: 0, display: 'flex', flexDirection: 'column', gap: '11px' }}>

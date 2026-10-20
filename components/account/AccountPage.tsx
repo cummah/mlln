@@ -189,6 +189,33 @@ export default function AccountPage({ user }: { user: AccountUser }) {
         }}>
           <div style={{ marginBottom: '20px' }}>
             <div style={{ fontSize: '12px', color: 'var(--text-3)', marginBottom: '4px', textTransform: 'uppercase' }}>
+              Display Name
+            </div>
+            <input
+              type="text"
+              value={profile.display_name || ''}
+              onChange={(e) => {
+                const newProfile = { ...profile, display_name: e.target.value };
+                setProfile(newProfile);
+              }}
+              placeholder="Enter your name"
+              style={{
+                padding: '10px 12px',
+                borderRadius: '8px',
+                border: '1px solid var(--border)',
+                background: 'var(--bg)',
+                color: 'var(--text)',
+                fontSize: '14px',
+                fontFamily: 'inherit',
+                width: '100%',
+                maxWidth: '300px',
+                boxSizing: 'border-box'
+              }}
+            />
+          </div>
+
+          <div style={{ marginBottom: '20px' }}>
+            <div style={{ fontSize: '12px', color: 'var(--text-3)', marginBottom: '4px', textTransform: 'uppercase' }}>
               Email
             </div>
             <div style={{ fontSize: '16px', color: 'var(--text)' }}>
@@ -228,6 +255,86 @@ export default function AccountPage({ user }: { user: AccountUser }) {
 
         {/* Pricing Tiers for Free Users */}
         {profile.tier === 0 && <PricingTiersForAccount />}
+
+        {/* Tier-specific Settings */}
+        {profile.tier > 0 && (
+          <div style={{
+            background: 'var(--surface)',
+            border: '1px solid var(--border)',
+            borderRadius: '12px',
+            padding: '24px',
+            marginBottom: '24px'
+          }}>
+            <h2 style={{ fontSize: '18px', fontWeight: '600', marginBottom: '16px', color: 'var(--text)' }}>
+              Your Plan Features
+            </h2>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '20px' }}>
+              <div>
+                <div style={{ fontSize: '12px', color: 'var(--text-3)', marginBottom: '8px', textTransform: 'uppercase' }}>
+                  Custom Watchlists
+                </div>
+                <div style={{ fontSize: '18px', fontWeight: '700', color: 'var(--text)' }}>
+                  {profile.tier === 1 ? '1' : profile.tier === 2 ? '3' : '5'}
+                </div>
+                <div style={{ fontSize: '12px', color: 'var(--text-2)', marginTop: '4px' }}>
+                  watchlists available
+                </div>
+                {profile.tier === 1 && (
+                  <a href="/my-watchlist" style={{
+                    display: 'inline-block',
+                    marginTop: '12px',
+                    padding: '8px 12px',
+                    borderRadius: '6px',
+                    background: 'rgba(0, 200, 180, 0.1)',
+                    color: 'var(--teal)',
+                    fontSize: '12px',
+                    fontWeight: '600',
+                    textDecoration: 'none'
+                  }}>
+                    View My Watchlist →
+                  </a>
+                )}
+              </div>
+              <div>
+                <div style={{ fontSize: '12px', color: 'var(--text-3)', marginBottom: '8px', textTransform: 'uppercase' }}>
+                  Saved Portfolios
+                </div>
+                <div style={{ fontSize: '18px', fontWeight: '700', color: 'var(--text)' }}>
+                  {profile.tier === 0 ? '1' : profile.tier === 1 ? '1' : profile.tier === 2 ? '3' : '5'}
+                </div>
+                <div style={{ fontSize: '12px', color: 'var(--text-2)', marginTop: '4px' }}>
+                  portfolios available
+                </div>
+                <a href="/my-portfolio" style={{
+                  display: 'inline-block',
+                  marginTop: '12px',
+                  padding: '8px 12px',
+                  borderRadius: '6px',
+                  background: 'rgba(0, 200, 180, 0.1)',
+                  color: 'var(--teal)',
+                  fontSize: '12px',
+                  fontWeight: '600',
+                  textDecoration: 'none'
+                }}>
+                  View My Portfolios →
+                </a>
+              </div>
+              {profile.tier === 1 && (
+                <div>
+                  <div style={{ fontSize: '12px', color: 'var(--text-3)', marginBottom: '8px', textTransform: 'uppercase' }}>
+                    Asset Swaps
+                  </div>
+                  <div style={{ fontSize: '18px', fontWeight: '700', color: 'var(--text)' }}>
+                    5 / month
+                  </div>
+                  <div style={{ fontSize: '12px', color: 'var(--text-2)', marginTop: '4px' }}>
+                    swap assets in watchlist
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
 
         {/* Tier 1 Assets Management */}
         {profile.tier === 1 && (
