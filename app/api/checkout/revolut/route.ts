@@ -45,6 +45,7 @@ export async function POST(req: Request) {
       headers: {
         'Authorization': `Bearer ${REVOLUT_API_KEY}`,
         'Content-Type': 'application/json',
+        'Revolut-Api-Version': '2024-08-20',
       },
       body: JSON.stringify({
         amount: tierData.amount,

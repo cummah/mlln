@@ -46,6 +46,7 @@ async function processPayments() {
           headers: {
             'Authorization': `Bearer ${REVOLUT_API_KEY}`,
             'Content-Type': 'application/json',
+            'Revolut-Api-Version': '2024-08-20',
           },
         });
 
