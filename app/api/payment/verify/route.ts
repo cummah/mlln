@@ -1,6 +1,6 @@
 import { createClient } from '@/lib/supabase/server';
 
-const REVOLUT_API_URL = process.env.REVOLUT_API_URL || 'https://revolut.com';
+const REVOLUT_API_URL = process.env.REVOLUT_API_URL || 'https://merchant.revolut.com/api';
 const REVOLUT_API_KEY = process.env.REVOLUT_API_KEY || '';
 
 export async function POST(req: Request) {
@@ -24,7 +24,7 @@ export async function POST(req: Request) {
     }
 
     // Check Revolut order status
-    const orderResponse = await fetch(`${REVOLUT_API_URL}/1.0/orders/${order_id}`, {
+    const orderResponse = await fetch(`${REVOLUT_API_URL}/orders/${order_id}`, {
       method: 'GET',
       headers: {
         'Authorization': `Bearer ${REVOLUT_API_KEY}`,

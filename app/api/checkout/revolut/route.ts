@@ -1,7 +1,8 @@
 import { createClient } from '@/lib/supabase/server';
 
-const REVOLUT_API_URL = process.env.REVOLUT_API_URL || 'https://revolut.com';
+const REVOLUT_API_URL = process.env.REVOLUT_API_URL || 'https://merchant.revolut.com/api';
 const REVOLUT_API_KEY = process.env.REVOLUT_API_KEY || '';
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://mlln.ai';
 
 const TIER_PRICES: Record<number, { amount: number; currency: string; name: string }> = {
   1: { amount: 1200, currency: 'GBP', name: 'Essential' },     // £12/month = 1200 pence
@@ -39,7 +40,7 @@ export async function POST(req: Request) {
     const tierMeta = TIER_METADATA[tier];
 
     // Create order with Revolut API
-    const orderResponse = await fetch(`${REVOLUT_API_URL}/1.0/orders`, {
+    const orderResponse = await fetch(`${REVOLUT_API_URL}/orders`, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${REVOLUT_API_KEY}`,
@@ -49,6 +50,7 @@ export async function POST(req: Request) {
         amount: tierData.amount,
         currency: tierData.currency,
         description: `mlln.ai ${tierData.name} Plan - Annual Subscription`,
+        redirect_url: `${SITE_URL}/payment-success`,
         metadata: {
           user_id: user.id,
           tier_id: tierMeta.id,

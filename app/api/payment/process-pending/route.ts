@@ -1,8 +1,7 @@
 import { createClient } from '@/lib/supabase/server';
 
-const REVOLUT_API_URL = process.env.REVOLUT_API_URL || 'https://revolut.com';
+const REVOLUT_API_URL = process.env.REVOLUT_API_URL || 'https://merchant.revolut.com/api';
 const REVOLUT_API_KEY = process.env.REVOLUT_API_KEY || '';
-const CRON_SECRET = process.env.CRON_SECRET || '';
 
 /**
  * Background cron job to process pending payments
@@ -50,7 +49,7 @@ export async function POST(req: Request) {
     for (const payment of pendingPayments || []) {
       try {
         // Check Revolut order status
-        const orderResponse = await fetch(`${REVOLUT_API_URL}/1.0/orders/${payment.order_id}`, {
+        const orderResponse = await fetch(`${REVOLUT_API_URL}/orders/${payment.order_id}`, {
           method: 'GET',
           headers: {
             'Authorization': `Bearer ${REVOLUT_API_KEY}`,
