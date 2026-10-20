@@ -5,6 +5,8 @@ import { createClient } from '@/lib/supabase/browser';
 import { useRouter } from 'next/navigation';
 import { usePendingTierUpgrade } from '@/lib/hooks/usePendingTierUpgrade';
 import PricingTiersForAccount from './PricingTiersForAccount';
+import WatchlistManagement from './WatchlistManagement';
+import PortfolioManagement from './PortfolioManagement';
 import type { UserProfile } from '@/types';
 
 interface AccountUser {
@@ -336,6 +338,24 @@ export default function AccountPage({ user }: { user: AccountUser }) {
           </div>
         )}
 
+        {/* Watchlist Management */}
+        {profile.tier >= 1 && (
+          <WatchlistManagement
+            userId={user.id}
+            tier={profile.tier}
+            maxWatchlists={profile.tier === 1 ? 1 : profile.tier === 2 ? 3 : 5}
+          />
+        )}
+
+        {/* Portfolio Management */}
+        {profile.tier >= 0 && (
+          <PortfolioManagement
+            userId={user.id}
+            tier={profile.tier}
+            maxPortfolios={profile.tier === 0 ? 1 : profile.tier === 1 ? 1 : profile.tier === 2 ? 3 : 5}
+          />
+        )}
+
         {/* Tier 1 Assets Management */}
         {profile.tier === 1 && (
           <div style={{
@@ -346,7 +366,7 @@ export default function AccountPage({ user }: { user: AccountUser }) {
             marginBottom: '24px'
           }}>
             <h2 style={{ fontSize: '18px', fontWeight: '600', marginBottom: '16px', color: 'var(--text)' }}>
-              Your 20 Assets
+              Watchlist Assets
             </h2>
             <p style={{ fontSize: '14px', color: 'var(--text-2)', marginBottom: '16px' }}>
               {assets.length} / 20 assets added. You can swap up to 5 times per month.
