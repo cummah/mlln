@@ -1,1 +1,8 @@
-{}
+{
+    "crons": [
+        {
+            "path": "/api/payment/process-pending",
+            "schedule": "0 */60 * * *"
+        }
+    ]
+}

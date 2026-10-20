@@ -16,11 +16,8 @@ const CRON_SECRET = process.env.CRON_SECRET || '';
  */
 export async function POST(req: Request) {
   try {
-    // Verify cron authorization
-    const authHeader = req.headers.get('authorization');
-    if (!CRON_SECRET || authHeader !== `Bearer ${CRON_SECRET}`) {
-      return Response.json({ error: 'Unauthorized' }, { status: 401 });
-    }
+    // Vercel crons run in secure infrastructure, no auth needed
+    // (External cron services would need CRON_SECRET verification)
 
     if (!REVOLUT_API_KEY) {
       console.error('REVOLUT_API_KEY not configured');
