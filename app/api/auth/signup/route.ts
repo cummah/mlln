@@ -4,9 +4,9 @@ export async function POST(req: Request) {
   try {
     const { email, password, display_name } = await req.json();
 
-    if (!email || !password || !display_name) {
+    if (!email || !password) {
       return Response.json(
-        { error: 'Email, password, and display name are required' },
+        { error: 'Email and password are required' },
         { status: 400 }
       );
     }

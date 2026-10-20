@@ -114,6 +114,16 @@ export async function POST(req: Request) {
         );
       }
 
+      // Extract customer name from Revolut order and auto-populate display_name
+      const customerName = orderData.customer?.name || orderData.metadata?.email;
+      if (customerName) {
+        await supabase
+          .from('profiles')
+          .update({ display_name: customerName })
+          .eq('user_id', user.id)
+          .is('display_name', null); // Only update if currently null
+      }
+
       // Mark pending payment as completed
       await supabase
         .from('pending_payments')

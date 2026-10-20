@@ -21,11 +21,6 @@ export default function SignupModal({ isOpen, onClose }: SignupModalProps) {
     e.preventDefault();
     setError(null);
 
-    if (!displayName.trim()) {
-      setError('Display name is required');
-      return;
-    }
-
     if (password !== confirmPassword) {
       setError('Passwords do not match');
       return;
@@ -153,10 +148,9 @@ export default function SignupModal({ isOpen, onClose }: SignupModalProps) {
           <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
             <input
               type="text"
-              placeholder="Display name"
+              placeholder="Display name (optional - will use payment details)"
               value={displayName}
               onChange={(e) => setDisplayName(e.target.value)}
-              required
               disabled={loading}
               style={{
                 padding: '12px',
@@ -226,7 +220,7 @@ export default function SignupModal({ isOpen, onClose }: SignupModalProps) {
 
             <button
               type="submit"
-              disabled={loading || !displayName || !email || !password || !confirmPassword}
+              disabled={loading || !email || !password || !confirmPassword}
               style={{
                 padding: '12px',
                 borderRadius: '8px',
@@ -235,8 +229,8 @@ export default function SignupModal({ isOpen, onClose }: SignupModalProps) {
                 color: 'var(--bg)',
                 fontSize: '14px',
                 fontWeight: '600',
-                cursor: loading || !displayName || !email || !password || !confirmPassword ? 'not-allowed' : 'pointer',
-                opacity: loading || !displayName || !email || !password || !confirmPassword ? 0.6 : 1,
+                cursor: loading || !email || !password || !confirmPassword ? 'not-allowed' : 'pointer',
+                opacity: loading || !email || !password || !confirmPassword ? 0.6 : 1,
                 transition: 'all 0.2s'
               }}
             >
