@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { createClient } from '@/lib/supabase/browser';
 import { useRouter } from 'next/navigation';
 import { usePendingTierUpgrade } from '@/lib/hooks/usePendingTierUpgrade';
+import PricingTiersForAccount from './PricingTiersForAccount';
 import type { UserProfile } from '@/types';
 
 interface AccountUser {
@@ -223,26 +224,10 @@ export default function AccountPage({ user }: { user: AccountUser }) {
             </div>
           )}
 
-          {profile.tier === 0 && (
-            <a
-              href="/#pricing"
-              style={{
-                display: 'inline-block',
-                marginTop: '8px',
-                padding: '10px 20px',
-                borderRadius: '8px',
-                background: 'var(--teal)',
-                color: 'var(--bg)',
-                textDecoration: 'none',
-                fontWeight: '600',
-                fontSize: '14px',
-                cursor: 'pointer'
-              }}
-            >
-              Upgrade Plan
-            </a>
-          )}
         </div>
+
+        {/* Pricing Tiers for Free Users */}
+        {profile.tier === 0 && <PricingTiersForAccount />}
 
         {/* Tier 1 Assets Management */}
         {profile.tier === 1 && (
