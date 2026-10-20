@@ -10,6 +10,7 @@ export type GatingSection = 'asset_page' | 'rank' | 'sectors' | 'watchlist' | 'w
 export interface UserProfile {
   user_id: string;
   tier: UserTier;
+  display_name: string | null;
   tradingview_enabled: boolean;
   billing_provider: string | null;
   billing_customer_id: string | null;
