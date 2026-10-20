@@ -1,8 +1,10 @@
 'use client'
 
+import { useState } from 'react'
 import Link from 'next/link'
 import { motion, useReducedMotion } from 'framer-motion'
 import { Reveal } from './Motion'
+import SignupModal from './SignupModal'
 
 interface Tier {
   id: string
@@ -118,10 +120,7 @@ function PriceCard({ tier, i }: { tier: Tier; i: number }) {
         </div>
       </div>
 
-      {/* All tiers link to the same signup, tier selection happens on account page */}
-      <Link href="/signup" className={`lp-btn ${tier.highlight ? 'lp-btn-primary' : 'lp-btn-ghost'}`}>
-        Get Started
-      </Link>
+      {/* Buttons removed - single "Get Started" button shown below all tiers */}
 
       <ul style={{ listStyle: 'none', margin: 0, padding: 0, display: 'flex', flexDirection: 'column', gap: '11px' }}>
         {tier.features.map(f => (
@@ -136,6 +135,8 @@ function PriceCard({ tier, i }: { tier: Tier; i: number }) {
 }
 
 export function Pricing() {
+  const [signupOpen, setSignupOpen] = useState(false)
+
   return (
     <>
       <Reveal>
@@ -152,9 +153,40 @@ export function Pricing() {
           <PriceCard key={t.id} tier={t} i={i} />
         ))}
       </div>
+
+      <div style={{ textAlign: 'center', marginTop: '32px', marginBottom: '22px' }}>
+        <button
+          onClick={() => setSignupOpen(true)}
+          className="lp-btn lp-btn-primary"
+          style={{
+            border: 'none',
+            cursor: 'pointer',
+            background: 'var(--teal)',
+            color: 'var(--bg)',
+            fontSize: '14px',
+            fontWeight: '600',
+            padding: '12px 32px',
+            borderRadius: '8px',
+            transition: 'all 0.2s'
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.background = 'var(--teal-mid)';
+            e.currentTarget.style.boxShadow = '0 2px 8px rgba(0, 200, 180, 0.2)';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.background = 'var(--teal)';
+            e.currentTarget.style.boxShadow = 'none';
+          }}
+        >
+          Get Started
+        </button>
+      </div>
+
       <div style={{ textAlign: 'center', fontSize: '12px', color: 'var(--text-3)', marginTop: '22px' }}>
         Prices in GBP. All plans are annual, with the monthly rate shown for comparison.
       </div>
+
+      <SignupModal isOpen={signupOpen} onClose={() => setSignupOpen(false)} />
     </>
   )
 }

@@ -255,6 +255,25 @@ export default function AccountPage({ user }: { user: AccountUser }) {
 
         </div>
 
+        {/* Complete Setup Banner for New Users */}
+        {profile.tier === 0 && (
+          <div style={{
+            background: 'linear-gradient(135deg, rgba(0, 200, 180, 0.1) 0%, rgba(0, 200, 180, 0.05) 100%)',
+            border: '2px solid var(--teal)',
+            borderRadius: '12px',
+            padding: '24px',
+            marginBottom: '24px',
+            textAlign: 'center'
+          }}>
+            <h2 style={{ fontSize: '18px', fontWeight: '700', color: 'var(--text)', marginBottom: '8px' }}>
+              Complete Your Setup
+            </h2>
+            <p style={{ fontSize: '14px', color: 'var(--text-2)', marginBottom: '0' }}>
+              Choose a plan below to unlock advanced features and analysis
+            </p>
+          </div>
+        )}
+
         {/* Pricing Tiers for Free Users */}
         {profile.tier === 0 && <PricingTiersForAccount />}
 
