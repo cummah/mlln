@@ -62,8 +62,14 @@ export async function POST(req: Request) {
 
     if (!orderResponse.ok) {
       const error = await orderResponse.text();
-      console.error('Revolut order creation failed:', error);
-      return Response.json({ error: 'Failed to create checkout order' }, { status: 500 });
+      console.error('Revolut order creation failed:', {
+        status: orderResponse.status,
+        statusText: orderResponse.statusText,
+        body: error,
+        apiUrl: REVOLUT_API_URL,
+        hasApiKey: !!REVOLUT_API_KEY
+      });
+      return Response.json({ error: 'Failed to create checkout order', details: error }, { status: 500 });
     }
 
     const orderData = await orderResponse.json();
