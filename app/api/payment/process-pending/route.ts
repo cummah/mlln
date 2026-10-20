@@ -6,26 +6,20 @@ const REVOLUT_API_KEY = process.env.REVOLUT_API_KEY || '';
 /**
  * Background cron job to process pending payments
  * Handles the "closed tab" scenario where users complete payment but don't return
- * Run every 5-10 minutes
+ * Run every hour via Vercel cron
  *
  * Curl example:
  * curl -X POST https://your-domain.com/api/payment/process-pending \
- *   -H "Content-Type: application/json" \
- *   -H "Authorization: Bearer YOUR_CRON_SECRET"
+ *   -H "Content-Type: application/json"
  */
-export async function POST(req: Request) {
+async function processPayments() {
   try {
-    // Vercel crons run in secure infrastructure, no auth needed
-    // (External cron services would need CRON_SECRET verification)
-
     if (!REVOLUT_API_KEY) {
       console.error('REVOLUT_API_KEY not configured');
-      return Response.json({ error: 'Payment service not configured' }, { status: 500 });
+      return { success: false, error: 'Payment service not configured' };
     }
 
     const supabase = await createClient();
-
-    // Find pending payments older than 15 minutes that haven't been checked recently
     const fifteenMinutesAgo = new Date(Date.now() - 15 * 60 * 1000).toISOString();
 
     const { data: pendingPayments, error: fetchError } = await supabase
@@ -34,21 +28,19 @@ export async function POST(req: Request) {
       .eq('status', 'pending')
       .lt('created_at', fifteenMinutesAgo)
       .or(`checked_at.is.null,checked_at.lt.${new Date(Date.now() - 5 * 60 * 1000).toISOString()}`)
-      .limit(50); // Process max 50 at a time to avoid rate limits
+      .limit(50);
 
     if (fetchError) {
       console.error('Failed to fetch pending payments:', fetchError);
-      return Response.json({ error: 'Database error' }, { status: 500 });
+      return { success: false, error: 'Database error' };
     }
 
     let processed = 0;
     let upgraded = 0;
     let failed = 0;
 
-    // Process each pending payment
     for (const payment of pendingPayments || []) {
       try {
-        // Check Revolut order status
         const orderResponse = await fetch(`${REVOLUT_API_URL}/orders/${payment.order_id}`, {
           method: 'GET',
           headers: {
@@ -59,7 +51,6 @@ export async function POST(req: Request) {
 
         if (!orderResponse.ok) {
           console.error(`Failed to check order ${payment.order_id}:`, await orderResponse.text());
-          // Update checked_at but keep pending
           await supabase
             .from('pending_payments')
             .update({ checked_at: new Date().toISOString() })
@@ -70,14 +61,12 @@ export async function POST(req: Request) {
         const orderData = await orderResponse.json();
         const orderStatus = orderData.state || orderData.status;
 
-        // Update checked_at
         await supabase
           .from('pending_payments')
           .update({ checked_at: new Date().toISOString() })
           .eq('id', payment.id);
 
         if (orderStatus === 'COMPLETED' || orderStatus === 'SETTLED') {
-          // Upgrade user tier
           const { error: updateError } = await supabase
             .from('profiles')
             .update({
@@ -93,7 +82,6 @@ export async function POST(req: Request) {
             console.error(`Failed to upgrade user ${payment.user_id}:`, updateError);
             failed++;
           } else {
-            // Mark as completed
             await supabase
               .from('pending_payments')
               .update({
@@ -104,7 +92,6 @@ export async function POST(req: Request) {
             upgraded++;
           }
         } else if (orderStatus === 'FAILED' || orderStatus === 'EXPIRED' || orderStatus === 'CANCELLED') {
-          // Mark as failed
           await supabase
             .from('pending_payments')
             .update({ status: 'failed' })
@@ -117,22 +104,22 @@ export async function POST(req: Request) {
         console.error(`Error processing payment ${payment.order_id}:`, err);
       }
 
-      // Rate limit: don't hammer Revolut API
       await new Promise(resolve => setTimeout(resolve, 100));
     }
 
-    return Response.json({
-      success: true,
-      processed,
-      upgraded,
-      failed,
-      message: `Processed ${processed} pending payments: ${upgraded} upgraded, ${failed} failed`,
-    });
+    return { success: true, processed, upgraded, failed };
   } catch (err) {
     console.error('Background payment processing error:', err);
-    return Response.json(
-      { error: 'Internal error' },
-      { status: 500 }
-    );
+    return { success: false, error: 'Internal error' };
   }
+}
+
+export async function GET() {
+  const result = await processPayments();
+  return Response.json(result);
+}
+
+export async function POST() {
+  const result = await processPayments();
+  return Response.json(result);
 }
