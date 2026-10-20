@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import React, { useEffect, useState } from 'react';
 import { createClient } from '@/lib/supabase/browser';
+import { AnimatedLogo } from '@/components/ui/AnimatedLogo';
 
 interface UserInfo {
   email: string;
@@ -100,17 +101,7 @@ export function GlobalNav() {
         borderBottom: '1px solid var(--border)',
         flexShrink: 0
       }}>
-        <Link href="/" aria-label="mlln home" style={{
-          display: 'inline-block',
-          fontSize: '20px',
-          fontWeight: '800',
-          letterSpacing: '-0.02em',
-          color: 'var(--text)',
-          fontFamily: 'DM Sans, sans-serif',
-          textDecoration: 'none'
-        }}>
-          ml<span style={{ color: 'var(--teal)' }}>ln</span>
-        </Link>
+        <AnimatedLogo />
       </div>
 
       {/* Navigation */}
