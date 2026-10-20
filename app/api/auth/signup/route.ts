@@ -47,15 +47,21 @@ export async function POST(req: Request) {
       );
     }
 
-    // Update profile with display_name
+    // Upsert profile with display_name (handles both create and update)
     const { error: profileError } = await supabase
       .from('profiles')
-      .update({ display_name })
-      .eq('user_id', data.user.id);
+      .upsert(
+        {
+          user_id: data.user.id,
+          display_name,
+          tier: 0
+        },
+        { onConflict: 'user_id' }
+      );
 
     if (profileError) {
-      console.error('Profile update error:', profileError);
-      // Don't fail the signup if profile update fails, user can update it later
+      console.error('Profile upsert error:', profileError);
+      // Log but don't fail - user can update display_name on account page
     }
 
     return Response.json({

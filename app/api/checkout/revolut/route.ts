@@ -1,8 +1,5 @@
 import { createClient } from '@/lib/supabase/server';
 
-const REVOLUT_API_URL = 'https://api.revolut.com/1.0';
-const REVOLUT_API_KEY = process.env.REVOLUT_API_KEY || '';
-
 const TIER_URLS: Record<number, string> = {
   1: 'https://checkout.revolut.com/subscription/f92bd163-11be-478a-b099-0f3e9f79f1f6',
   2: 'https://checkout.revolut.com/subscription/f26a5883-3dab-4dce-917f-293d55667f32',
@@ -33,34 +30,14 @@ export async function POST(req: Request) {
     const tierMeta = TIER_METADATA[tier];
     const checkoutUrl = TIER_URLS[tier];
 
-    // Create order with Revolut API
-    const orderResponse = await fetch(`${REVOLUT_API_URL}/orders`, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${REVOLUT_API_KEY}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        amount: 100, // Placeholder, actual price is on Revolut's checkout
-        currency: 'GBP',
-        metadata: {
-          tier_id: tierMeta.id,
-          user_id: user.id,
-        },
-      }),
-    });
-
-    if (!orderResponse.ok) {
-      const error = await orderResponse.text();
-      console.error('Revolut API error:', error);
-      return Response.json({ error: 'Failed to create order' }, { status: 500 });
-    }
-
-    // Return the pre-configured checkout URL with user context
-    // User ID will be in the webhook metadata
+    // Return the pre-configured Revolut checkout URL
+    // Revolut handles order creation and payment processing
+    // Webhook will notify us of successful payment
     return Response.json({
       checkoutUrl,
-      message: `Redirecting to ${tierMeta.name} checkout`
+      message: `Redirecting to ${tierMeta.name} checkout`,
+      tier_id: tierMeta.id,
+      user_id: user.id,
     });
   } catch (err) {
     console.error('Checkout error:', err);
