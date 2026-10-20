@@ -3,9 +3,67 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import React, { useEffect, useState } from 'react';
+import { createClient } from '@/lib/supabase/browser';
+
+interface UserInfo {
+  email: string;
+  display_name: string | null;
+  tier: number;
+}
+
+const TIER_NAMES: Record<number, string> = {
+  0: 'Free',
+  1: 'Essential',
+  2: 'Full Access',
+  3: 'Pro',
+};
+
+const TIER_COLORS: Record<number, string> = {
+  0: '#666',
+  1: '#FFA500',
+  2: 'var(--teal)',
+  3: '#FFD700',
+};
 
 export function GlobalNav() {
   const pathname = usePathname() || '';
+  const [user, setUser] = useState<UserInfo | null>(null);
+  const [loading, setLoading] = useState(true);
+  const supabase = createClient();
+
+  useEffect(() => {
+    loadUserInfo();
+  }, []);
+
+  const loadUserInfo = async () => {
+    try {
+      const { data: { user: authUser } } = await supabase.auth.getUser();
+
+      if (!authUser) {
+        setUser(null);
+        setLoading(false);
+        return;
+      }
+
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('display_name, tier')
+        .eq('user_id', authUser.id)
+        .single();
+
+      if (profile) {
+        setUser({
+          email: authUser.email || '',
+          display_name: profile.display_name,
+          tier: profile.tier
+        });
+      }
+    } catch (err) {
+      console.error('Failed to load user info:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const isActive = (href: string) => pathname.startsWith(href);
 
@@ -132,12 +190,31 @@ export function GlobalNav() {
           active={isActive('/watchlist')}
           icon={<WatchlistIcon />}
         />
+
+        {user && user.tier >= 1 && (
+          <NavItem
+            href="/my-watchlist"
+            label="My Watchlist"
+            active={isActive('/my-watchlist')}
+            icon={<WatchlistIcon />}
+          />
+        )}
+
         <NavItem
           href="/portfolio"
-          label="My Portfolio"
+          label="Portfolio"
           active={isActive('/portfolio')}
           icon={<PortfolioIcon />}
         />
+
+        {user && (
+          <NavItem
+            href="/my-portfolio"
+            label="My Portfolios"
+            active={isActive('/my-portfolio')}
+            icon={<PortfolioIcon />}
+          />
+        )}
 
         <div style={{
           fontSize: '11px',
@@ -187,79 +264,133 @@ export function GlobalNav() {
         flexDirection: 'column',
         gap: '8px'
       }}>
-        <a
-          href="/#pricing"
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            padding: '10px 12px',
-            borderRadius: '8px',
-            fontSize: '13px',
-            fontWeight: '600',
-            background: 'var(--teal)',
-            color: 'var(--bg)',
-            textDecoration: 'none',
-            cursor: 'pointer',
-            transition: 'all 0.2s',
-            border: 'none'
-          }}
-          onMouseEnter={(e) => {
-            (e.currentTarget as HTMLAnchorElement).style.background = 'var(--teal-mid)';
-            (e.currentTarget as HTMLAnchorElement).style.boxShadow = '0 2px 8px rgba(0, 200, 180, 0.2)';
-          }}
-          onMouseLeave={(e) => {
-            (e.currentTarget as HTMLAnchorElement).style.background = 'var(--teal)';
-            (e.currentTarget as HTMLAnchorElement).style.boxShadow = 'none';
-          }}
-        >
-          Pricing
-        </a>
-
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: '10px',
-          padding: '8px 8px'
-        }}>
-          <div style={{
-            width: '32px',
-            height: '32px',
-            borderRadius: '50%',
-            background: 'var(--teal-dim)',
-            border: '1px solid var(--teal-mid)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            fontSize: '12px',
-            fontWeight: '700',
-            color: 'var(--teal)',
-            flexShrink: 0
-          }}>
-            JD
+        {!loading && !user ? (
+          <>
+            <Link
+              href="/login"
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                padding: '10px 12px',
+                borderRadius: '8px',
+                fontSize: '13px',
+                fontWeight: '600',
+                background: 'transparent',
+                color: 'var(--text)',
+                textDecoration: 'none',
+                cursor: 'pointer',
+                transition: 'all 0.2s',
+                border: '1px solid var(--border)'
+              }}
+              onMouseEnter={(e) => {
+                (e.currentTarget as HTMLAnchorElement).style.background = 'var(--surface2)';
+              }}
+              onMouseLeave={(e) => {
+                (e.currentTarget as HTMLAnchorElement).style.background = 'transparent';
+              }}
+            >
+              Login
+            </Link>
+            <a
+              href="/#pricing"
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                padding: '10px 12px',
+                borderRadius: '8px',
+                fontSize: '13px',
+                fontWeight: '600',
+                background: 'var(--teal)',
+                color: 'var(--bg)',
+                textDecoration: 'none',
+                cursor: 'pointer',
+                transition: 'all 0.2s',
+                border: 'none'
+              }}
+              onMouseEnter={(e) => {
+                (e.currentTarget as HTMLAnchorElement).style.background = 'var(--teal-mid)';
+                (e.currentTarget as HTMLAnchorElement).style.boxShadow = '0 2px 8px rgba(0, 200, 180, 0.2)';
+              }}
+              onMouseLeave={(e) => {
+                (e.currentTarget as HTMLAnchorElement).style.background = 'var(--teal)';
+                (e.currentTarget as HTMLAnchorElement).style.boxShadow = 'none';
+              }}
+            >
+              Pricing
+            </a>
+          </>
+        ) : user ? (
+          <>
+            <Link
+              href="/account"
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '10px',
+                padding: '8px 12px',
+                borderRadius: '8px',
+                textDecoration: 'none',
+                cursor: 'pointer',
+                transition: 'all 0.2s',
+                border: '1px solid var(--border)',
+                background: 'transparent'
+              }}
+              onMouseEnter={(e) => {
+                (e.currentTarget as HTMLAnchorElement).style.background = 'var(--surface2)';
+              }}
+              onMouseLeave={(e) => {
+                (e.currentTarget as HTMLAnchorElement).style.background = 'transparent';
+              }}
+            >
+              <div style={{
+                width: '32px',
+                height: '32px',
+                borderRadius: '50%',
+                background: TIER_COLORS[user.tier] + '20',
+                border: `1px solid ${TIER_COLORS[user.tier]}`,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: '12px',
+                fontWeight: '700',
+                color: TIER_COLORS[user.tier],
+                flexShrink: 0
+              }}>
+                {(user.display_name || user.email).charAt(0).toUpperCase()}
+              </div>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{
+                  fontSize: '13px',
+                  fontWeight: '600',
+                  color: 'var(--text)',
+                  marginBottom: '2px',
+                  whiteSpace: 'nowrap',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis'
+                }}>
+                  {user.display_name || user.email}
+                </div>
+                <span style={{
+                  display: 'inline-block',
+                  padding: '2px 8px',
+                  borderRadius: '12px',
+                  fontSize: '11px',
+                  fontWeight: '600',
+                  background: TIER_COLORS[user.tier] + '20',
+                  color: TIER_COLORS[user.tier]
+                }}>
+                  {TIER_NAMES[user.tier]}
+                </span>
+              </div>
+            </Link>
+          </>
+        ) : (
+          <div style={{ color: 'var(--text-2)', fontSize: '12px', textAlign: 'center' }}>
+            Loading...
           </div>
-          <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{
-              fontSize: '13px',
-              fontWeight: '600',
-              color: 'var(--text)',
-              marginBottom: '2px'
-            }}>
-              James D.
-            </div>
-            <span style={{
-              display: 'inline-block',
-              padding: '2px 8px',
-              borderRadius: '12px',
-              fontSize: '11px',
-              fontWeight: '600',
-              background: 'var(--teal-dim)',
-              color: 'var(--teal)'
-            }}>
-              Guest
-            </span>
-          </div>
-        </div>
+        )}
       </div>
     </div>
     </>
