@@ -147,23 +147,6 @@ export default function SignupModal({ isOpen, onClose }: SignupModalProps) {
         ) : (
           <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
             <input
-              type="text"
-              placeholder="Display name (optional - will use payment details)"
-              value={displayName}
-              onChange={(e) => setDisplayName(e.target.value)}
-              disabled={loading}
-              style={{
-                padding: '12px',
-                borderRadius: '8px',
-                border: '1px solid var(--border)',
-                background: 'var(--bg)',
-                color: 'var(--text)',
-                fontSize: '14px',
-                fontFamily: 'inherit',
-                opacity: loading ? 0.6 : 1
-              }}
-            />
-            <input
               type="email"
               placeholder="your@email.com"
               value={email}
