@@ -5,9 +5,9 @@ const REVOLUT_API_KEY = process.env.REVOLUT_API_KEY || '';
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://mlln.ai';
 
 const TIER_PRICES: Record<number, { amount: number; currency: string; name: string }> = {
-  1: { amount: 1200, currency: 'GBP', name: 'Essential' },     // £12/month = 1200 pence
-  2: { amount: 2900, currency: 'GBP', name: 'Premium' },       // £29/month = 2900 pence
-  3: { amount: 4900, currency: 'GBP', name: 'Pro' },           // £49/month = 4900 pence
+  1: { amount: 14400, currency: 'GBP', name: 'Essential' },    // £144/year = 14400 pence
+  2: { amount: 34800, currency: 'GBP', name: 'Premium' },      // £348/year = 34800 pence
+  3: { amount: 58800, currency: 'GBP', name: 'Pro' },          // £588/year = 58800 pence
 };
 
 const TIER_METADATA: Record<number, { id: string; name: string }> = {
@@ -52,6 +52,9 @@ export async function POST(req: Request) {
         currency: tierData.currency,
         description: `mlln.ai ${tierData.name} Plan - Annual Subscription`,
         redirect_url: `${SITE_URL}/payment-success`,
+        subscription_data: {
+          type: 'RECURRING',
+        },
         metadata: {
           user_id: user.id,
           tier_id: tierMeta.id,
