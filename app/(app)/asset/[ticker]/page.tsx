@@ -13,8 +13,10 @@ import { FAQSection } from '@/components/ticker/FAQSection';
 import { RelatedAssets } from '@/components/ticker/RelatedAssets';
 import { SectorLink } from '@/components/ticker/SectorLink';
 import { SignalDataSection } from '@/components/ticker/SignalDataSection';
+import { EnhancedDCACTA } from '@/components/ticker/EnhancedDCACTA';
 import { sectorToSlug } from '@/lib/sectors';
 import { getTickerPageData } from '@/lib/ticker/data';
+import { getEntitlement } from '@/lib/entitlements';
 
 // Built once per day. The nightly job asks the site to refresh when it finishes (/api/revalidate).
 export const revalidate = 86400;
@@ -106,6 +108,9 @@ export default async function TickerPage({ params }: PageProps) {
 
   // The long form sections quote five year results for both frequencies, so they need both to exist
   const has5y = !!summary && summary.available.weekly['5y'] && summary.available.monthly['5y'];
+
+  // Get user tier for the CTA
+  const entitlement = await getEntitlement();
 
   return (
     <div className="min-h-screen bg-[var(--bg)]">
@@ -210,6 +215,17 @@ export default async function TickerPage({ params }: PageProps) {
             monthlySignals={monthlySignals}
           />
         </div>
+
+        {/* Enhanced DCA CTA - Show if high quality + eDCA wins, OR if low quality asset */}
+        {summary && has5y && (
+          <EnhancedDCACTA
+            ticker={ticker}
+            name={summary.name}
+            monthlyAlpha5y={summary.monthlyAlpha5y}
+            dca_suitability_score={summary.dca_suitability_score}
+            tier={entitlement.tier}
+          />
+        )}
 
         {/* FAQ Section */}
         {summary && has5y && <FAQSection ticker={ticker} name={summary.name} data={summary} sector={asset.sector} spyReturn5y={spyReturn5y} />}
