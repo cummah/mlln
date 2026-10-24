@@ -160,6 +160,7 @@ export default async function TickerPage({ params }: PageProps) {
 
         {/* Signal Data Section */}
         <SignalDataSection
+          ticker={ticker}
           weeklyMajor={major.weekly}
           monthlyMajor={major.monthly}
           currentWeekly={current.weekly}

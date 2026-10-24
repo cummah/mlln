@@ -6,6 +6,7 @@ import { CurrentSignalTile } from './CurrentSignalTile';
 import { formatCurrency } from '@/lib/formatters';
 
 interface SignalDataSectionProps {
+  ticker: string;
   weeklyMajor: MajorBuy | null;
   monthlyMajor: MajorBuy | null;
   currentWeekly: CurrentReading | null;
@@ -28,7 +29,7 @@ function formatDateForDisplay(dateStr: string): string {
   return date.toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' });
 }
 
-export function SignalDataSection({ weeklyMajor, monthlyMajor, currentWeekly, currentMonthly, universeCount }: SignalDataSectionProps) {
+export function SignalDataSection({ ticker, weeklyMajor, monthlyMajor, currentWeekly, currentMonthly, universeCount }: SignalDataSectionProps) {
   // Return to date is measured from the real fill price (next open) to the latest close. It stays empty
   // until that fill price exists, which is the day after the signal.
   const weeklyPerf = weeklyMajor && weeklyMajor.performance !== null ? { ...weeklyMajor, performance: weeklyMajor.performance as number, currentValue: weeklyMajor.currentValue as number } : null;
@@ -183,7 +184,7 @@ export function SignalDataSection({ weeklyMajor, monthlyMajor, currentWeekly, cu
         </div>
 
         {/* Latest Major Buy Signal Tile */}
-        <CurrentSignalTile weekly={currentWeekly} monthly={currentMonthly} />
+        <CurrentSignalTile ticker={ticker} weekly={currentWeekly} monthly={currentMonthly} />
       </div>
 
       <div className="rs-stack" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px' }}>
