@@ -212,6 +212,41 @@ export function GlobalNav() {
           />
         )}
 
+        {user && user.tier === 4 && (
+          <>
+            <div style={{
+              fontSize: '11px',
+              fontWeight: '700',
+              letterSpacing: '0.08em',
+              textTransform: 'uppercase',
+              color: 'var(--text-3)',
+              padding: '12px 12px',
+              marginTop: '8px',
+              marginBottom: '4px'
+            }}>
+              Admin
+            </div>
+            <NavItem
+              href="/admin/permissions"
+              label="Tier Permissions"
+              active={isActive('/admin/permissions')}
+              icon={<SettingsIcon />}
+            />
+            <NavItem
+              href="/admin/tier-limits"
+              label="Tier Limits"
+              active={isActive('/admin/tier-limits')}
+              icon={<SettingsIcon />}
+            />
+            <NavItem
+              href="/admin/etf-config-comparison"
+              label="ETF Config"
+              active={isActive('/admin/etf-config-comparison')}
+              icon={<SettingsIcon />}
+            />
+          </>
+        )}
+
         <div style={{
           fontSize: '11px',
           fontWeight: '700',
@@ -575,6 +610,15 @@ function PrivacyIcon() {
   return (
     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
       <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+    </svg>
+  );
+}
+
+function SettingsIcon() {
+  return (
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <circle cx="12" cy="12" r="3" />
+      <path d="M12 1v6m0 6v6M4.22 4.22l4.24 4.24m0 4.24l4.24 4.24M19.78 4.22l-4.24 4.24m0 4.24l-4.24 4.24" />
     </svg>
   );
 }
