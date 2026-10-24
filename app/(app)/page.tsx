@@ -160,8 +160,8 @@ export default async function HomePage() {
               </Reveal>
               <Reveal delay={0.24}>
                 <div style={{ display: 'flex', gap: '12px', marginTop: '32px', flexWrap: 'wrap' }}>
-                  <Link href="/portfolio" className="lp-btn lp-btn-primary">Compare my portfolio</Link>
-                  <Link href="/asset/monthly" className="lp-btn lp-btn-ghost">Browse live signals</Link>
+                  <Link href="/portfolio" className="lp-btn lp-btn-primary">Compare your portfolio</Link>
+                  <Link href="/rank" className="lp-btn lp-btn-ghost">Browse top assets</Link>
                 </div>
               </Reveal>
               <Reveal delay={0.32}>
@@ -169,12 +169,12 @@ export default async function HomePage() {
                   {[
                     { v: universe.stocks, label: 'stocks' },
                     { v: universe.etfs, label: 'ETFs' },
-                    { v: sectors.length, label: 'sectors' },
-                    { v: 2, label: 'signal speeds: weekly, monthly' },
+                    { v: universe.avgAlpha['5y'] ?? 0, label: 'average alpha (5y)', isAlpha: true },
+                    { v: universe.beatShare['5y'] !== null ? Math.round(universe.beatShare['5y'] * 100) : 0, label: 'assets beat standard dca', isPercent: true },
                   ].map(s => (
                     <div key={s.label}>
                       <div style={{ fontSize: '28px', fontWeight: 700, letterSpacing: '-0.02em' }}>
-                        <CountUp value={s.v} />
+                        {s.isAlpha ? '+' : ''}<CountUp value={Math.abs(s.v)} />{s.isPercent ? '%' : s.isAlpha ? 'pt' : ''}
                       </div>
                       <div style={{ fontSize: '12px', color: colors.text3, maxWidth: '110px', lineHeight: 1.4 }}>{s.label}</div>
                     </div>
@@ -250,8 +250,8 @@ export default async function HomePage() {
           </div>
           <Reveal delay={0.2}>
             <div style={{ marginTop: '28px', display: 'flex', alignItems: 'center', gap: '24px', flexWrap: 'wrap' }}>
-              <Link href="/portfolio" className="lp-btn lp-btn-primary">Compare 2,000 assets : Standard vs Enhanced DCA</Link>
-              <Link href="/assets" style={{ color: colors.teal, textDecoration: 'none', fontWeight: 500, fontSize: '14px' }}>
+              <Link href="/rank" className="lp-btn lp-btn-primary">Compare 2,000 assets : Standard vs Enhanced DCA</Link>
+              <Link href="/methodology" style={{ color: colors.teal, textDecoration: 'none', fontWeight: 500, fontSize: '14px' }}>
                 Read the methodology and the research behind it →
               </Link>
             </div>
@@ -348,9 +348,9 @@ export default async function HomePage() {
         <div className="lp-orb lp-orb-a" style={{ top: '-200px' }} />
         <div className="lp-wrap" style={{ position: 'relative', paddingTop: '84px', paddingBottom: '84px', textAlign: 'center' }}>
           <Reveal>
-            <h2 style={{ fontSize: '38px', fontWeight: 700, letterSpacing: '-0.03em', margin: 0, lineHeight: 1.15 }}>Same schedule. Better-sized buys.</h2>
+            <h2 style={{ fontSize: '38px', fontWeight: 700, letterSpacing: '-0.03em', margin: 0, lineHeight: 1.15 }}>Profit from fear. Sidestep greed.</h2>
             <p style={{ fontSize: '16px', color: colors.text2, margin: '14px 0 28px' }}>Get 50% off while launch pricing lasts.</p>
-            <a href="#pricing" className="lp-btn lp-btn-primary">Choose your plan</a>
+            <a href="#pricing" className="lp-btn lp-btn-primary">Start Enhancing your DCA</a>
           </Reveal>
         </div>
       </section>
