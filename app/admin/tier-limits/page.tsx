@@ -1,18 +1,13 @@
 import { redirect } from 'next/navigation';
-import { createClient } from '@/lib/supabase/server';
+import { isAdmin } from '@/lib/entitlements';
 import AdminTierLimitsPage from '@/components/admin/AdminTierLimitsPage';
 
 export const dynamic = 'force-dynamic';
 
 export default async function AdminTierLimits() {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const admin = await isAdmin();
 
-  if (!user) {
-    redirect('/login');
-  }
-
-  if (user.email !== 'tc@phycomex.com') {
+  if (!admin) {
     redirect('/');
   }
 

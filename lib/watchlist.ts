@@ -1,23 +1,18 @@
-// Demo watchlist data. One curated list shown to every visitor: for each asset, its signal in the latest weekly and monthly
-// period, and its monthly signals since the list's start date. Everything comes from the nightly tables (assets,
-// latest_prices, signal_feed) and is cached for a day, refreshed when the nightly job calls /api/revalidate. A missing
-// value stays missing, it is never shown as a zero.
+// Watchlist data: for each asset in a watchlist, its signal in the latest weekly and monthly period, and its monthly
+// signals since the list's start date. Everything comes from the nightly tables (assets, latest_prices, signal_feed)
+// and is cached for a day, refreshed when the nightly job calls /api/revalidate. A missing value stays missing, it is
+// never shown as a zero.
 
 import { unstable_cache } from 'next/cache'
 import { fetchAllPages, getSupabaseClient } from '@/lib/supabase'
 import { isoWeekKey } from '@/lib/engine/evaluate'
 import { FREQ_SETTINGS } from '@/lib/signals/config'
 import { buildYtd, type Bar, type FeedEntry, type YtdData } from '@/lib/watchlist-ytd'
+import { getWatchlistConfig, WATCHLIST_CONFIGS } from '@/lib/watchlist-config'
+import type { WatchlistConfig } from '@/lib/watchlist-config'
 
-// The ten largest listed companies at the start of 2026, chosen by the product owner (Alphabet is GOOGL, Berkshire is
-// BRK.A). The list is fixed as of that date, so it is not picked with hindsight. The start date is assumed: the list is
-// shown as if it had been watched and invested in from 1 January 2026.
-export const DEMO_WATCHLIST = {
-  name: 'Top 10 Watchlist',
-  description: 'The ten largest companies at the start of 2026, watched since then. See what the model buys this period, how much of each, and how a monthly plan has done since January against standard DCA and SPY.',
-  tickers: ['NVDA', 'AAPL', 'GOOGL', 'MSFT', 'AMZN', 'TSM', 'AVGO', 'META', 'TSLA', 'BRK.A'],
-  startDate: '2026-01-01',
-}
+// Backward compatibility: the top-10 watchlist as used historically
+export const DEMO_WATCHLIST = WATCHLIST_CONFIGS[0]
 
 export type WatchFreq = 'weekly' | 'monthly'
 
@@ -132,9 +127,9 @@ function monthRange(startDate: string, latest: string | null): string[] {
   return out
 }
 
-async function getDemoWatchlistUncached(): Promise<DemoWatchlist> {
+async function getWatchlistUncached(config: WatchlistConfig): Promise<DemoWatchlist> {
   const db = getSupabaseClient()
-  const { tickers, startDate } = DEMO_WATCHLIST
+  const { tickers, startDate, name, description } = config
   const [weeklyLatest, monthlyLatest] = await Promise.all([latestSignalDate('weekly'), latestSignalDate('monthly')])
   const [assets, prices, weekly, monthly, feed, bars] = await Promise.all([
     db.from('assets').select('ticker, name, sector').eq('is_active', true).in('ticker', tickers),
@@ -169,8 +164,8 @@ async function getDemoWatchlistUncached(): Promise<DemoWatchlist> {
   const listed = rows.map(r => r.ticker)
 
   return {
-    name: DEMO_WATCHLIST.name,
-    description: DEMO_WATCHLIST.description,
+    name,
+    description,
     startDate,
     rows,
     months,
@@ -180,8 +175,25 @@ async function getDemoWatchlistUncached(): Promise<DemoWatchlist> {
   }
 }
 
-// Bump when the shape of the cached result changes, so results saved in the old shape are never served
-export const getDemoWatchlist = unstable_cache(getDemoWatchlistUncached, ['v5', 'demo-watchlist'], {
-  revalidate: 24 * 60 * 60,
-  tags: ['watchlist'],
-})
+// Cache functions for each watchlist, created at module load time
+const cachedFuncs = new Map<string, () => Promise<DemoWatchlist>>()
+
+function getCachedWatchlist(config: WatchlistConfig) {
+  if (!cachedFuncs.has(config.id)) {
+    const cached = unstable_cache(() => getWatchlistUncached(config), ['v5', `watchlist-${config.id}`], {
+      revalidate: 24 * 60 * 60,
+      tags: ['watchlist', config.id],
+    })
+    cachedFuncs.set(config.id, cached)
+  }
+  return cachedFuncs.get(config.id)!()
+}
+
+export function getWatchlist(id: string) {
+  const config = getWatchlistConfig(id)
+  if (!config) throw new Error(`Unknown watchlist: ${id}`)
+  return getCachedWatchlist(config)
+}
+
+// Backward compatibility: get the top-10 watchlist
+export const getDemoWatchlist = () => getWatchlist('top-10')

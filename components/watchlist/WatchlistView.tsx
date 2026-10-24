@@ -90,7 +90,7 @@ function Tile({ label, value, sub }: { label: string; value: string; sub?: strin
   )
 }
 
-export function WatchlistView({ data }: { data: DemoWatchlist }) {
+export function WatchlistView({ data, maxMonths }: { data: DemoWatchlist; maxMonths?: number }) {
   const [freq, setFreq] = useState<WatchFreq>('monthly')
   const [amounts, setAmounts] = useState<Record<WatchFreq, string>>({
     weekly: String(data.baseAmount.weekly),
@@ -160,15 +160,16 @@ export function WatchlistView({ data }: { data: DemoWatchlist }) {
 
   // Monthly distribution since the start date, always at the monthly base amount
   const monthlyBase = amountFor('monthly')
+  const displayMonths = maxMonths ? data.months.slice(-maxMonths) : data.months
   const grid = useMemo(() => {
     const cell = (mult: number | undefined) => (mult === undefined ? 0 : round2(monthlyBase * mult))
     const rows = data.rows.map(row => {
-      const byMonth = data.months.map(m => cell(row.history[m]))
+      const byMonth = displayMonths.map(m => cell(row.history[m]))
       return { row, byMonth, total: round2(byMonth.reduce((a, b) => a + b, 0)), bought: byMonth.filter(v => v > 0).length }
     })
-    const monthTotals = data.months.map((_, i) => round2(rows.reduce((t, r) => t + r.byMonth[i], 0)))
+    const monthTotals = displayMonths.map((_, i) => round2(rows.reduce((t, r) => t + r.byMonth[i], 0)))
     return { rows, monthTotals, grand: round2(monthTotals.reduce((a, b) => a + b, 0)) }
-  }, [data.rows, data.months, monthlyBase])
+  }, [data.rows, displayMonths, monthlyBase])
 
   const th = { textAlign: 'right', padding: '10px 8px', fontWeight: 600, color: 'var(--text-2)', whiteSpace: 'nowrap' } as const
 
@@ -311,9 +312,9 @@ export function WatchlistView({ data }: { data: DemoWatchlist }) {
         </div>
       )}
 
-      {data.months.length > 0 && (
+      {displayMonths.length > 0 && (
         <div style={card}>
-          <h2 style={{ fontSize: '20px', fontWeight: 500, color: 'var(--text)', margin: '0 0 6px 0' }}>Monthly allocation since {dateCompact(data.startDate)}</h2>
+          <h2 style={{ fontSize: '20px', fontWeight: 500, color: 'var(--text)', margin: '0 0 6px 0' }}>Monthly allocation {maxMonths ? `(last ${maxMonths} months)` : `since ${dateCompact(data.startDate)}`}</h2>
           <p style={{ fontSize: '13px', color: 'var(--text-2)', margin: '0 0 14px 0', lineHeight: 1.6, maxWidth: '820px' }}>
             What a monthly plan on this list would have bought each month: the {usdWhole.format(monthlyBase)} base amount times that month&apos;s signal multiplier, and nothing in a month with no signal. Uses the monthly base amount above, whichever signals are selected.
           </p>
@@ -322,26 +323,26 @@ export function WatchlistView({ data }: { data: DemoWatchlist }) {
               <thead>
                 <tr style={{ borderBottom: '1px solid var(--border)' }}>
                   <th style={{ ...th, textAlign: 'left' }}>Asset</th>
-                  {data.months.map(m => <th key={m} style={th}>{monthLabel(m)}</th>)}
+                  {displayMonths.map(m => <th key={m} style={th}>{monthLabel(m)}</th>)}
                   <th style={{ ...th, color: 'var(--text)' }}>Total</th>
                   <th style={th} title="Months with a buy, out of the months shown">Buys</th>
                 </tr>
               </thead>
               <tbody>
                 {grid.rows.map(r => {
-                  const isLatestLocked = data.months.length > 0 && !canAccessTicker(r.row.ticker, entitlement)
+                  const isLatestLocked = displayMonths.length > 0 && !canAccessTicker(r.row.ticker, entitlement)
                   return (
                   <tr key={r.row.ticker} style={{ borderBottom: '1px solid var(--border)' }}>
                     <td style={{ padding: '10px 8px' }}>
                       <Link href={`/asset/${r.row.ticker.toLowerCase()}`} style={{ fontWeight: 500, color: 'var(--teal)' }}>{r.row.ticker}</Link>
                     </td>
                     {r.byMonth.map((v, i) => {
-                      const mult = r.row.history[data.months[i]]
-                      const isLatestMonth = i === data.months.length - 1
+                      const mult = r.row.history[displayMonths[i]]
+                      const isLatestMonth = i === displayMonths.length - 1
                       const isLocked = isLatestMonth && isLatestLocked
                       return (
                         <td
-                          key={data.months[i]}
+                          key={displayMonths[i]}
                           title={mult === undefined ? 'No signal this month' : `${mult.toFixed(2)}×`}
                           style={{ textAlign: 'right', padding: '10px 8px', color: v > 0 ? 'var(--text)' : 'var(--text-3)', background: v > 0 ? 'var(--teal-dim)' : 'transparent', cursor: isLocked ? 'pointer' : 'default' }}
                           onClick={() => isLocked && setShowUpgrade(true)}
@@ -351,17 +352,17 @@ export function WatchlistView({ data }: { data: DemoWatchlist }) {
                       )
                     })}
                     <td style={{ textAlign: 'right', padding: '10px 8px', fontWeight: 600, color: 'var(--text)' }}>{r.total > 0 ? usdWhole.format(r.total) : '-'}</td>
-                    <td style={{ textAlign: 'right', padding: '10px 8px', color: 'var(--text-2)' }}>{r.bought} of {data.months.length}</td>
+                    <td style={{ textAlign: 'right', padding: '10px 8px', color: 'var(--text-2)' }}>{r.bought} of {displayMonths.length}</td>
                   </tr>
                   )
                 })}
                 <tr>
                   <td style={{ padding: '10px 8px', fontWeight: 600, color: 'var(--text)' }}>Total</td>
                   {grid.monthTotals.map((v, i) => {
-                    const isLatestMonth = i === data.months.length - 1
-                    const isLocked = isLatestMonth && data.months.length > 0 && !canAccessTicker('', entitlement)
+                    const isLatestMonth = i === displayMonths.length - 1
+                    const isLocked = isLatestMonth && displayMonths.length > 0 && !canAccessTicker('', entitlement)
                     return (
-                      <td key={data.months[i]} style={{ textAlign: 'right', padding: '10px 8px', fontWeight: 600, color: 'var(--text)', cursor: isLocked ? 'pointer' : 'default' }} onClick={() => isLocked && setShowUpgrade(true)}>
+                      <td key={displayMonths[i]} style={{ textAlign: 'right', padding: '10px 8px', fontWeight: 600, color: 'var(--text)', cursor: isLocked ? 'pointer' : 'default' }} onClick={() => isLocked && setShowUpgrade(true)}>
                         {isLocked ? <MaskedCell onUnlock={() => setShowUpgrade(true)} /> : (v > 0 ? usdWhole.format(v) : '-')}
                       </td>
                     )

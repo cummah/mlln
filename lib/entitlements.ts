@@ -2,6 +2,36 @@ import { createClient as createServerClient } from '@/lib/supabase/server';
 import type { Entitlement, GatingSection, UserTier } from '@/types';
 
 /**
+ * Check if current user is an admin (tier 4).
+ * Returns false if not authenticated.
+ */
+export async function isAdmin(): Promise<boolean> {
+  try {
+    const supabase = await createServerClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user) {
+      return false;
+    }
+
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('tier')
+      .eq('user_id', user.id)
+      .single();
+
+    if (error || !data) {
+      return false;
+    }
+
+    return data.tier === 4;
+  } catch (err) {
+    console.error('[isAdmin] Error:', err);
+    return false;
+  }
+}
+
+/**
  * Get the current user's entitlement (tier + allowed assets).
  * Returns tier 0 (no access) if not authenticated.
  */

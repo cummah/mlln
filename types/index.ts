@@ -4,8 +4,8 @@ export type SignalStrength = 'strong_dip' | 'moderate_dip' | 'mild_dip' | 'mild_
 export type UserPlan = 'free' | 'pro' | 'quant' | null;
 
 // Auth and subscriptions
-export type UserTier = 0 | 1 | 2 | 3;
-export type GatingSection = 'asset_page' | 'rank' | 'sectors' | 'watchlist' | 'weekly_signals' | 'monthly_signals';
+export type UserTier = 0 | 1 | 2 | 3 | 4;
+export type GatingSection = 'asset_page' | 'rank' | 'sectors' | 'watchlist' | 'weekly_signals' | 'monthly_signals' | 'admin';
 
 export interface UserProfile {
   user_id: string;

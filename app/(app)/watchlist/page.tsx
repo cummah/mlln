@@ -1,17 +1,20 @@
 import type { Metadata } from 'next'
-import { getDemoWatchlist } from '@/lib/watchlist'
-import { WatchlistView } from '@/components/watchlist/WatchlistView'
+import { WATCHLIST_CONFIGS } from '@/lib/watchlist-config'
+import { getWatchlist } from '@/lib/watchlist'
+import { WatchlistHubPage } from '@/components/watchlist/WatchlistHubPage'
 
 export const metadata: Metadata = {
-  title: 'Top 10 Watchlist: What to Buy This Period | mlln.ai',
-  description: 'A watchlist of assets with their latest weekly and monthly buy signals, and exactly how much of each to buy this period.',
+  title: 'Watchlists | mlln.ai',
+  description: 'Curated watchlists: Top 10, AI, Defence, Energy. See what the model buys this period with weekly and monthly buy signals.',
 }
 
-// Built once a day and refreshed by the nightly job (/api/revalidate). If the data cannot be read this throws, so the
-// last good page keeps being served and a database outage is never cached as a page of empty or wrong numbers.
 export const revalidate = 86400
 export const dynamic = 'force-static'
 
 export default async function WatchlistPage() {
-  return <WatchlistView data={await getDemoWatchlist()} />
+  const watchlistsData = await Promise.all(
+    WATCHLIST_CONFIGS.map(config => getWatchlist(config.id))
+  )
+
+  return <WatchlistHubPage watchlists={WATCHLIST_CONFIGS} data={watchlistsData} />
 }
