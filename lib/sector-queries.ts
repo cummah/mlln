@@ -355,3 +355,24 @@ export const getTopPerformers = cached(getTopPerformersUncached, 'top-performers
 export const getOversoldAssets = cached(getOversoldAssetsUncached, 'buy-opportunities')
 export const getRecentBuyZoneEntries = cached(getRecentBuyZoneEntriesUncached, 'recent-signals')
 export const getSectorAssets = cached(getSectorAssetsUncached, 'sector-assets')
+
+// ─── Dashboard: all sectors ─────────────────────────────────────────────────────────────────
+
+export interface SectorDashboardCard {
+  name: string
+  slug: string
+  stats: SectorStats
+}
+
+async function getAllSectorsStatsUncached(sectors: string[]): Promise<SectorDashboardCard[]> {
+  const cards = await Promise.all(
+    sectors.map(async (sector) => {
+      const slug = sector.toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]/g, '')
+      const stats = await getSectorStatsUncached(slug)
+      return { name: sector, slug, stats }
+    })
+  )
+  return cards
+}
+
+export const getAllSectorStats = cached(getAllSectorsStatsUncached, 'all-sectors-stats')

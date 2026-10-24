@@ -4,8 +4,8 @@ import { useEffect, useState } from 'react';
 import { createClient } from '@/lib/supabase/browser';
 import type { GatingSection, TierPermissions, UserTier } from '@/types';
 
-const SECTIONS: GatingSection[] = ['asset_page', 'rank', 'sectors', 'watchlist', 'weekly_signals', 'monthly_signals'];
-const TIERS: UserTier[] = [0, 1, 2, 3];
+const SECTIONS: GatingSection[] = ['asset_page', 'rank', 'sectors', 'watchlist', 'weekly_signals', 'monthly_signals', 'admin'];
+const TIERS: UserTier[] = [0, 1, 2, 3, 4];
 
 const SECTION_NAMES: Record<GatingSection, string> = {
   asset_page: 'Asset Page',
@@ -13,14 +13,16 @@ const SECTION_NAMES: Record<GatingSection, string> = {
   sectors: 'Sectors',
   watchlist: 'Watchlist',
   weekly_signals: 'Weekly Signals',
-  monthly_signals: 'Monthly Signals'
+  monthly_signals: 'Monthly Signals',
+  admin: 'Admin'
 };
 
 const TIER_NAMES: Record<UserTier, string> = {
   0: 'Tier 0 (No Plan)',
   1: 'Tier 1 (Limited)',
   2: 'Tier 2 (Full)',
-  3: 'Tier 3 (Pro)'
+  3: 'Tier 3 (Pro)',
+  4: 'Tier 4 (Admin)'
 };
 
 interface Tier0User {

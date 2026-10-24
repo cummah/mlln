@@ -145,18 +145,20 @@ export default function AccountPage({ user }: { user: AccountUser }) {
     );
   }
 
-  const tierNames: Record<0 | 1 | 2 | 3, string> = {
+  const tierNames: Record<0 | 1 | 2 | 3 | 4, string> = {
     0: 'No Plan',
     1: 'Tier 1 - Limited',
     2: 'Tier 2 - Full Access',
-    3: 'Tier 3 - Pro'
+    3: 'Tier 3 - Pro',
+    4: 'Tier 4 - Admin'
   };
 
-  const tierColors: Record<0 | 1 | 2 | 3, string> = {
+  const tierColors: Record<0 | 1 | 2 | 3 | 4, string> = {
     0: '#666',
     1: '#FFA500',
     2: 'var(--teal)',
-    3: '#FFD700'
+    3: '#FFD700',
+    4: '#ec4899'
   };
 
   return (
