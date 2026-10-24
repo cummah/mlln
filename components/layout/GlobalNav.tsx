@@ -34,6 +34,12 @@ export function GlobalNav() {
 
   useEffect(() => {
     loadUserInfo();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(() => {
+      loadUserInfo();
+    });
+
+    return () => subscription?.unsubscribe();
   }, []);
 
   const loadUserInfo = async () => {
@@ -161,6 +167,12 @@ export function GlobalNav() {
           active={isActive('/portfolio')}
           icon={<PortfolioIcon />}
         />
+        <NavItem
+          href="/watchlist"
+          label="Watchlist"
+          active={isActive('/watchlist')}
+          icon={<WatchlistIcon />}
+        />
 
         <div style={{
           fontSize: '11px',
@@ -174,13 +186,6 @@ export function GlobalNav() {
         }}>
           Tools
         </div>
-
-        <NavItem
-          href="/watchlist"
-          label="Watchlist"
-          active={isActive('/watchlist')}
-          icon={<WatchlistIcon />}
-        />
 
         {user && user.tier >= 1 && (
           <NavItem
