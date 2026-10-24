@@ -35,13 +35,26 @@ function nextEvaluation(asOf: string, freq: 'weekly' | 'monthly'): string {
 }
 
 function Half({ label, reading, freq }: { label: string; reading: CurrentReading | null; freq: 'weekly' | 'monthly' }) {
+  const isStale = reading && (() => {
+    const signalDate = new Date(reading.signalDate + 'T12:00:00Z');
+    const now = new Date();
+    const daysOld = (now.getTime() - signalDate.getTime()) / (1000 * 60 * 60 * 24);
+    const threshold = freq === 'weekly' ? 7 : 30;
+    return daysOld > threshold;
+  })();
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
       <div>
         <div style={{ fontSize: '12px', fontWeight: '600', color: 'var(--text-2)', marginBottom: '4px' }}>{label}</div>
-        {reading && <div style={{ fontSize: '11px', color: 'var(--text-2)', marginBottom: '6px' }}>Signal: {formatDateForDisplay(reading.signalDate)}</div>}
-        <div style={{ fontSize: '22px', fontWeight: '700', fontFamily: 'DM Mono, monospace', color: reading && reading.mult > 0 ? 'var(--green)' : 'var(--text-3)' }}>
-          {reading ? formatMultiplier(reading.mult) : 'n/a'}
+        {reading && (
+          <div style={{ fontSize: '11px', color: 'var(--text-2)', marginBottom: '6px' }}>
+            Latest signal: {formatDateForDisplay(reading.signalDate)}
+          </div>
+        )}
+        <div style={{ fontSize: '22px', fontWeight: '700', fontFamily: 'DM Mono, monospace', color: reading && reading.mult > 0 ? 'var(--green)' : 'var(--text-3)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <span>{reading ? formatMultiplier(reading.mult) : 'n/a'}</span>
+          {isStale && <span style={{ fontSize: '10px', color: 'var(--text-3)', fontWeight: '400' }}>— No buy since then</span>}
         </div>
         {reading && reading.mult === 0 && <div style={{ fontSize: '10.5px', color: 'var(--text-3)' }}>No buy at this reading</div>}
       </div>

@@ -74,7 +74,7 @@ export async function getTickerPageData(rawTicker: string): Promise<TickerPageDa
     const r = ((currentRows.data as any[]) ?? []).find(x => x.freq === freq)
     if (!r) return null
     const mult = Number(r.mult)
-    const signalRow = all.filter(x => x.freq === freq && Number(x.mult) === mult).pop()
+    const signalRow = all.filter(x => x.freq === freq).pop()
     const signalDate = signalRow?.signal_date || r.as_of
     return { asOf: r.as_of, signalDate, mult, isEvaluationBar: !!r.components?.isEvaluationBar }
   }
