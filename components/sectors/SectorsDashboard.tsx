@@ -5,6 +5,45 @@ import Link from 'next/link'
 import type { SectorDashboardCard } from '@/lib/sector-queries'
 import { colors, spacing } from '@/lib/designSystem'
 
+function PerformanceBar({ value }: { value: number | null }) {
+  if (value === null) return <div style={{ height: '4px', background: colors.border, borderRadius: '2px' }} />
+  const clamped = Math.max(-30, Math.min(30, value))
+  const isPositive = clamped >= 0
+  const width = Math.abs(clamped) / 30 * 100
+  return (
+    <div style={{ height: '4px', background: colors.border, borderRadius: '2px', overflow: 'hidden' }}>
+      <div
+        style={{
+          height: '100%',
+          width: `${width}%`,
+          background: isPositive ? colors.green : colors.red,
+          transition: 'width 0.3s'
+        }}
+      />
+    </div>
+  )
+}
+
+function BuyZoneVisual({ count, total }: { count: number; total: number }) {
+  const dots = Array.from({ length: Math.min(total, 8) }, (_, i) => i < count)
+  return (
+    <div style={{ display: 'flex', gap: '3px' }}>
+      {dots.map((filled, i) => (
+        <div
+          key={i}
+          style={{
+            width: '6px',
+            height: '6px',
+            borderRadius: '50%',
+            background: filled ? colors.teal : colors.border,
+            transition: 'background 0.2s'
+          }}
+        />
+      ))}
+    </div>
+  )
+}
+
 interface SectorsDashboardProps {
   sectors: SectorDashboardCard[]
 }
@@ -72,100 +111,106 @@ export function SectorsDashboard({ sectors }: SectorsDashboardProps) {
   const selectedCards = filtered.filter(s => selected.has(s.slug))
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: spacing['5xl'] }}>
-      {/* Dashboard Stats Header */}
+    <div style={{ display: 'flex', flexDirection: 'column', gap: spacing.xl }}>
+      {/* Compact Stats Header */}
       <div style={{
         display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-        gap: spacing.lg,
-        padding: spacing['2xl'],
+        gridTemplateColumns: 'repeat(3, 1fr)',
+        gap: spacing.md,
+        padding: `${spacing.lg} ${spacing['2xl']}`,
         background: colors.surface,
-        borderRadius: '12px',
+        borderRadius: '10px',
         border: `1px solid ${colors.border}`,
       }}>
         <div>
-          <div style={{ fontSize: '12px', color: colors.text3, textTransform: 'uppercase', fontWeight: 600, marginBottom: spacing.sm }}>
-            Sectors with buys
+          <div style={{ fontSize: '10px', color: colors.text3, textTransform: 'uppercase', fontWeight: 700, letterSpacing: '0.05em', marginBottom: '6px' }}>
+            With buys
           </div>
-          <div style={{ fontSize: '28px', fontWeight: 700, color: colors.teal }}>
-            {stats.withBuys}
-          </div>
-          <div style={{ fontSize: '12px', color: colors.text3, marginTop: '4px' }}>
-            of {sectors.length} total
-          </div>
-        </div>
-        <div>
-          <div style={{ fontSize: '12px', color: colors.text3, textTransform: 'uppercase', fontWeight: 600, marginBottom: spacing.sm }}>
-            Total buy signals
-          </div>
-          <div style={{ fontSize: '28px', fontWeight: 700, color: colors.teal }}>
-            {stats.totalSignals}
-          </div>
-          <div style={{ fontSize: '12px', color: colors.text3, marginTop: '4px' }}>
-            assets at 4x+ today
+          <div style={{ display: 'flex', alignItems: 'baseline', gap: '4px', marginBottom: '4px' }}>
+            <div style={{ fontSize: '22px', fontWeight: 700, color: colors.teal }}>
+              {stats.withBuys}
+            </div>
+            <div style={{ fontSize: '11px', color: colors.text3 }}>
+              /{sectors.length}
+            </div>
           </div>
         </div>
         <div>
-          <div style={{ fontSize: '12px', color: colors.text3, textTransform: 'uppercase', fontWeight: 600, marginBottom: spacing.sm }}>
-            Avg sector return (1M)
+          <div style={{ fontSize: '10px', color: colors.text3, textTransform: 'uppercase', fontWeight: 700, letterSpacing: '0.05em', marginBottom: '6px' }}>
+            Buy signals
           </div>
-          <div style={{ fontSize: '28px', fontWeight: 700, color: stats.avgReturn > 0 ? colors.green : colors.red }}>
-            {stats.avgReturn > 0 ? '+' : ''}{stats.avgReturn.toFixed(2)}%
+          <div style={{ display: 'flex', alignItems: 'baseline', gap: '4px', marginBottom: '4px' }}>
+            <div style={{ fontSize: '22px', fontWeight: 700, color: colors.teal }}>
+              {stats.totalSignals}
+            </div>
+            <div style={{ fontSize: '11px', color: colors.text3 }}>
+              4x+
+            </div>
           </div>
-          <div style={{ fontSize: '12px', color: colors.text3, marginTop: '4px' }}>
-            equal weighted
+        </div>
+        <div>
+          <div style={{ fontSize: '10px', color: colors.text3, textTransform: 'uppercase', fontWeight: 700, letterSpacing: '0.05em', marginBottom: '6px' }}>
+            Avg return (1M)
+          </div>
+          <div style={{
+            fontSize: '22px',
+            fontWeight: 700,
+            color: stats.avgReturn > 0 ? colors.green : stats.avgReturn < 0 ? colors.red : colors.text3,
+            marginBottom: '4px'
+          }}>
+            {stats.avgReturn > 0 ? '+' : ''}{stats.avgReturn.toFixed(1)}%
           </div>
         </div>
       </div>
 
       {/* Controls */}
-      <div style={{ display: 'flex', gap: spacing.lg, flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between' }}>
-        <div style={{ display: 'flex', gap: spacing.md, flexWrap: 'wrap' }}>
+      <div style={{ display: 'flex', gap: spacing.md, alignItems: 'flex-end', justifyContent: 'space-between', flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', gap: spacing.md }}>
           <div>
-            <label style={{ fontSize: '12px', color: colors.text3, fontWeight: 600, display: 'block', marginBottom: '6px' }}>
-              Sort by
+            <label style={{ fontSize: '10px', color: colors.text3, textTransform: 'uppercase', fontWeight: 700, display: 'block', marginBottom: '4px' }}>
+              Sort
             </label>
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value as SortBy)}
               style={{
-                padding: '8px 12px',
+                padding: '6px 10px',
                 borderRadius: '6px',
                 border: `1px solid ${colors.border}`,
                 background: colors.surface,
                 color: colors.text,
-                fontSize: '14px',
+                fontSize: '12px',
                 cursor: 'pointer',
               }}
             >
-              <option value="performance">1M Performance</option>
-              <option value="buySignals">Buy Signals</option>
-              <option value="multiplier">Avg Multiplier</option>
-              <option value="assets">Total Assets</option>
-              <option value="name">Name (A-Z)</option>
+              <option value="performance">1M Perf</option>
+              <option value="buySignals">Buy signals</option>
+              <option value="multiplier">Mild signals</option>
+              <option value="assets">Total assets</option>
+              <option value="name">Name</option>
             </select>
           </div>
 
           <div>
-            <label style={{ fontSize: '12px', color: colors.text3, fontWeight: 600, display: 'block', marginBottom: '6px' }}>
+            <label style={{ fontSize: '10px', color: colors.text3, textTransform: 'uppercase', fontWeight: 700, display: 'block', marginBottom: '4px' }}>
               Filter
             </label>
             <select
               value={filterBy}
               onChange={(e) => setFilterBy(e.target.value as FilterBy)}
               style={{
-                padding: '8px 12px',
+                padding: '6px 10px',
                 borderRadius: '6px',
                 border: `1px solid ${colors.border}`,
                 background: colors.surface,
                 color: colors.text,
-                fontSize: '14px',
+                fontSize: '12px',
                 cursor: 'pointer',
               }}
             >
-              <option value="all">All sectors</option>
-              <option value="withBuys">Has buy signals</option>
-              <option value="strong">Strong buy zone (3+)</option>
+              <option value="all">All</option>
+              <option value="withBuys">Has buys</option>
+              <option value="strong">Strong (3+)</option>
             </select>
           </div>
         </div>
@@ -173,23 +218,24 @@ export function SectorsDashboard({ sectors }: SectorsDashboardProps) {
         <button
           onClick={() => setCompareMode(!compareMode)}
           style={{
-            padding: '8px 16px',
+            padding: '6px 12px',
             borderRadius: '6px',
             border: `1px solid ${compareMode ? colors.teal : colors.border}`,
             background: compareMode ? colors.teal : colors.surface,
             color: compareMode ? colors.bg : colors.text,
-            fontSize: '14px',
+            fontSize: '12px',
             fontWeight: 600,
             cursor: 'pointer',
             transition: 'all 0.2s',
+            whiteSpace: 'nowrap'
           }}
         >
-          {compareMode ? `Compare (${selected.size}/3)` : 'Compare sectors'}
+          {compareMode ? `Compare (${selected.size}/3)` : 'Compare'}
         </button>
       </div>
 
-      {/* Sector Grid */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: spacing.lg }}>
+      {/* Sector Grid - Compact cards */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: spacing.md, maxHeight: 'calc(100vh - 400px)', overflow: 'auto' }}>
         {filtered.map((sector) => {
           const isSelected = selected.has(sector.slug)
           const returnColor = sector.stats.sectorReturn1M === null
@@ -197,6 +243,7 @@ export function SectorsDashboard({ sectors }: SectorsDashboardProps) {
             : sector.stats.sectorReturn1M > 0
               ? colors.green
               : colors.red
+          const bgOpacity = sector.stats.sectorReturn1M === null ? 0 : Math.abs(sector.stats.sectorReturn1M) / 30
 
           return (
             <div
@@ -204,12 +251,18 @@ export function SectorsDashboard({ sectors }: SectorsDashboardProps) {
               onClick={() => compareMode && handleToggleSelect(sector.slug)}
               style={{
                 position: 'relative',
-                padding: spacing.lg,
-                borderRadius: '12px',
-                border: `2px solid ${isSelected ? colors.teal : colors.border}`,
-                background: isSelected ? 'rgba(0, 196, 167, 0.04)' : colors.surface,
+                padding: spacing.md,
+                borderRadius: '8px',
+                border: `1.5px solid ${isSelected ? colors.teal : colors.border}`,
+                background: isSelected
+                  ? `rgba(0, 196, 167, 0.1)`
+                  : sector.stats.sectorReturn1M === null
+                    ? colors.surface
+                    : `rgba(${sector.stats.sectorReturn1M > 0 ? '40, 217, 126' : '240, 92, 110'}, ${bgOpacity * 0.15})`,
                 cursor: compareMode ? 'pointer' : 'default',
                 transition: 'all 0.2s',
+                display: 'flex',
+                flexDirection: 'column',
               }}
               onMouseEnter={(e: React.MouseEvent<HTMLDivElement>) => {
                 if (!compareMode) {
@@ -222,11 +275,12 @@ export function SectorsDashboard({ sectors }: SectorsDashboardProps) {
                 if (!compareMode) {
                   const el = e.currentTarget as HTMLDivElement
                   el.style.borderColor = colors.border
-                  el.style.background = colors.surface
+                  el.style.background = sector.stats.sectorReturn1M === null
+                    ? colors.surface
+                    : `rgba(${sector.stats.sectorReturn1M > 0 ? '40, 217, 126' : '240, 92, 110'}, ${bgOpacity * 0.15})`
                 } else {
                   const el = e.currentTarget as HTMLDivElement
                   el.style.borderColor = isSelected ? colors.teal : colors.border
-                  el.style.background = isSelected ? 'rgba(0, 196, 167, 0.04)' : colors.surface
                 }
               }}
             >
@@ -235,71 +289,70 @@ export function SectorsDashboard({ sectors }: SectorsDashboardProps) {
                   position: 'absolute',
                   top: spacing.md,
                   right: spacing.md,
-                  width: '20px',
-                  height: '20px',
-                  borderRadius: '4px',
-                  border: `2px solid ${isSelected ? colors.teal : colors.border}`,
+                  width: '16px',
+                  height: '16px',
+                  borderRadius: '3px',
+                  border: `1.5px solid ${isSelected ? colors.teal : colors.border}`,
                   background: isSelected ? colors.teal : 'transparent',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                   color: colors.bg,
-                  fontSize: '12px',
+                  fontSize: '10px',
                   fontWeight: 700,
                 }}>
                   {isSelected ? '✓' : ''}
                 </div>
               )}
 
-              <Link href={`/sectors/${sector.slug}`} style={{ textDecoration: 'none', color: 'inherit' }}>
-                <div style={{ marginBottom: spacing.lg }}>
-                  <h3 style={{ fontSize: '18px', fontWeight: 600, color: colors.text, margin: 0, marginBottom: '4px' }}>
-                    {sector.name}
-                  </h3>
-                  <p style={{ fontSize: '12px', color: colors.text3, margin: 0 }}>
-                    {sector.stats.totalAssets} assets
-                  </p>
-                </div>
-              </Link>
+              <Link href={`/sectors/${sector.slug}`} style={{ textDecoration: 'none', color: 'inherit', flex: 1, display: 'flex', flexDirection: 'column' }}>
+                <h3 style={{ fontSize: '13px', fontWeight: 700, color: colors.text, margin: 0, marginBottom: '2px', lineHeight: 1.2 }}>
+                  {sector.name}
+                </h3>
+                <p style={{ fontSize: '10px', color: colors.text3, margin: 0, marginBottom: spacing.md }}>
+                  {sector.stats.totalAssets} assets
+                </p>
 
-              {/* Key metrics grid */}
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: spacing.md, marginBottom: spacing.lg }}>
-                <div>
-                  <div style={{ fontSize: '11px', color: colors.text3, textTransform: 'uppercase', fontWeight: 600, marginBottom: '4px' }}>
+                {/* Buy zone indicator - dots */}
+                <div style={{ marginBottom: spacing.md }}>
+                  <div style={{ fontSize: '9px', color: colors.text3, textTransform: 'uppercase', fontWeight: 700, marginBottom: '3px', letterSpacing: '0.03em' }}>
                     Buy zone
                   </div>
-                  <div style={{ fontSize: '20px', fontWeight: 700, color: colors.teal }}>
+                  <BuyZoneVisual count={sector.stats.assetsInBuyZone} total={sector.stats.totalAssets} />
+                  <div style={{ fontSize: '11px', fontWeight: 700, color: colors.teal, marginTop: '3px' }}>
                     {sector.stats.assetsInBuyZone}
                   </div>
-                  {sector.stats.assetsMildSignal > 0 && (
-                    <div style={{ fontSize: '11px', color: colors.text3, marginTop: '4px' }}>
-                      +{sector.stats.assetsMildSignal} mild
-                    </div>
-                  )}
                 </div>
 
-                <div>
-                  <div style={{ fontSize: '11px', color: colors.text3, textTransform: 'uppercase', fontWeight: 600, marginBottom: '4px' }}>
-                    Mild signals
+                {/* Performance bar */}
+                <div style={{ marginBottom: spacing.md }}>
+                  <div style={{ fontSize: '9px', color: colors.text3, textTransform: 'uppercase', fontWeight: 700, marginBottom: '3px', letterSpacing: '0.03em' }}>
+                    1M Return
                   </div>
-                  <div style={{ fontSize: '20px', fontWeight: 700, color: colors.text }}>
-                    {sector.stats.assetsMildSignal}
+                  <PerformanceBar value={sector.stats.sectorReturn1M} />
+                  <div style={{ fontSize: '11px', fontWeight: 700, color: returnColor, marginTop: '3px' }}>
+                    {sector.stats.sectorReturn1M !== null
+                      ? `${sector.stats.sectorReturn1M > 0 ? '+' : ''}${sector.stats.sectorReturn1M.toFixed(1)}%`
+                      : '—'
+                    }
                   </div>
                 </div>
-              </div>
 
-              {/* Performance */}
-              <div style={{ paddingTop: spacing.md, borderTop: `1px solid ${colors.border}` }}>
-                <div style={{ fontSize: '11px', color: colors.text3, textTransform: 'uppercase', fontWeight: 600, marginBottom: '4px' }}>
-                  1M Performance
-                </div>
-                <div style={{ fontSize: '16px', fontWeight: 700, color: returnColor }}>
-                  {sector.stats.sectorReturn1M !== null
-                    ? `${sector.stats.sectorReturn1M > 0 ? '+' : ''}${sector.stats.sectorReturn1M.toFixed(2)}%`
-                    : '—'
-                  }
-                </div>
-              </div>
+                {/* Mild signals as small badge */}
+                {sector.stats.assetsMildSignal > 0 && (
+                  <div style={{
+                    fontSize: '10px',
+                    padding: '2px 6px',
+                    background: colors.amber,
+                    color: colors.bg,
+                    borderRadius: '4px',
+                    fontWeight: 600,
+                    textAlign: 'center'
+                  }}>
+                    +{sector.stats.assetsMildSignal} mild
+                  </div>
+                )}
+              </Link>
             </div>
           )
         })}
@@ -308,91 +361,64 @@ export function SectorsDashboard({ sectors }: SectorsDashboardProps) {
       {/* Comparison Panel */}
       {compareMode && selectedCards.length > 0 && (
         <div style={{
-          padding: spacing['2xl'],
+          padding: `${spacing.lg} ${spacing['2xl']}`,
           background: colors.surface,
-          borderRadius: '12px',
+          borderRadius: '10px',
           border: `1px solid ${colors.teal}`,
+          marginTop: spacing.lg
         }}>
-          <h3 style={{ fontSize: '16px', fontWeight: 600, color: colors.text, margin: 0, marginBottom: spacing.lg }}>
+          <h3 style={{ fontSize: '12px', fontWeight: 700, color: colors.teal, margin: 0, marginBottom: spacing.lg, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
             Comparing {selectedCards.length} sector{selectedCards.length !== 1 ? 's' : ''}
           </h3>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: spacing.lg }}>
+          <div style={{ display: 'grid', gridTemplateColumns: `repeat(${selectedCards.length}, 1fr)`, gap: spacing.lg }}>
             {selectedCards.map((sector) => (
-              <div key={sector.slug} style={{
-                padding: spacing.lg,
-                background: colors.bg,
-                borderRadius: '8px',
-                border: `1px solid ${colors.border}`,
-              }}>
-                <h4 style={{ fontSize: '14px', fontWeight: 600, color: colors.text, margin: 0, marginBottom: spacing.md }}>
-                  {sector.name}
-                </h4>
+              <Link key={sector.slug} href={`/sectors/${sector.slug}`} style={{ textDecoration: 'none', color: 'inherit' }}>
+                <div style={{
+                  padding: spacing.lg,
+                  background: colors.bg,
+                  borderRadius: '8px',
+                  border: `1px solid ${colors.border}`,
+                  cursor: 'pointer',
+                  transition: 'all 0.2s',
+                }}>
+                  <h4 style={{ fontSize: '13px', fontWeight: 700, color: colors.text, margin: 0, marginBottom: spacing.md }}>
+                    {sector.name}
+                  </h4>
 
-                <div style={{ display: 'flex', flexDirection: 'column', gap: spacing.md, fontSize: '13px' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                    <span style={{ color: colors.text3 }}>Total assets:</span>
-                    <strong style={{ color: colors.text }}>{sector.stats.totalAssets}</strong>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', fontSize: '12px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <span style={{ color: colors.text3 }}>Assets</span>
+                      <strong style={{ color: colors.text }}>{sector.stats.totalAssets}</strong>
+                    </div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <span style={{ color: colors.text3 }}>Buy zone</span>
+                      <strong style={{ color: colors.teal }}>{sector.stats.assetsInBuyZone}</strong>
+                    </div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <span style={{ color: colors.text3 }}>Mild</span>
+                      <strong style={{ color: colors.amber }}>{sector.stats.assetsMildSignal}</strong>
+                    </div>
+                    <div style={{ marginTop: '2px', paddingTop: '6px', borderTop: `1px solid ${colors.border}` }}>
+                      <div style={{ fontSize: '11px', color: colors.text3, marginBottom: '2px' }}>1M Return</div>
+                      <div style={{
+                        fontSize: '14px',
+                        fontWeight: 700,
+                        color: sector.stats.sectorReturn1M === null
+                          ? colors.text3
+                          : sector.stats.sectorReturn1M > 0
+                            ? colors.green
+                            : colors.red
+                      }}>
+                        {sector.stats.sectorReturn1M !== null
+                          ? `${sector.stats.sectorReturn1M > 0 ? '+' : ''}${sector.stats.sectorReturn1M.toFixed(1)}%`
+                          : '—'
+                        }
+                      </div>
+                    </div>
                   </div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                    <span style={{ color: colors.text3 }}>Buy zone:</span>
-                    <strong style={{ color: colors.teal }}>{sector.stats.assetsInBuyZone}</strong>
-                  </div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                    <span style={{ color: colors.text3 }}>Mild signals:</span>
-                    <strong style={{ color: colors.text }}>{sector.stats.assetsMildSignal}</strong>
-                  </div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                    <span style={{ color: colors.text3 }}>1M return:</span>
-                    <strong style={{
-                      color: sector.stats.sectorReturn1M === null
-                        ? colors.text3
-                        : sector.stats.sectorReturn1M > 0
-                          ? colors.green
-                          : colors.red
-                    }}>
-                      {sector.stats.sectorReturn1M !== null
-                        ? `${sector.stats.sectorReturn1M > 0 ? '+' : ''}${sector.stats.sectorReturn1M.toFixed(2)}%`
-                        : '—'
-                      }
-                    </strong>
-                  </div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                    <span style={{ color: colors.text3 }}>Avg RSI:</span>
-                    <strong style={{ color: colors.text }}>
-                      {sector.stats.avgRsi !== null ? sector.stats.avgRsi : '—'}
-                    </strong>
-                  </div>
-
-                  <Link
-                    href={`/sectors/${sector.slug}`}
-                    style={{
-                      marginTop: spacing.md,
-                      padding: '8px 12px',
-                      textAlign: 'center',
-                      borderRadius: '6px',
-                      border: `1px solid ${colors.teal}`,
-                      color: colors.teal,
-                      textDecoration: 'none',
-                      fontSize: '12px',
-                      fontWeight: 600,
-                      transition: 'all 0.2s',
-                    }}
-                    onMouseEnter={(e: React.MouseEvent<HTMLAnchorElement>) => {
-                      const el = e.currentTarget as HTMLAnchorElement
-                      el.style.background = colors.teal
-                      el.style.color = colors.bg
-                    }}
-                    onMouseLeave={(e: React.MouseEvent<HTMLAnchorElement>) => {
-                      const el = e.currentTarget as HTMLAnchorElement
-                      el.style.background = 'transparent'
-                      el.style.color = colors.teal
-                    }}
-                  >
-                    View full analysis →
-                  </Link>
                 </div>
-              </div>
+              </Link>
             ))}
           </div>
         </div>
