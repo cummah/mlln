@@ -45,7 +45,7 @@ export function WatchlistHubPage({
       <div
         style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
+          gridTemplateColumns: 'repeat(2, 1fr)',
           gap: '24px',
           marginBottom: '40px',
         }}
