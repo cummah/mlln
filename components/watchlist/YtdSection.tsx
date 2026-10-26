@@ -167,17 +167,27 @@ export function YtdSection({ ytd, monthlyBase, startDate }: { ytd: YtdData; mont
   const vsSpy = diff(ret.mlln, ret.spyMirror)
   const m = dollars(ytd.totals.mlln)
 
+  const windowLabel = useMemo(() => {
+    const start = new Date(startDate)
+    const now = new Date()
+    const years = (now.getTime() - start.getTime()) / (365.25 * 86400000)
+    if (years >= 2.9) return `3-year rolling since ${dateCompact(startDate)}`
+    if (years >= 1.9) return `2-year rolling since ${dateCompact(startDate)}`
+    if (years >= 1) return `Year to date since ${dateCompact(startDate)}`
+    return `Since ${dateCompact(startDate)}`
+  }, [startDate])
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
       <div>
-        <h2 style={{ fontSize: '20px', fontWeight: 500, color: 'var(--text)', margin: '0 0 6px 0' }}>Year to date since {dateCompact(startDate)}</h2>
+        <h2 style={{ fontSize: '20px', fontWeight: 500, color: 'var(--text)', margin: '0 0 6px 0' }}>{windowLabel}</h2>
         <p style={{ fontSize: '13px', color: 'var(--text-2)', margin: 0, lineHeight: 1.6, maxWidth: '820px' }}>
           How the monthly plan above has done, as return on the money put in, against three benchmarks. Standard DCA buys a flat {usdWhole.format(monthlyBase)} of every asset each month. The SPY lines put the same dollars into SPY, once on the days mlln bought and once as a flat monthly plan.
         </p>
       </div>
 
       <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
-        <Tile label="mlln plan, year to date" value={pct(ret.mlln)} sub={`${usdWhole.format(m.invested)} in, worth ${usdWhole.format(m.value)} (${signedUsd(m.value - m.invested)})`} color={tone(ret.mlln)} />
+        <Tile label={`mlln plan, ${windowLabel.split(' since')[0].toLowerCase()}`} value={pct(ret.mlln)} sub={`${usdWhole.format(m.invested)} in, worth ${usdWhole.format(m.value)} (${signedUsd(m.value - m.invested)})`} color={tone(ret.mlln)} />
         <Tile label="Versus standard DCA" value={pts(vsStd)} sub={`Standard DCA on the same assets: ${pct(ret.std)}`} color={tone(vsStd)} />
         <Tile label="Versus SPY, same dollars" value={pts(vsSpy)} sub={`SPY on the days mlln bought: ${pct(ret.spyMirror)}`} color={tone(vsSpy)} />
       </div>
