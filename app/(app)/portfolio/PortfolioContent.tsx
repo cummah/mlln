@@ -722,9 +722,6 @@ export function PortfolioContent({
                   portfolioMetrics={analytics?.portfolioMetrics}
                   efficientFrontier={analytics?.efficientFrontier}
                   maxDrawdown={analytics?.portfolioMetrics.maxDrawdown}
-                  tickers={allocations.map(a => a.ticker)}
-                  allocations={Object.fromEntries(allocations.map(a => [a.ticker, a.pct]))}
-                  monthlyAmount={totalAmount}
                 />
               </div>
             ) : (

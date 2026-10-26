@@ -54,17 +54,11 @@ export function PortfolioPerformanceSection({
   portfolioMetrics,
   efficientFrontier,
   maxDrawdown,
-  tickers,
-  allocations,
-  monthlyAmount,
 }: {
   results: PerformanceResult[];
   portfolioMetrics?: PortfolioMetrics;
   efficientFrontier?: Array<{ volatility: number; return: number; sharpeRatio: number }>;
   maxDrawdown?: number;
-  tickers?: string[];
-  allocations?: Record<string, number>;
-  monthlyAmount?: number;
 }) {
   const rows: RowData[] = results.map((result) => ({
     period: result.period,
@@ -284,7 +278,11 @@ export function PortfolioPerformanceSection({
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2" style={{ gap: '12px' }}>
-        <Panel title="5-Year Performance">5-year performance chart coming soon</Panel>
+        {results.length > 0 && (
+          <Panel title="5-Year Performance">
+            <PortfolioPerformanceChart data={results.filter(r => r.frequency === 'monthly')} />
+          </Panel>
+        )}
 
         {efficientFrontier && portfolioMetrics && maxDrawdown !== undefined ? (
           <EfficiencyFrontierChart

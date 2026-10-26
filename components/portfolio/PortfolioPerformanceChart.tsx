@@ -34,8 +34,8 @@ const drawCss = `
 
 export function PortfolioPerformanceChart({ data }: { data: PerformanceData[] }) {
   const [hover, setHover] = useState<number | null>(null)
-  // Reverse data so 1Y is on left, 5Y is on right
-  const reversed = [...data].reverse()
+  // Data already ordered: 1Y on left, 5Y on right
+  const reversed = [...data]
   const n = reversed.length
   const last = n - 1
   const series = [reversed.map(d => d.stdReturn), reversed.map(d => d.enhReturn)]
