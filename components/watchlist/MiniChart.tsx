@@ -96,14 +96,19 @@ export function MiniChart({ ytd, canAccess }: { ytd: YtdData; canAccess?: boolea
         )}
       </svg>
 
-      {/* Legend */}
-      <div style={{ display: 'flex', gap: '8px', marginTop: '8px', fontSize: '11px', justifyContent: 'center', flexWrap: 'wrap' }}>
-        {LINES.map(l => (
-          <span key={l.key} style={{ color: 'var(--text-2)' }}>
-            <span style={{ display: 'inline-block', width: '12px', height: '2px', background: l.color, marginRight: '4px', verticalAlign: 'middle' }} />
-            {pct(series[LINES.indexOf(l)][shown] ?? 0)}
-          </span>
-        ))}
+      {/* Performance grid */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px', marginTop: '12px' }}>
+        {LINES.map((l, k) => {
+          const v = series[k][shown]
+          return (
+            <div key={l.key} style={{ borderTop: `2px solid ${l.color}`, paddingTop: '6px', textAlign: 'center' }}>
+              <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '15px', fontWeight: 600, color: v === null ? 'var(--text-3)' : v >= 0 ? 'var(--green)' : 'var(--red)' }}>
+                {pct(v)}
+              </div>
+              <div style={{ fontSize: '10px', color: 'var(--text-2)', marginTop: '2px', lineHeight: 1.2 }}>{l.label}</div>
+            </div>
+          )
+        })}
       </div>
     </div>
   )
