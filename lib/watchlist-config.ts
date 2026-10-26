@@ -30,8 +30,8 @@ export const WATCHLIST_CONFIGS: WatchlistConfig[] = [
   {
     id: 'defence',
     name: 'Defence Watchlist',
-    description: 'Space systems, drone networks, and defence primes: emerging tech and established players in modern defence.',
-    tickers: ['RKLB', 'ASTS', 'LUNR', 'RDW', 'KTOS', 'ONDS', 'RCAT', 'UAV', 'LMT', 'RTX'],
+    description: 'Space systems, defence primes, and emerging defence tech: satellites, aerospace, electronics, and emerging players.',
+    tickers: ['RKLB', 'RDW', 'NOC', 'GD', 'BA', 'VSAT', 'AXON', 'CACI', 'LMT', 'RTX'],
     startDate: '2023-10-26',
     order: 3,
   },
