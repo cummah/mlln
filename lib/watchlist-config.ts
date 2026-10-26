@@ -24,7 +24,7 @@ export const WATCHLIST_CONFIGS: WatchlistConfig[] = [
     name: 'AI Watchlist',
     description: 'AI compute leaders and infrastructure plays: from chip makers to foundries, memory, and data-centre operators.',
     tickers: ['NVDA', 'AMD', 'AVGO', 'TSM', 'MU', 'PLTR', 'NBIS', 'IREN', 'APLD', 'VRT'],
-    startDate: '2026-01-01',
+    startDate: '2024-10-26',
     order: 2,
   },
   {
@@ -32,7 +32,7 @@ export const WATCHLIST_CONFIGS: WatchlistConfig[] = [
     name: 'Defence Watchlist',
     description: 'Space systems, drone networks, and defence primes: emerging tech and established players in modern defence.',
     tickers: ['RKLB', 'ASTS', 'LUNR', 'RDW', 'KTOS', 'ONDS', 'RCAT', 'UAV', 'LMT', 'RTX'],
-    startDate: '2026-01-01',
+    startDate: '2023-10-26',
     order: 3,
   },
   {

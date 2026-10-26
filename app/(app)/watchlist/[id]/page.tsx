@@ -25,6 +25,6 @@ export default async function WatchlistDetailPage({ params }: { params: { id: st
   if (!config) notFound()
 
   const data = await getWatchlist(params.id)
-  const maxMonths = params.id === 'etfs' ? 10 : undefined
+  const maxMonths = (params.id === 'ai' || params.id === 'etfs' || params.id === 'defence') ? 10 : undefined
   return <WatchlistView data={data} maxMonths={maxMonths} />
 }
