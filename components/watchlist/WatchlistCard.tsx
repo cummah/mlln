@@ -7,6 +7,17 @@ import type { WatchlistConfig } from '@/lib/watchlist-config'
 import type { Entitlement } from '@/types'
 import { MiniChart } from './MiniChart'
 
+function getPeriodLabel(startDate: string): string {
+  const start = new Date(startDate)
+  const now = new Date()
+  const years = (now.getTime() - start.getTime()) / (365.25 * 86400000)
+  if (years >= 2.9) return 'over 3 years'
+  if (years >= 1.9) return 'over 2 years'
+  if (years >= 1) return 'over 1 year'
+  const months = Math.round(years * 12)
+  return `over ${months} month${months === 1 ? '' : 's'}`
+}
+
 export function WatchlistCard({
   config,
   data,
@@ -17,6 +28,7 @@ export function WatchlistCard({
   entitlement?: Entitlement
 }) {
   const canAccess = entitlement ? entitlement.tier >= 2 : false
+  const periodLabel = getPeriodLabel(config.startDate)
 
   return (
     <Link href={`/watchlist/${config.id}`}>
@@ -67,7 +79,7 @@ export function WatchlistCard({
         {/* Footer */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 'auto', paddingTop: '16px', borderTop: '1px solid var(--border)' }}>
           <div style={{ fontSize: '12px', color: 'var(--text-2)' }}>
-            {data.rows.length} assets
+            {data.rows.length} assets {periodLabel}
           </div>
           <ChevronRight size={18} style={{ color: 'var(--text-2)' }} />
         </div>
