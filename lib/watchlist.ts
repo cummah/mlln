@@ -197,3 +197,64 @@ export function getWatchlist(id: string) {
 
 // Backward compatibility: get the top-10 watchlist
 export const getDemoWatchlist = () => getWatchlist('top-10')
+
+/** Get watchlist data for a user custom watchlist by tickers */
+async function getUserWatchlistUncached(name: string, tickers: string[]): Promise<DemoWatchlist> {
+  const db = getSupabaseClient()
+  const startDate = new Date().toISOString().split('T')[0]
+  const [weeklyLatest, monthlyLatest] = await Promise.all([latestSignalDate('weekly'), latestSignalDate('monthly')])
+  const [assets, prices, weekly, monthly, feed, bars] = await Promise.all([
+    db.from('assets').select('ticker, name, sector').eq('is_active', true).in('ticker', tickers),
+    db.from('latest_prices').select('ticker, close').in('ticker', tickers),
+    latestSignals(tickers, 'weekly', weeklyLatest),
+    latestSignals(tickers, 'monthly', monthlyLatest),
+    monthlyFeed(tickers, startDate),
+    dailyBars([...tickers, 'SPY'], startDate),
+  ])
+  if (assets.error) throw new Error(`assets: ${assets.error.message}`)
+  if (prices.error) throw new Error(`latest_prices: ${prices.error.message}`)
+
+  const assetBy = new Map<string, any>(((assets.data as any[]) ?? []).map(a => [a.ticker, a]))
+  const priceBy = new Map<string, number>(((prices.data as any[]) ?? []).map(p => [p.ticker, Number(p.close)]))
+
+  const rows: WatchRow[] = tickers.filter(t => assetBy.has(t)).map(t => {
+    const a = assetBy.get(t)
+    const price = priceBy.get(t)
+    return {
+      ticker: t,
+      name: a.name ?? t,
+      sector: a.sector ?? 'Unknown',
+      price: price !== undefined && price > 0 ? round2(price) : null,
+      weekly: weekly.get(t) ?? null,
+      monthly: monthly.get(t) ?? null,
+      history: Object.fromEntries(Object.entries(feed.get(t) ?? {}).map(([m, e]) => [m, e.mult])),
+    }
+  })
+
+  const months = monthRange(startDate, monthlyLatest)
+  const listed = rows.map(r => r.ticker)
+
+  return {
+    name,
+    description: `Custom watchlist with ${tickers.length} asset${tickers.length !== 1 ? 's' : ''}`,
+    startDate,
+    rows,
+    months,
+    latestDate: { weekly: weeklyLatest, monthly: monthlyLatest },
+    baseAmount: { weekly: FREQ_SETTINGS.weekly.baseAmount, monthly: FREQ_SETTINGS.monthly.baseAmount },
+    ytd: buildYtd(listed, months, feed, bars, FREQ_SETTINGS.monthly.baseAmount),
+  }
+}
+
+const userWatchlistCaches = new Map<string, () => Promise<DemoWatchlist>>()
+
+export function getUserWatchlist(id: string, name: string, tickers: string[]) {
+  if (!userWatchlistCaches.has(id)) {
+    const cached = unstable_cache(() => getUserWatchlistUncached(name, tickers), ['v5', `user-watchlist-${id}`], {
+      revalidate: 24 * 60 * 60,
+      tags: ['user-watchlist', id],
+    })
+    userWatchlistCaches.set(id, cached)
+  }
+  return userWatchlistCaches.get(id)!()
+}

@@ -20,14 +20,14 @@ export function EdgeCTATile({
   periodLabel,
   cadenceLabel,
 }: EdgeCTATileProps) {
-  // Calculate subscription cost: $100/month
+  // Calculate subscription cost: $40/month (Pro Plan)
   const monthsMap: Record<string, number> = {
     '1y': 12,
     '3y': 36,
     '5y': 60,
   };
   const months = monthsMap[periodLabel.toLowerCase()] || 60;
-  const subscriptionCost = 100 * months;
+  const subscriptionCost = 40 * months;
 
   const netGain = dollarGain - subscriptionCost;
   const alphaPercent = enhInvested > 0 ? (dollarGain / enhInvested) * 100 : 0;
@@ -60,7 +60,7 @@ export function EdgeCTATile({
             {formatCurrency(Math.abs(netGain))}
           </div>
           <div style={{ fontSize: T.label, color: 'var(--text-2)', marginTop: '6px', lineHeight: 1.4 }}>
-            After deducting $100/month subscription fee on your {periodLabel.toLowerCase()} {cadenceLabel.toLowerCase()} portfolio.
+            After deducting $40/month subscription fee on your {periodLabel.toLowerCase()} {cadenceLabel.toLowerCase()} portfolio.
           </div>
         </div>
 

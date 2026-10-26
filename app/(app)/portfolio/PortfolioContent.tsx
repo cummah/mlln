@@ -15,6 +15,7 @@ import { EdgeCTATile } from '@/components/portfolio/EdgeCTATile';
 import { Panel, Skeleton, T, MONO, RADIUS, tickerColors } from '@/components/portfolio/ui';
 import { createClient } from '@/lib/supabase/browser';
 import SavePortfolioModal from '@/components/portfolio/SavePortfolioModal';
+import CreateWatchlistModal from '@/components/portfolio/CreateWatchlistModal';
 
 const MAX_ASSETS = 20;
 const PERIODS: Period[] = ['1y', '3y', '5y'];
@@ -125,7 +126,9 @@ export function PortfolioContent({
   const [analyticsAttempt, setAnalyticsAttempt] = useState(0);
   const [restored, setRestored] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [userTier, setUserTier] = useState(0);
   const [showSaveModal, setShowSaveModal] = useState(false);
+  const [showCreateWatchlistModal, setShowCreateWatchlistModal] = useState(false);
   const searchRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const listboxId = 'portfolio-asset-options';
@@ -177,11 +180,23 @@ export function PortfolioContent({
     setActiveIndex(0);
   }, [query]);
 
-  // Check if user is authenticated
+  // Check if user is authenticated and get tier
   useEffect(() => {
     const checkAuth = async () => {
       const { data: { user } } = await supabase.auth.getUser();
       setIsAuthenticated(!!user);
+
+      if (user) {
+        try {
+          const res = await fetch('/api/user/entitlement');
+          if (res.ok) {
+            const data = await res.json();
+            setUserTier(data.tier || 0);
+          }
+        } catch (err) {
+          console.error('Failed to fetch user tier:', err);
+        }
+      }
     };
     checkAuth();
   }, [supabase]);
@@ -655,44 +670,36 @@ export function PortfolioContent({
               )}
 
               <div style={{ display: 'flex', gap: '6px', marginTop: '12px', paddingTop: '12px', borderTop: '1px solid var(--border)', flexDirection: 'column' }}>
-                <button
-                  type="button"
-                  onClick={() => {
-                    // Save portfolio to localStorage with a small delay to ensure write completes
-                    const data = JSON.stringify(allocations);
-                    localStorage.setItem('mlln-watchlist-import', data);
-                    // Verify data was written
-                    if (localStorage.getItem('mlln-watchlist-import') === data) {
-                      window.location.href = '/watchlist?imported=true';
-                    } else {
-                      console.error('Failed to save watchlist import data');
-                    }
-                  }}
-                  className="mlln-focusable mlln-cta"
-                  style={{ ...ctaStyle, width: '100%' }}
-                >
-                  📋 Create Watchlist
-                </button>
-                <div style={{ display: 'flex', gap: '6px' }}>
-                  <a
-                    href="/asset/weekly"
+                {isAuthenticated ? (
+                  <>
+                    <button
+                      type="button"
+                      onClick={() => setShowCreateWatchlistModal(true)}
+                      className="mlln-focusable mlln-cta"
+                      style={{ ...ctaStyle, width: '100%' }}
+                    >
+                      Create Watchlist
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setShowSaveModal(true)}
+                      className="mlln-focusable mlln-cta"
+                      style={{ ...ctaStyle, width: '100%' }}
+                    >
+                      Save Portfolio
+                    </button>
+                  </>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => setShowSaveModal(true)}
                     className="mlln-focusable mlln-cta"
-                    style={{ ...ctaStyle, flex: 1 }}
+                    style={{ ...ctaStyle, width: '100%' }}
                   >
-                    Weekly signals
-                  </a>
-                  <a
-                    href="/asset/monthly"
-                    className="mlln-focusable mlln-cta"
-                    style={{ ...ctaStyle, flex: 1 }}
-                  >
-                    Monthly signals
-                  </a>
-                </div>
+                    Save Portfolio
+                  </button>
+                )}
               </div>
-              <p style={{ margin: '6px 0 0', fontSize: '10px', color: 'var(--text-3)', lineHeight: 1.4 }}>
-                Live buy signals across all assets, not limited to the {allocations.length} above.
-              </p>
             </>
           )}
         </Panel>
@@ -715,6 +722,9 @@ export function PortfolioContent({
                   portfolioMetrics={analytics?.portfolioMetrics}
                   efficientFrontier={analytics?.efficientFrontier}
                   maxDrawdown={analytics?.portfolioMetrics.maxDrawdown}
+                  tickers={allocations.map(a => a.ticker)}
+                  allocations={Object.fromEntries(allocations.map(a => [a.ticker, a.pct]))}
+                  monthlyAmount={totalAmount}
                 />
               </div>
             ) : (
@@ -824,6 +834,13 @@ export function PortfolioContent({
         isOpen={showSaveModal}
         onClose={() => setShowSaveModal(false)}
         portfolio={{ tickers: allocations.map(a => a.ticker), allocations: Object.fromEntries(allocations.map(a => [a.ticker, a.pct])) }}
+      />
+
+      <CreateWatchlistModal
+        isOpen={showCreateWatchlistModal}
+        onClose={() => setShowCreateWatchlistModal(false)}
+        tickers={allocations.map(a => a.ticker)}
+        tier={userTier}
       />
     </div>
   );

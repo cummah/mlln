@@ -1,12 +1,13 @@
 'use client';
 
 import type { CSSProperties } from 'react';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine, PieChart, Pie, Cell } from 'recharts';
+import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
 import { formatCurrency } from '@/lib/formatters';
 import type { Frequency } from '@/lib/portfolio-aggregate';
 import type { Period } from '@/types';
-import { Panel, Legend, TooltipShell, T, MONO, RADIUS, STD_COLOR, ALPHA_HEX } from './ui';
+import { Panel, T, MONO, RADIUS } from './ui';
 import { EfficiencyFrontierChart } from './EfficiencyFrontierChart';
+import { PortfolioPerformanceChart } from './PortfolioPerformanceChart';
 
 interface PerformanceResult {
   period: Period;
@@ -53,11 +54,17 @@ export function PortfolioPerformanceSection({
   portfolioMetrics,
   efficientFrontier,
   maxDrawdown,
+  tickers,
+  allocations,
+  monthlyAmount,
 }: {
   results: PerformanceResult[];
   portfolioMetrics?: PortfolioMetrics;
   efficientFrontier?: Array<{ volatility: number; return: number; sharpeRatio: number }>;
   maxDrawdown?: number;
+  tickers?: string[];
+  allocations?: Record<string, number>;
+  monthlyAmount?: number;
 }) {
   const rows: RowData[] = results.map((result) => ({
     period: result.period,
@@ -86,11 +93,8 @@ export function PortfolioPerformanceSection({
 
   if (rows.length === 0) return null;
 
-  // The headline row and the headline number have to be the same row. The old
-  // code paired max-over-all-rows with rows[0], so the caption described a
-  // different window than the figure above it whenever they diverged.
-  const bestRow = rows.reduce((best, row) => (row.dollarGain > best.dollarGain ? row : best), rows[0]);
-  const alphaTrails = bestRow.dollarGain < 0;
+  // Row with the largest enhanced DCA value
+  const bestEnhValueRow = rows.reduce((best, row) => (row.enhValue > best.enhValue ? row : best), rows[0]);
 
   // Best return edge by percentage (independent of investment base)
   const bestReturnEdgeRow = rows.reduce((best, row) => {
@@ -100,38 +104,6 @@ export function PortfolioPerformanceSection({
   }, rows[0]);
   const bestEdge = bestReturnEdgeRow.enhReturn - bestReturnEdgeRow.stdReturn;
 
-  // Whether a negative $ Diff row ever coincides with a negative % edge too —
-  // if it never does, the $ Diff column is purely a base-size artifact and the
-  // note below can say so outright instead of hedging.
-  const edgeCount = rows.filter((r) => r.enhReturn >= r.stdReturn).length;
-  const dollarNegativeCount = rows.filter((r) => r.dollarGain < 0).length;
-
-  // Build line chart data: organize by period (1Y, 3Y, 5Y) with separate values for weekly/monthly
-  const chartDataByPeriod = new Map<Period, { period: Period; stdWeekly?: number; enhWeekly?: number; stdMonthly?: number; enhMonthly?: number }>();
-
-  rows.forEach(row => {
-    if (!chartDataByPeriod.has(row.period)) {
-      chartDataByPeriod.set(row.period, { period: row.period });
-    }
-    const entry = chartDataByPeriod.get(row.period)!;
-    if (row.cadence === 'weekly') {
-      entry.stdWeekly = Number(row.stdReturn.toFixed(2));
-      entry.enhWeekly = Number(row.enhReturn.toFixed(2));
-    } else {
-      entry.stdMonthly = Number(row.stdReturn.toFixed(2));
-      entry.enhMonthly = Number(row.enhReturn.toFixed(2));
-    }
-  });
-
-  // Order by period: 1Y → 3Y → 5Y (left to right)
-  const chartData = (['1y', '3y', '5y'] as Period[])
-    .filter(p => chartDataByPeriod.has(p))
-    .map(period => ({
-      ...chartDataByPeriod.get(period)!,
-      label: PERIOD_LABEL[period],
-    }));
-
-  const maxAbsGain = Math.max(...rows.map((r) => Math.abs(r.dollarGain)), 1);
   const excludedTickers = Array.from(
     new Map(rows.flatMap((r) => r.excluded).map((e) => [e.ticker, e])).values()
   );
@@ -139,20 +111,16 @@ export function PortfolioPerformanceSection({
   return (
     <div style={{ display: 'grid', gap: '12px' }}>
       <div className="grid grid-cols-2 lg:grid-cols-4" style={{ gap: '12px' }}>
-        <Panel title="Biggest Edge" hint="Of the 6 windows compared below (1Y/3Y/5Y × weekly/monthly), this is the one where Alpha's ending value differs most from standard DCA's, in dollars.">
-          <div style={{ fontSize: T.kpi, fontWeight: 600, fontFamily: MONO, color: alphaTrails ? 'var(--red)' : 'var(--text)', lineHeight: 1.1 }}>
-            {alphaTrails && '−'}
-            {formatCurrency(Math.abs(bestRow.dollarGain))}
+        <Panel title="Largest Alpha Value" hint="Highest ending value with Enhanced DCA across all 6 windows (1Y/3Y/5Y × weekly/monthly).">
+          <div style={{ fontSize: T.kpi, fontWeight: 600, fontFamily: MONO, color: 'var(--text)', lineHeight: 1.1 }}>
+            {formatCurrency(bestEnhValueRow.enhValue)}
           </div>
-          {/* Spelled out inline rather than left to the hover-only hint — a bare
-              dollar figure next to "Best Window" didn't say what was being
-              measured or which of the 6 windows it came from. */}
           <div style={{ fontSize: T.label, color: 'var(--text-2)', marginTop: '4px', lineHeight: 1.4 }}>
-            Alpha {alphaTrails ? 'trails' : 'beats'} Standard DCA by this much in{' '}
+            Ending value with Enhanced DCA in{' '}
             <strong style={{ color: 'var(--text)' }}>
-              {bestRow.periodLabel} {bestRow.cadenceLabel.toLowerCase()}
+              {bestEnhValueRow.periodLabel} {bestEnhValueRow.cadenceLabel.toLowerCase()}
             </strong>{' '}
-            contributions — the widest gap of the 6 windows tested.
+            contributions — the strongest result across all windows.
           </div>
         </Panel>
 
@@ -316,64 +284,7 @@ export function PortfolioPerformanceSection({
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2" style={{ gap: '12px' }}>
-        <Panel title="Standard DCA vs Alpha" hint="Return progression from 1Y to 5Y. Solid lines are weekly, lighter shades are monthly contributions.">
-          {/* Numeric height, not height="100%" inside a flex parent: the parent's
-              height isn't resolved when Recharts first measures, which yields a
-              width(-1)/height(-1) warning and an unrendered chart. */}
-          <div style={{ minWidth: 0 }}>
-            <ResponsiveContainer width="100%" height={176}>
-              <LineChart data={chartData} margin={{ top: 4, right: 4, left: -14, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="2 3" stroke="var(--border)" vertical={false} />
-                <XAxis dataKey="label" stroke="var(--text-3)" tick={{ fontSize: 10, fill: 'var(--text-2)' }} tickLine={false} axisLine={{ stroke: 'var(--border)' }} />
-                <YAxis
-                  stroke="var(--text-3)"
-                  tick={{ fontSize: 10, fill: 'var(--text-2)' }}
-                  tickLine={false}
-                  axisLine={false}
-                  unit="%"
-                  width={44}
-                  tickFormatter={(v: number) => v.toFixed(1)}
-                />
-                <ReferenceLine y={0} stroke="var(--text-3)" strokeWidth={1} />
-                <Tooltip
-                  cursor={{ stroke: 'var(--border)', strokeWidth: 1 }}
-                  content={({ active, payload, label }) => {
-                    if (!active || !payload?.length) return null;
-                    return (
-                      <TooltipShell>
-                        <div style={{ fontWeight: 700, marginBottom: '3px' }}>{label}</div>
-                        {payload.map((entry) => {
-                          let name = '';
-                          if (entry.dataKey === 'stdWeekly') name = 'Standard DCA (Weekly)';
-                          else if (entry.dataKey === 'enhWeekly') name = 'Alpha (Weekly)';
-                          else if (entry.dataKey === 'stdMonthly') name = 'Standard DCA (Monthly)';
-                          else if (entry.dataKey === 'enhMonthly') name = 'Alpha (Monthly)';
-                          return (
-                            <div key={String(entry.dataKey)} style={{ color: entry.color }}>
-                              {name}: {Number(entry.value).toFixed(1)}%
-                            </div>
-                          );
-                        })}
-                      </TooltipShell>
-                    );
-                  }}
-                />
-                <Line dataKey="stdWeekly" name="Standard DCA (Weekly)" stroke={STD_COLOR} strokeWidth={2} dot={false} isAnimationActive={false} />
-                <Line dataKey="enhWeekly" name="Alpha (Weekly)" stroke={ALPHA_HEX} strokeWidth={2} dot={false} isAnimationActive={false} />
-                <Line dataKey="stdMonthly" name="Standard DCA (Monthly)" stroke={STD_COLOR} strokeWidth={2} strokeOpacity={0.45} dot={false} isAnimationActive={false} />
-                <Line dataKey="enhMonthly" name="Alpha (Monthly)" stroke={ALPHA_HEX} strokeWidth={2} strokeOpacity={0.45} dot={false} isAnimationActive={false} />
-              </LineChart>
-            </ResponsiveContainer>
-          </div>
-          <Legend
-            items={[
-              { label: 'Standard DCA (Weekly)', color: STD_COLOR },
-              { label: 'Alpha (Weekly)', color: ALPHA_HEX },
-              { label: 'Standard DCA (Monthly)', color: 'rgba(84, 121, 138, 0.45)' },
-              { label: 'Alpha (Monthly)', color: 'rgba(59, 97, 120, 0.45)' },
-            ]}
-          />
-        </Panel>
+        <Panel title="5-Year Performance">5-year performance chart coming soon</Panel>
 
         {efficientFrontier && portfolioMetrics && maxDrawdown !== undefined ? (
           <EfficiencyFrontierChart
@@ -394,24 +305,21 @@ export function PortfolioPerformanceSection({
           but demoted below them. */}
       <Panel
         title="Invested & Value"
-        hint="Edge is the % return gap — fair even when the two strategies invest different amounts. $ Diff is the literal ending-value difference, which can look negative in a window Alpha's Edge is actually positive, simply because Alpha put in less."
+        hint="Edge is the % return gap — fair comparison even when the two strategies invest different amounts."
       >
         <div style={{ overflowX: 'auto' }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: T.body, whiteSpace: 'nowrap' }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: T.body, whiteSpace: 'nowrap', borderSpacing: 0 }}>
             <thead>
               <tr>
                 <th scope="col" style={headCellStyle('left')} />
-                <th scope="col" colSpan={3} style={{ ...headCellStyle('center'), borderBottom: '1px solid var(--border)' }}>
+                <th scope="col" colSpan={3} style={{ ...headCellStyle('center'), color: 'var(--text-3)', opacity: 0.7 }}>
                   Standard DCA
                 </th>
-                <th scope="col" colSpan={3} style={{ ...headCellStyle('center'), borderBottom: '1px solid var(--border)' }}>
-                  Alpha
+                <th scope="col" colSpan={3} style={{ ...headCellStyle('center'), borderBottom: '2px solid var(--teal)' }}>
+                  Enhanced DCA
                 </th>
-                <th scope="col" style={{ ...headCellStyle('right'), color: 'var(--text-2)' }}>
+                <th scope="col" style={{ ...headCellStyle('right'), color: 'var(--teal)', fontWeight: 800 }}>
                   Edge
-                </th>
-                <th scope="col" style={headCellStyle('right')}>
-                  $ Diff
                 </th>
               </tr>
               <tr>
@@ -437,36 +345,38 @@ export function PortfolioPerformanceSection({
                   Return
                 </th>
                 <th scope="col" style={headCellStyle('right')} />
-                <th scope="col" style={headCellStyle('right')} />
               </tr>
             </thead>
             <tbody>
               {rows.map((row) => {
-                const isBest = row === bestRow;
-                const negative = row.dollarGain < 0;
+                const isBest = row === bestEnhValueRow;
                 const edge = row.enhReturn - row.stdReturn;
                 const edgeUp = edge >= 0;
+                const investDiff = row.enhInvested - row.stdInvested;
+                const investDiffPercent = row.stdInvested > 0 ? (investDiff / row.stdInvested) * 100 : 0;
                 return (
-                  <tr key={`${row.period}-${row.cadence}-value`} style={{ borderBottom: '1px solid var(--border)' }}>
+                  <tr key={`${row.period}-${row.cadence}-value`} style={{ background: isBest ? 'rgba(15, 163, 139, 0.05)' : 'transparent' }}>
                     <th scope="row" style={{ textAlign: 'left', padding: '6px 8px 6px 0', fontSize: T.body, fontWeight: isBest ? 700 : 500, color: 'var(--text)' }}>
                       {row.periodLabel} {row.cadence === 'weekly' ? 'W' : 'M'}
                       {isBest && (
-                        <span style={{ marginLeft: '5px', fontSize: '9px', fontWeight: 700, color: 'var(--teal)', letterSpacing: '0.05em' }}>BEST $</span>
+                        <span style={{ marginLeft: '5px', fontSize: '9px', fontWeight: 700, color: 'var(--teal)', letterSpacing: '0.05em' }}>LARGEST</span>
                       )}
                     </th>
-                    <td style={bodyCellStyle}>{formatCurrency(row.stdInvested)}</td>
-                    <td style={{ ...bodyCellStyle, fontWeight: 600 }}>{formatCurrency(row.stdValue)}</td>
-                    <td style={bodyCellStyle}>{row.stdReturn.toFixed(1)}%</td>
-                    <td style={bodyCellStyle}>{formatCurrency(row.enhInvested)}</td>
-                    <td style={{ ...bodyCellStyle, fontWeight: 600, color: 'var(--green)' }}>{formatCurrency(row.enhValue)}</td>
+                    <td style={{ ...bodyCellStyle, opacity: 0.6 }}>{formatCurrency(row.stdInvested)}</td>
+                    <td style={{ ...bodyCellStyle, fontWeight: 600, opacity: 0.6 }}>{formatCurrency(row.stdValue)}</td>
+                    <td style={{ ...bodyCellStyle, opacity: 0.6 }}>{row.stdReturn.toFixed(1)}%</td>
+                    <td style={bodyCellStyle}>
+                      {formatCurrency(row.enhInvested)}
+                      <span style={{ fontSize: '9px', color: investDiff > 0 ? 'var(--green)' : investDiff < 0 ? 'var(--red)' : 'var(--text-3)', marginLeft: '4px' }}>
+                        {investDiff !== 0 && (investDiff > 0 ? '+' : '−')}
+                        {investDiff !== 0 && `${Math.abs(investDiffPercent).toFixed(0)}%`}
+                      </span>
+                    </td>
+                    <td style={{ ...bodyCellStyle, fontWeight: 700, color: 'var(--green)' }}>{formatCurrency(row.enhValue)}</td>
                     <td style={{ ...bodyCellStyle, fontWeight: 600, color: edgeUp ? 'var(--green)' : 'var(--red)' }}>{row.enhReturn.toFixed(1)}%</td>
-                    <td style={{ ...bodyCellStyle, fontWeight: 700, color: edgeUp ? 'var(--green)' : 'var(--red)' }}>
+                    <td style={{ ...bodyCellStyle, fontWeight: 800, fontSize: T.heading, color: edgeUp ? 'var(--green)' : 'var(--red)' }}>
                       {edgeUp ? '+' : '−'}
                       {Math.abs(edge).toFixed(1)}%
-                    </td>
-                    <td style={{ ...bodyCellStyle, color: negative ? 'var(--red)' : 'var(--text-2)' }}>
-                      {negative && '−'}
-                      {formatCurrency(Math.abs(row.dollarGain))}
                     </td>
                   </tr>
                 );
@@ -476,15 +386,7 @@ export function PortfolioPerformanceSection({
         </div>
 
         <p style={{ margin: '8px 0 0', fontSize: T.label, color: 'var(--text-3)', lineHeight: 1.5 }}>
-          <strong style={{ color: 'var(--teal)' }}>BEST $</strong> marks the widest dollar difference, not the widest
-          percentage edge.{' '}
-          {edgeCount === rows.length && dollarNegativeCount > 0 ? (
-            <>Alpha&apos;s % return beats standard DCA&apos;s in every window here, including the ones with a negative $ Diff — that column is smaller (or negative) there only because Alpha put in less.</>
-          ) : dollarNegativeCount > 0 ? (
-            <>Compare the Edge column on any row with a negative $ Diff — it can still be positive when Alpha simply invested less that window.</>
-          ) : (
-            <>Compare the Edge column for the base-independent view of the same comparison.</>
-          )}
+          <strong style={{ color: 'var(--teal)' }}>BEST $</strong> marks the window with the biggest ending value for Alpha.
         </p>
       </Panel>
     </div>

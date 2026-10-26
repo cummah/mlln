@@ -38,6 +38,17 @@ export async function POST(req: Request) {
       return Response.json({ error: 'Name is required' }, { status: 400 });
     }
 
+    // Check user tier
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('tier')
+      .eq('user_id', user.id)
+      .single();
+
+    if (!profile || profile.tier === 0) {
+      return Response.json({ error: 'Custom watchlists require a paid subscription' }, { status: 403 });
+    }
+
     const { data, error } = await supabase
       .from('user_watchlists')
       .insert([{ user_id: user.id, name }])
