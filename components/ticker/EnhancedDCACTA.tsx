@@ -147,7 +147,7 @@ export function EnhancedDCACTA({ ticker, name, monthlyAlpha5y, dca_suitability_s
               e.currentTarget.style.transform = 'translateY(0)'
             }}
           >
-            Start Enhancing your DCA
+            Enhance your DCA now »
           </Link>
         </div>
       </div>
