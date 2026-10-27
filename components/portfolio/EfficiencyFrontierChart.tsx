@@ -68,25 +68,24 @@ export function EfficiencyFrontierChart({ frontier, portfolioMetrics, maxDrawdow
   return (
     <Panel
       title="Risk vs Return"
-      hint="Grey dots are randomly weighted mixes of your same assets. The line is the best return available at each risk level; the blue dot is your current allocation."
+      hint={`Each grey dot is a random mix of your assets. The teal line is the efficient frontier—the best possible return at each risk level. Your current allocation is the larger teal dot (max drawdown: ${(maxDrawdown * 100).toFixed(1)}%).`}
     >
       <div style={{ minWidth: 0 }}>
-        <ResponsiveContainer width="100%" height={160}>
-          <ComposedChart data={envelope} margin={{ top: 6, right: 8, left: -12, bottom: 0 }}>
+        <ResponsiveContainer width="100%" height={260}>
+          <ComposedChart data={envelope} margin={{ top: 8, right: 12, left: 18, bottom: 28 }}>
             <CartesianGrid strokeDasharray="2 3" stroke="var(--border)" />
             <XAxis
               type="number"
               dataKey="x"
               unit="%"
               domain={['dataMin - 2', 'dataMax + 2']}
-              // Auto-generated ticks are raw computed floats (e.g. 17.333333);
-              // without a formatter they render at full float precision.
               tickFormatter={(v: number) => v.toFixed(1)}
               stroke="var(--text-3)"
-              tick={{ fontSize: 10, fill: 'var(--text-2)' }}
+              tick={{ fontSize: 12, fill: 'var(--text-2)', fontWeight: 500 }}
               tickLine={false}
               axisLine={false}
-              height={18}
+              height={24}
+              label={{ value: 'Risk (Volatility)', position: 'bottom', offset: 0, style: { fontSize: 11, fill: 'var(--text-3)', fontWeight: 500 } }}
             />
             <YAxis
               type="number"
@@ -95,10 +94,11 @@ export function EfficiencyFrontierChart({ frontier, portfolioMetrics, maxDrawdow
               domain={['dataMin - 2', 'dataMax + 2']}
               tickFormatter={(v: number) => v.toFixed(1)}
               stroke="var(--text-3)"
-              tick={{ fontSize: 10, fill: 'var(--text-2)' }}
+              tick={{ fontSize: 12, fill: 'var(--text-2)', fontWeight: 500 }}
               tickLine={false}
               axisLine={false}
-              width={44}
+              width={58}
+              label={{ value: 'Return', angle: -90, position: 'insideLeft', style: { fontSize: 11, fill: 'var(--text-3)', fontWeight: 500 } }}
             />
             <Tooltip
               content={({ active, payload }) => {
@@ -113,17 +113,17 @@ export function EfficiencyFrontierChart({ frontier, portfolioMetrics, maxDrawdow
                 );
               }}
             />
-            <Scatter data={cloud} fill="#122c39" fillOpacity={0.65} r={2.5} isAnimationActive={false} />
-            <Line type="monotone" dataKey="y" stroke="#54798a" strokeWidth={1.5} dot={false} isAnimationActive={false} legendType="none" />
-            <ReferenceDot x={current.x} y={current.y} r={5} fill="#3b6178" stroke="var(--bg)" strokeWidth={2} />
+            <Scatter data={cloud} fill="#54798a" fillOpacity={0.55} r={3} isAnimationActive={false} />
+            <Line type="monotone" dataKey="y" stroke="#00c4a7" strokeWidth={2.5} dot={false} isAnimationActive={false} legendType="none" />
+            <ReferenceDot x={current.x} y={current.y} r={7} fill="#00c4a7" stroke="var(--bg)" strokeWidth={2.5} />
           </ComposedChart>
         </ResponsiveContainer>
       </div>
 
-      {headroom !== null && headroom > 0.5 && (
-        <p style={{ margin: '8px 0 0', fontSize: T.label, color: 'var(--text-2)', lineHeight: 1.5 }}>
-          At your risk level, a different weighting of these same assets reached{' '}
-          <strong style={{ color: '#54798a' }}>+{headroom.toFixed(1)}%</strong> more return.
+      {headroom !== null && headroom > 0.1 && (
+        <p style={{ margin: '10px 0 0', fontSize: T.label, color: 'var(--text-2)', lineHeight: 1.5, padding: '8px 10px', background: 'rgba(0, 196, 167, 0.08)', borderRadius: '6px', borderLeft: '3px solid #00c4a7' }}>
+          <strong style={{ color: 'var(--text)' }}>Rebalancing opportunity:</strong> At your current risk level, a different mix could reach{' '}
+          <strong style={{ color: '#00c4a7' }}>+{headroom.toFixed(1)}%</strong> more return.
         </p>
       )}
     </Panel>
