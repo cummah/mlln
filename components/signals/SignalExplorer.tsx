@@ -13,11 +13,16 @@ import { CohortChart, Results } from './Summary'
 import { sliderCss } from './ui'
 import type { Entitlement } from '@/types'
 
-const TABS: { key: Freq; label: string }[] = [
-  { key: 'daily', label: 'Daily' },
-  { key: 'weekly', label: 'Weekly' },
-  { key: 'monthly', label: 'Monthly' },
-]
+const getTabs = (freq: Freq): { key: Freq; label: string }[] => {
+  const tabs: { key: Freq; label: string }[] = [
+    { key: 'weekly', label: 'Weekly' },
+    { key: 'monthly', label: 'Monthly' },
+  ]
+  if (freq === 'daily') {
+    tabs.unshift({ key: 'daily', label: 'Daily' })
+  }
+  return tabs
+}
 
 function shift(date: string, days: number): string {
   return new Date(new Date(date + 'T12:00:00Z').getTime() - days * 86400000).toISOString().slice(0, 10)
@@ -104,7 +109,7 @@ export function SignalExplorer({ data }: { data: FeedPayload }) {
           </div>
         </div>
         <div style={{ display: 'flex', gap: '4px', background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: '8px', padding: '2px' }}>
-          {TABS.map(t => (
+          {getTabs(freq).map(t => (
             <Link key={t.key} href={`/asset/${t.key}`} style={{ padding: '6px 16px', borderRadius: '6px', fontSize: '13px', textDecoration: 'none', fontWeight: t.key === freq ? 700 : 500, background: t.key === freq ? 'var(--teal)' : 'transparent', color: t.key === freq ? '#040e18' : 'var(--text-2)' }}>
               {t.label}
             </Link>

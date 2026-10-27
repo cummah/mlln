@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useRef, useMemo, useState } from 'react'
 import { exportTableToCSV } from '@/lib/csv-export'
 import { effective } from '@/lib/signals/model'
 import { dateCompact, fracPct, mult, NA, num, money, pct, tone } from '@/lib/signals/format'
@@ -49,24 +49,24 @@ const COLS: Col[] = [
     ),
   },
   { key: 'date', label: 'Signal', pri: 1, align: 'left', sort: x => x.r.d, csv: x => x.r.d, cell: x => dateCompact(x.r.d) },
-  { key: 'mult', label: 'Mult', pri: 1, align: 'right', sort: x => x.r.m, csv: x => x.r.m, cell: x => mult(x.r.m), hint: 'Buy multiplier' },
-  { key: 'pnl', label: 'P&L held', pri: 2, align: 'right', sort: x => x.pnl, csv: x => (x.pnl === null ? null : Math.round(x.pnl)), cell: x => (x.pnl === null ? pendingCell : <span style={{ color: tone(x.pnl), fontWeight: 600 }}>{money(x.pnl)}</span>), hint: 'Profit if held to the latest close' },
-  { key: 'ret', label: 'Return held', pri: 1, align: 'right', sort: x => x.r.p, csv: x => x.r.p, cell: x => (x.r.p === null ? pendingCell : <span style={{ color: tone(x.r.p), fontWeight: 600 }}>{pct(x.r.p)}</span>), hint: 'Return if held to the latest close' },
+  { key: 'invested', label: 'Invested', pri: 1, align: 'right', sort: x => x.invested, csv: x => Math.round(x.invested), cell: x => money(x.invested) },
+  { key: 'pnl', label: 'P&L held', pri: 1, align: 'right', sort: x => x.pnl, csv: x => (x.pnl === null ? null : Math.round(x.pnl)), cell: x => (x.pnl === null ? pendingCell : <span style={{ color: tone(x.pnl), fontWeight: 600 }}>{money(x.pnl)}</span>), hint: 'Profit if held to the latest close' },
   {
-    key: 'sold', label: 'If sold', pri: 1, align: 'right', sort: soldRet,
+    key: 'sold', label: 'Return sold', pri: 1, align: 'right', sort: soldRet,
     csv: x => (x.eff.closed ? x.eff.retPct : null),
     hint: 'Return if sold at the exit signal, or Held if no exit has happened',
     cell: x => x.eff.closed
       ? <span title={`Sold ${x.eff.date}${x.eff.reason === 'atr' ? ' by stop loss' : ''}`} style={{ color: tone(x.eff.retPct), fontWeight: 600 }}>{pct(x.eff.retPct)}{x.eff.reason === 'atr' ? ' ◦' : ''}</span>
       : <span style={{ color: 'var(--text-3)' }}>Held</span>,
   },
-  { key: 'factor', label: 'Factor', pri: 2, align: 'right', sort: x => x.r.f, csv: x => x.r.f, cell: x => <span style={{ color: tone(x.r.f) }}>{fracPct(x.r.f)}</span>, hint: 'Factor regime' },
+  { key: 'mult', label: 'Mult', pri: 2, align: 'right', sort: x => x.r.m, csv: x => x.r.m, cell: x => mult(x.r.m), hint: 'Buy multiplier', off: true },
+  { key: 'ret', label: 'Return held', pri: 2, align: 'right', sort: x => x.r.p, csv: x => x.r.p, cell: x => (x.r.p === null ? pendingCell : <span style={{ color: tone(x.r.p), fontWeight: 600 }}>{pct(x.r.p)}</span>), hint: 'Return if held to the latest close', off: true },
+  { key: 'factor', label: 'Factor', pri: 2, align: 'right', sort: x => x.r.f, csv: x => x.r.f, cell: x => <span style={{ color: tone(x.r.f) }}>{fracPct(x.r.f)}</span>, hint: 'Factor regime', off: true },
   // Vol timing exists only on down days. Up days have no value, shown as a dash.
-  { key: 'vol', label: 'Vol timing', pri: 2, align: 'right', sort: x => x.r.v, csv: x => x.r.v, cell: x => (x.r.v === 0 ? <span style={{ color: 'var(--text-3)' }}>-</span> : <span style={{ color: tone(x.r.v) }}>{fracPct(x.r.v)}</span>), hint: 'Only on down days, a dash means the signal day was not a down day' },
-  { key: 'mr', label: 'Mean rev', pri: 2, align: 'right', sort: x => x.r.r, csv: x => x.r.r, cell: x => <span style={{ color: tone(x.r.r) }}>{fracPct(x.r.r)}</span>, hint: 'Mean reversion' },
-  { key: 'invested', label: 'Invested', pri: 3, align: 'right', sort: x => x.invested, csv: x => Math.round(x.invested), cell: x => money(x.invested) },
-  { key: 'dca', label: 'DCA', pri: 3, align: 'right', sort: x => x.t.dca, csv: x => x.t.dca, cell: x => (x.t.dca === null ? NA : Math.round(x.t.dca)), hint: 'DCA suitability score' },
-  { key: 'atr', label: 'Volat.', pri: 3, align: 'right', sort: x => x.r.a, csv: x => x.r.a, cell: x => (x.r.a === null ? NA : `${x.r.a.toFixed(1)}%`), hint: 'ATR(14) as a percent of price' },
+  { key: 'vol', label: 'Vol timing', pri: 2, align: 'right', sort: x => x.r.v, csv: x => x.r.v, cell: x => (x.r.v === 0 ? <span style={{ color: 'var(--text-3)' }}>-</span> : <span style={{ color: tone(x.r.v) }}>{fracPct(x.r.v)}</span>), hint: 'Only on down days, a dash means the signal day was not a down day', off: true },
+  { key: 'mr', label: 'Mean rev', pri: 2, align: 'right', sort: x => x.r.r, csv: x => x.r.r, cell: x => <span style={{ color: tone(x.r.r) }}>{fracPct(x.r.r)}</span>, hint: 'Mean reversion', off: true },
+  { key: 'dca', label: 'DCA', pri: 3, align: 'right', sort: x => x.t.dca, csv: x => x.t.dca, cell: x => (x.t.dca === null ? NA : Math.round(x.t.dca)), hint: 'DCA suitability score', off: true },
+  { key: 'atr', label: 'Volat.', pri: 3, align: 'right', sort: x => x.r.a, csv: x => x.r.a, cell: x => (x.r.a === null ? NA : `${x.r.a.toFixed(1)}%`), hint: 'ATR(14) as a percent of price', off: true },
   { key: 'sector', label: 'Sector', pri: 3, align: 'left', off: true, sort: x => x.t.sector, csv: x => x.t.sector, cell: x => x.t.sector },
   { key: 'exitScore', label: 'Exit score', pri: 3, align: 'right', off: true, sort: x => x.r.xs, csv: x => x.r.xs, cell: x => num(x.r.xs) },
   { key: 'wa', label: 'Wkly buy', pri: 3, align: 'right', only: 'daily', off: true, sort: x => x.r.wa, csv: x => x.r.wa, cell: x => (x.r.wa === null ? '-' : `${x.r.wa}d`), hint: 'Days since a weekly buy' },
@@ -133,7 +133,19 @@ export function SignalTable({ rows, tickers, strategy, base, freq, onSelect, lat
   const [visible, setVisible] = useState<Set<string>>(new Set(COLS.filter(c => !c.off).map(c => c.key)))
   const [pickerOpen, setPickerOpen] = useState(false)
   const [showUpgrade, setShowUpgrade] = useState(false)
+  const pickerRef = useRef<HTMLDivElement>(null)
   const phone = useIsPhone()
+
+  useEffect(() => {
+    if (!pickerOpen) return
+    const handleClickOutside = (e: MouseEvent) => {
+      if (pickerRef.current && !pickerRef.current.contains(e.target as Node)) {
+        setPickerOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [pickerOpen])
 
   const available = COLS.filter(c => !c.only || c.only === freq)
   const cols = available.filter(c => visible.has(c.key))
@@ -182,7 +194,7 @@ export function SignalTable({ rows, tickers, strategy, base, freq, onSelect, lat
             <button style={btn} onClick={() => setPickerOpen(!pickerOpen)}>Columns</button>
           )}
           {pickerOpen && !phone && (
-            <div style={{ position: 'absolute', top: '100%', left: 0, marginTop: '8px', background: 'var(--surface-elevated)', border: '1px solid var(--border-elevated)', borderRadius: '8px', padding: '10px 12px', minWidth: '200px', maxHeight: '320px', overflowY: 'auto', zIndex: 50, boxShadow: 'var(--shadow-lg)' }}>
+            <div ref={pickerRef} style={{ position: 'absolute', top: '100%', left: 0, marginTop: '8px', background: 'var(--surface-elevated)', border: '1px solid var(--border-elevated)', borderRadius: '8px', padding: '10px 12px', minWidth: '200px', maxHeight: '320px', overflowY: 'auto', zIndex: 50, boxShadow: 'var(--shadow-lg)' }}>
               {available.map(c => (
                 <label key={c.key} style={{ display: 'flex', gap: '8px', alignItems: 'center', padding: '5px 0', fontSize: '12px', cursor: 'pointer' }}>
                   <input type="checkbox" checked={visible.has(c.key)} onChange={() => { const n = new Set(visible); if (n.has(c.key)) n.delete(c.key); else n.add(c.key); setVisible(n) }} />
