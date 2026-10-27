@@ -47,8 +47,8 @@ export function InvestedValueChart({ data }: { data: ChartRowData[] }) {
       const data = payload[0].payload;
       return (
         <div style={{
-          backgroundColor: 'var(--bg-2)',
-          border: '1px solid var(--border)',
+          backgroundColor: '#172b40',
+          border: '1px solid rgba(255,255,255,0.08)',
           borderRadius: '4px',
           padding: '8px 12px',
           fontSize: '12px',
@@ -83,7 +83,7 @@ export function InvestedValueChart({ data }: { data: ChartRowData[] }) {
           axisLine={{ stroke: 'var(--border)' }}
           tickFormatter={(value) => formatCurrency(value)}
         />
-        <Tooltip content={<CustomTooltip />} />
+        <Tooltip content={<CustomTooltip />} cursor={{ fill: '#172b40', opacity: 0.5 }} />
         <Legend
           verticalAlign="top"
           height={30}
