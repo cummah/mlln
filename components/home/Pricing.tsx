@@ -178,7 +178,7 @@ export function Pricing() {
             e.currentTarget.style.boxShadow = 'none';
           }}
         >
-          Get Started
+          Start mlln. Get rich slow.
         </button>
       </div>
 
