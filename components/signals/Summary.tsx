@@ -90,8 +90,26 @@ export function Results({ stats, base, strategy, setStrategy, settings }: Result
               sell={money(s.minCapital)}
               spy={money(spy.invested)}
             />
-            <Row label="Profit" hold={signed(holdProfit)} sell={signed(s.profit)} spy={signed(spy.value - spy.invested)} />
-            <Row label="Ending value" hold={money(h.value)} sell={money(s.endingValue)} spy={money(spy.value)} />
+            <Row
+              label="Profit"
+              hint="Buy and hold: all unrealised gains/losses. Sell: realised gains from closed positions + unrealised from open positions. SPY: unrealised gains/losses."
+              hold={signed(holdProfit)}
+              sell={signed(s.profit)}
+              spy={signed(spy.value - spy.invested)}
+            />
+            <Row
+              label="Unrealised gains"
+              hint="Buy and hold: gains from all held positions. Sell: gains from open positions only (closed positions counted in Profit)."
+              hold={<span>{h.gainCount} positions · {signed(h.gains)}</span>}
+              sell={<span>{s.openGainCount} positions · {signed(s.openGains)}</span>}
+            />
+            <Row
+              label="Unrealised losses"
+              hint="Buy and hold: losses from all held positions. Sell: losses from open positions only (closed positions counted in Profit)."
+              hold={<span>{h.lossCount} positions · {signed(h.losses)}</span>}
+              sell={<span>{s.openLossCount} positions · {signed(s.openLosses)}</span>}
+            />
+            <Row label="Current P&L" hold={money(h.value)} sell={money(s.endingValue)} spy={money(spy.value)} />
             <Row label="Win rate" hold={h.winRate === null ? NA : `${h.winRate.toFixed(0)}%`} sell={s.winRate === null ? NA : `${s.winRate.toFixed(0)}%`} />
             <Row label="Median return" hold={pct(h.medianPct)} sell={pct(s.medianPct)} />
             <Row label="Positions" hold={`${h.n.toLocaleString()} held`} sell={`${s.closedCount.toLocaleString()} sold · ${s.openCount.toLocaleString()} held`} />
@@ -100,7 +118,9 @@ export function Results({ stats, base, strategy, setStrategy, settings }: Result
           </tbody>
         </table>
         <div style={{ fontSize: '10.5px', color: 'var(--text-3)', margin: '4px 0 10px', lineHeight: 1.4 }}>
-          Sell side: minimum starting cash {money(s.minCapital)} + realised profit {money(s.closedProfit)} + unrealised profit {money(s.openProfit)} = ending value {money(s.endingValue)}.
+          Hold side: gains {money(h.gains)} − losses {money(Math.abs(h.losses))} = Current P&L {money(h.value)}.
+          <br />
+          Sell side: minimum starting cash {money(s.minCapital)} + realised profit {money(s.closedProfit)} + unrealised gains {money(s.openGains)} − unrealised losses {money(Math.abs(s.openLosses))} = Current P&L {money(s.endingValue)}.
         </div>
       </div>
 

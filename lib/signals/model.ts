@@ -98,6 +98,10 @@ export interface HoldStats {
   medianPct: number | null
   wins: number
   winRate: number | null
+  gains: number
+  gainCount: number
+  losses: number
+  lossCount: number
 }
 
 export interface SellStats {
@@ -107,6 +111,10 @@ export interface SellStats {
   openCount: number
   closedProfit: number
   openProfit: number
+  openGains: number
+  openGainCount: number
+  openLosses: number
+  openLossCount: number
   avgHoldDays: number | null
   minCapital: number
   endingValue: number
@@ -143,16 +151,29 @@ export function computeStats(rows: SigRow[], base: number, strat: Strategy, spy:
   // Buy and hold
   let invested = 0
   let value = 0
+  let gains = 0
+  let gainCount = 0
+  let losses = 0
+  let lossCount = 0
   const rets: number[] = []
   let spyValue = 0
   let spyInvested = 0
   let multSum = 0
   for (const r of known) {
     const inv = base * r.m
+    const v = inv * (1 + (r.p as number) / 100)
+    const gain = v - inv
     invested += inv
-    value += inv * (1 + (r.p as number) / 100)
+    value += v
     rets.push(r.p as number)
     multSum += r.m
+    if (gain >= 0) {
+      gains += gain
+      gainCount++
+    } else {
+      losses += gain
+      lossCount++
+    }
     const sr = spy(r.d)
     if (sr !== null) { spyInvested += inv; spyValue += inv * (1 + sr / 100) }
   }
@@ -173,6 +194,10 @@ export function computeStats(rows: SigRow[], base: number, strat: Strategy, spy:
     medianPct: median(rets),
     wins,
     winRate: rets.length ? (wins / rets.length) * 100 : null,
+    gains,
+    gainCount,
+    losses,
+    lossCount,
   }
 
   // Sell on exit signal, always worked out beside buy and hold so the two can be compared
@@ -180,6 +205,10 @@ export function computeStats(rows: SigRow[], base: number, strat: Strategy, spy:
     const events: { date: string; amount: number }[] = []
     let closedProfit = 0
     let openProfit = 0
+    let openGains = 0
+    let openGainCount = 0
+    let openLosses = 0
+    let openLossCount = 0
     let openValue = 0
     let closedCount = 0
     let openCount = 0
@@ -202,9 +231,17 @@ export function computeStats(rows: SigRow[], base: number, strat: Strategy, spy:
         else bySignal++
       } else {
         const v = inv * (1 + (r.p as number) / 100)
-        openProfit += v - inv
+        const gain = v - inv
+        openProfit += gain
         openValue += v
         openCount++
+        if (gain >= 0) {
+          openGains += gain
+          openGainCount++
+        } else {
+          openLosses += gain
+          openLossCount++
+        }
         sellRets.push(r.p as number)
       }
     }
@@ -225,6 +262,10 @@ export function computeStats(rows: SigRow[], base: number, strat: Strategy, spy:
       openCount,
       closedProfit,
       openProfit,
+      openGains,
+      openGainCount,
+      openLosses,
+      openLossCount,
       avgHoldDays: holdDays.length ? holdDays.reduce((a, b) => a + b, 0) / holdDays.length : null,
       minCapital,
       endingValue,
