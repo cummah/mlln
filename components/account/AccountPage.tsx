@@ -7,6 +7,7 @@ import { usePendingTierUpgrade } from '@/lib/hooks/usePendingTierUpgrade';
 import PricingTiersForAccount from './PricingTiersForAccount';
 import WatchlistManagement from './WatchlistManagement';
 import PortfolioManagement from './PortfolioManagement';
+import SignalPreferencesManagement from './SignalPreferencesManagement';
 import type { UserProfile } from '@/types';
 
 interface AccountUser {
@@ -375,6 +376,11 @@ export default function AccountPage({ user }: { user: AccountUser }) {
             tier={profile.tier}
             maxPortfolios={profile.tier === 0 ? 1 : profile.tier === 1 ? 1 : profile.tier === 2 ? 3 : 5}
           />
+        )}
+
+        {/* Signal Filter Preferences */}
+        {profile.tier >= 2 && (
+          <SignalPreferencesManagement userId={user.id} />
         )}
 
         {/* Tier 1 Assets Management */}

@@ -16,11 +16,16 @@ interface Props {
   sectors: string[]
   years: number[]
   onReset: () => void
+  onSave?: () => void
+  onUpgrade?: () => void
+  isSaving?: boolean
+  userTier?: number
+  saveMessage?: string
 }
 
 const NA_NOTE = 'Signals with no value for this indicator are hidden only while this is narrowed.'
 
-export function FilterRail({ settings, filters, setFilters, base, setBase, datePreset, setDatePreset, sectors, years, onReset }: Props) {
+export function FilterRail({ settings, filters, setFilters, base, setBase, datePreset, setDatePreset, sectors, years, onReset, onSave, onUpgrade, isSaving, userTier = 0, saveMessage }: Props) {
   const [sectorsOpen, setSectorsOpen] = useState(false)
   const [moreOpen, setMoreOpen] = useState(false)
   const set = (patch: Partial<Filters>) => setFilters({ ...filters, ...patch })
@@ -134,12 +139,67 @@ export function FilterRail({ settings, filters, setFilters, base, setBase, dateP
         )}
       </Card>
 
-      <button
-        onClick={onReset}
-        style={{ padding: '8px 10px', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '6px', fontSize: '12px', fontWeight: 600, color: 'var(--text-2)', cursor: 'pointer' }}
-      >
-        Reset filters
-      </button>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+        <button
+          onClick={onReset}
+          style={{ padding: '8px 10px', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '6px', fontSize: '12px', fontWeight: 600, color: 'var(--text-2)', cursor: 'pointer' }}
+        >
+          Reset filters
+        </button>
+
+        {userTier >= 2 && onSave ? (
+          <button
+            onClick={onSave}
+            disabled={isSaving}
+            style={{
+              padding: '7px 10px',
+              background: 'var(--teal)',
+              border: '1px solid var(--teal)',
+              borderRadius: '8px',
+              fontSize: '12px',
+              fontWeight: 600,
+              color: '#000',
+              cursor: isSaving ? 'not-allowed' : 'pointer',
+              opacity: isSaving ? 0.7 : 1,
+              transition: 'all 0.15s',
+            }}
+          >
+            {isSaving ? 'Saving...' : 'Save filters'}
+          </button>
+        ) : onUpgrade && userTier < 2 ? (
+          <button
+            onClick={onUpgrade}
+            style={{
+              padding: '7px 10px',
+              background: 'var(--teal)',
+              border: '1px solid var(--teal)',
+              borderRadius: '8px',
+              fontSize: '12px',
+              fontWeight: 600,
+              color: '#000',
+              cursor: 'pointer',
+              transition: 'all 0.15s',
+            }}
+          >
+            Upgrade to save
+          </button>
+        ) : null}
+
+        {saveMessage && (
+          <div style={{
+            padding: '6px 8px',
+            background: 'rgba(0, 196, 167, 0.12)',
+            border: '1px solid var(--teal)',
+            borderRadius: '6px',
+            fontSize: '11px',
+            fontWeight: 600,
+            color: 'var(--teal)',
+            textAlign: 'center',
+          }}>
+            {saveMessage}
+          </div>
+        )}
+      </div>
     </div>
   )
 }

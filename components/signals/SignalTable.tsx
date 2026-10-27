@@ -324,7 +324,7 @@ export function SignalTable({ rows, tickers, strategy, base, freq, onSelect, lat
             </p>
             <div style={{ display: 'flex', gap: '8px' }}>
               <button onClick={() => setShowUpgrade(false)} style={{ flex: 1, padding: '10px 16px', background: 'var(--surface)', border: '1px solid var(--border-elevated)', borderRadius: '8px', fontSize: '13px', fontWeight: 600, color: 'var(--text)', cursor: 'pointer' }}>Close</button>
-              <Link href="/pricing" onClick={() => setShowUpgrade(false)} style={{ flex: 1, padding: '10px 16px', background: 'var(--teal)', border: 'none', borderRadius: '8px', fontSize: '13px', fontWeight: 600, color: '#040e18', cursor: 'pointer', textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>View plans</Link>
+              <Link href="/#pricing" onClick={() => setShowUpgrade(false)} style={{ flex: 1, padding: '10px 16px', background: 'var(--teal)', border: 'none', borderRadius: '8px', fontSize: '13px', fontWeight: 600, color: '#040e18', cursor: 'pointer', textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>View plans</Link>
             </div>
           </div>
         </div>

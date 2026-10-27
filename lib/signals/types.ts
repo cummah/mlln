@@ -53,6 +53,7 @@ export interface Strategy {
   nextOpen: boolean // sell at the next open instead of the exit day's close
   atrIdx: number | null // index into ATR_MULTIPLIERS, daily page only
   fee: number // dollars per closed trade
+  base?: number // base amount for saving/restoring preferences
 }
 
 export interface Effective {
