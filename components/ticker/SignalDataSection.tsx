@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import type { CurrentReading, MajorBuy } from '@/lib/ticker/data';
+import type { UserTier } from '@/types';
 import { CurrentSignalTile } from './CurrentSignalTile';
 import { formatCurrency } from '@/lib/formatters';
 
@@ -13,6 +14,7 @@ interface SignalDataSectionProps {
   currentMonthly: CurrentReading | null;
   universeCount: number;
   dcaSuitabilityScore: number | null;
+  tier: UserTier;
 }
 
 function formatPerformance(perf: number): string {
@@ -30,7 +32,7 @@ function formatDateForDisplay(dateStr: string): string {
   return date.toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' });
 }
 
-export function SignalDataSection({ ticker, weeklyMajor, monthlyMajor, currentWeekly, currentMonthly, universeCount, dcaSuitabilityScore }: SignalDataSectionProps) {
+export function SignalDataSection({ ticker, weeklyMajor, monthlyMajor, currentWeekly, currentMonthly, universeCount, dcaSuitabilityScore, tier }: SignalDataSectionProps) {
   // Return to date is measured from the real fill price (next open) to the latest close. It stays empty
   // until that fill price exists, which is the day after the signal.
   const weeklyPerf = weeklyMajor && weeklyMajor.performance !== null ? { ...weeklyMajor, performance: weeklyMajor.performance as number, currentValue: weeklyMajor.currentValue as number } : null;
@@ -232,40 +234,76 @@ export function SignalDataSection({ ticker, weeklyMajor, monthlyMajor, currentWe
           </div>
         </div>
 
-        {/* Right Column - Get Signal Button */}
-        <Link href="/#pricing" style={{ textDecoration: 'none' }}>
-          <button style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: '8px',
-            padding: '10px 16px',
-            background: 'var(--teal)',
-            border: '1px solid var(--teal)',
-            borderRadius: '10px',
-            fontSize: '12px',
-            fontWeight: '600',
-            color: '#000',
-            cursor: 'pointer',
-            transition: 'all 0.15s',
-            width: '100%'
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.background = 'rgba(0, 196, 167, 0.9)';
-            e.currentTarget.style.borderColor = 'rgba(0, 196, 167, 0.9)';
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.background = 'var(--teal)';
-            e.currentTarget.style.borderColor = 'var(--teal)';
-          }}
-          >
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
-              <path d="M13.73 21a2 2 0 0 1-3.46 0" />
-            </svg>
-            Unlock the next buy signal
-          </button>
-        </Link>
+        {/* Right Column - Signal Button (Tier-aware) */}
+        {tier === 2 ? (
+          <Link href="/portfolio" style={{ textDecoration: 'none' }}>
+            <button style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '8px',
+              padding: '10px 16px',
+              background: 'var(--teal)',
+              border: '1px solid var(--teal)',
+              borderRadius: '10px',
+              fontSize: '12px',
+              fontWeight: '600',
+              color: '#000',
+              cursor: 'pointer',
+              transition: 'all 0.15s',
+              width: '100%'
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = 'rgba(0, 196, 167, 0.9)';
+              e.currentTarget.style.borderColor = 'rgba(0, 196, 167, 0.9)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = 'var(--teal)';
+              e.currentTarget.style.borderColor = 'var(--teal)';
+            }}
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+                <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+              </svg>
+              View in portfolio
+            </button>
+          </Link>
+        ) : (
+          <Link href={tier === 1 ? '/pricing' : '/signup'} style={{ textDecoration: 'none' }}>
+            <button style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '8px',
+              padding: '10px 16px',
+              background: 'var(--teal)',
+              border: '1px solid var(--teal)',
+              borderRadius: '10px',
+              fontSize: '12px',
+              fontWeight: '600',
+              color: '#000',
+              cursor: 'pointer',
+              transition: 'all 0.15s',
+              width: '100%'
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = 'rgba(0, 196, 167, 0.9)';
+              e.currentTarget.style.borderColor = 'rgba(0, 196, 167, 0.9)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = 'var(--teal)';
+              e.currentTarget.style.borderColor = 'var(--teal)';
+            }}
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+                <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+              </svg>
+              {tier === 1 ? 'Upgrade for signals' : 'Unlock the next buy signal'}
+            </button>
+          </Link>
+        )}
       </div>
     </div>
   );

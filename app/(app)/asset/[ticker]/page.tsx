@@ -172,6 +172,7 @@ export default async function TickerPage({ params }: PageProps) {
           currentMonthly={current.monthly}
           universeCount={universeCount}
           dcaSuitabilityScore={summary?.dca_suitability_score ?? null}
+          tier={entitlement.tier}
         />
 
         {/* Custom Backtest Tiles */}
