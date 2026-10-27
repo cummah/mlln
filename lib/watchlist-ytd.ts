@@ -8,6 +8,8 @@
 // fills at the open of the day after the month's first trading day, which is how the feed dates its own fills. Prices are
 // price returns: no dividends, fees or slippage. Pure functions only, so the numbers are easy to check.
 
+import { isoWeekKey } from '@/lib/engine/evaluate'
+
 export type YtdKey = 'mlln' | 'std' | 'spyMirror' | 'spyDca'
 
 export interface FeedEntry {
@@ -68,9 +70,17 @@ export function buildYtd(
   if (!spyBars || months.length === 0) return null
   const spyDates = Array.from(spyBars.keys()).sort()
 
-  // Fill date for a month with no signal: the day after the month's first trading day
-  const fallbackDate = (ym: string): string | null => {
-    const i = spyDates.findIndex(d => d.startsWith(ym))
+  // Fill date for a period with no signal: the day after the period's first trading day
+  // Handles both YYYY-MM (monthly) and YYYY-Www (weekly ISO) formats
+  const fallbackDate = (period: string): string | null => {
+    let i: number
+    if (period.includes('-W')) {
+      // Weekly period: find first date in that week using isoWeekKey
+      i = spyDates.findIndex(d => isoWeekKey(d) === period)
+    } else {
+      // Monthly period: find first date in that month
+      i = spyDates.findIndex(d => d.startsWith(period))
+    }
     return i >= 0 && i + 1 < spyDates.length ? spyDates[i + 1] : null
   }
   const openOn = (ticker: string, date: string): number | null => {
