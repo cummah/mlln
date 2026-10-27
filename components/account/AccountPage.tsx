@@ -15,6 +15,8 @@ interface AccountUser {
   email?: string;
 }
 
+type Tab = 'account' | 'assets';
+
 const TIER_NAMES: Record<number, string> = {
   0: 'Free',
   1: 'Essential',
@@ -33,6 +35,10 @@ export default function AccountPage({ user }: { user: AccountUser }) {
   const [newAsset, setNewAsset] = useState('');
   const [adding, setAdding] = useState(false);
   const [success, setSuccess] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<Tab>('account');
+  const [displayNameSaved, setDisplayNameSaved] = useState(true);
+  const [displayNameInput, setDisplayNameInput] = useState('');
+  const [savingName, setSavingName] = useState(false);
 
   const loadData = async () => {
     try {
@@ -55,6 +61,7 @@ export default function AccountPage({ user }: { user: AccountUser }) {
       }
 
       setProfile(profile);
+      setDisplayNameInput(profile?.display_name || '');
 
       if (profile?.tier === 1) {
         const { data: assetsData } = await supabase
@@ -68,6 +75,32 @@ export default function AccountPage({ user }: { user: AccountUser }) {
       console.error(err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleSaveDisplayName = async () => {
+    if (!profile || displayNameInput === profile.display_name) return;
+
+    setSavingName(true);
+    setDisplayNameSaved(false);
+    try {
+      const { error: updateError } = await supabase
+        .from('profiles')
+        .update({ display_name: displayNameInput })
+        .eq('user_id', user.id);
+
+      if (updateError) throw updateError;
+
+      setProfile({ ...profile, display_name: displayNameInput });
+      setDisplayNameSaved(true);
+      setSuccess('Display name updated');
+      setTimeout(() => setSuccess(null), 2000);
+    } catch (err) {
+      setError('Failed to save display name');
+      console.error(err);
+      setDisplayNameInput(profile.display_name || '');
+    } finally {
+      setSavingName(false);
     }
   };
 
@@ -162,17 +195,22 @@ export default function AccountPage({ user }: { user: AccountUser }) {
     4: '#ec4899'
   };
 
+  const tabs = [
+    { id: 'account' as const, label: 'Account & Plan', show: true },
+    { id: 'assets' as const, label: 'Assets & Collections', show: profile && profile.tier > 0 }
+  ].filter(t => t.show) as { id: Tab; label: string; show: boolean }[];
+
   return (
-    <div style={{ padding: '40px 20px', maxWidth: '800px', margin: '0 auto' }}>
+    <div style={{ padding: '40px 20px', maxWidth: '900px', margin: '0 auto' }}>
       {success && (
         <div style={{
-          padding: '16px',
+          padding: '12px 16px',
           borderRadius: '8px',
           background: 'rgba(0, 200, 180, 0.1)',
           color: 'var(--teal)',
           border: '1px solid rgba(0, 200, 180, 0.3)',
-          marginBottom: '24px',
-          fontSize: '14px',
+          marginBottom: '20px',
+          fontSize: '13px',
           fontWeight: '600'
         }}>
           ✓ {success}
@@ -180,314 +218,495 @@ export default function AccountPage({ user }: { user: AccountUser }) {
       )}
 
       <div style={{ marginBottom: '40px' }}>
-        <h1 style={{ fontSize: '32px', fontWeight: '800', marginBottom: '24px', color: 'var(--text)' }}>
-          Account
-        </h1>
-
-        {/* User Info */}
-        <div style={{
-          background: 'var(--surface)',
-          border: '1px solid var(--border)',
-          borderRadius: '12px',
-          padding: '24px',
-          marginBottom: '24px'
-        }}>
-          <div style={{ marginBottom: '20px' }}>
-            <div style={{ fontSize: '12px', color: 'var(--text-3)', marginBottom: '4px', textTransform: 'uppercase' }}>
-              Display Name
-            </div>
-            <input
-              type="text"
-              value={profile.display_name || ''}
-              onChange={(e) => {
-                const newProfile = { ...profile, display_name: e.target.value };
-                setProfile(newProfile);
-              }}
-              placeholder="Enter your name"
-              style={{
-                padding: '10px 12px',
-                borderRadius: '8px',
-                border: '1px solid var(--border)',
-                background: 'var(--bg)',
-                color: 'var(--text)',
-                fontSize: '14px',
-                fontFamily: 'inherit',
-                width: '100%',
-                maxWidth: '300px',
-                boxSizing: 'border-box'
-              }}
-            />
-          </div>
-
-          <div style={{ marginBottom: '20px' }}>
-            <div style={{ fontSize: '12px', color: 'var(--text-3)', marginBottom: '4px', textTransform: 'uppercase' }}>
-              Email
-            </div>
-            <div style={{ fontSize: '16px', color: 'var(--text)' }}>
-              {user.email}
-            </div>
-          </div>
-
-          <div style={{ marginBottom: '20px' }}>
-            <div style={{ fontSize: '12px', color: 'var(--text-3)', marginBottom: '4px', textTransform: 'uppercase' }}>
-              Current Plan
-            </div>
-            <div style={{
-              display: 'inline-block',
-              padding: '8px 16px',
-              borderRadius: '8px',
-              background: `${tierColors[profile.tier]}20`,
-              color: tierColors[profile.tier],
-              fontWeight: '600',
-              fontSize: '14px'
-            }}>
-              {tierNames[profile.tier]}
-            </div>
-          </div>
-
-          {profile.current_period_end && (
-            <div style={{ marginBottom: '20px' }}>
-              <div style={{ fontSize: '12px', color: 'var(--text-3)', marginBottom: '4px', textTransform: 'uppercase' }}>
-                Billing Period Ends
-              </div>
-              <div style={{ fontSize: '14px', color: 'var(--text)' }}>
-                {new Date(profile.current_period_end).toLocaleDateString()}
-              </div>
-            </div>
-          )}
-
+        <div style={{ marginBottom: '32px' }}>
+          <h1 style={{ fontSize: '32px', fontWeight: '800', marginBottom: '8px', color: 'var(--text)' }}>
+            Account
+          </h1>
+          <p style={{ fontSize: '14px', color: 'var(--text-2)', margin: 0 }}>
+            Manage your profile and plan
+          </p>
         </div>
 
-        {/* Complete Setup Banner for New Users */}
-        {profile.tier === 0 && (
+        {/* Tab Navigation */}
+        {tabs.length > 1 && (
           <div style={{
-            background: 'linear-gradient(135deg, rgba(0, 200, 180, 0.1) 0%, rgba(0, 200, 180, 0.05) 100%)',
-            border: '2px solid var(--teal)',
-            borderRadius: '12px',
-            padding: '24px',
-            marginBottom: '24px',
-            textAlign: 'center'
+            display: 'flex',
+            gap: '8px',
+            borderBottom: '1px solid var(--border)',
+            marginBottom: '32px',
+            overflowX: 'auto',
+            paddingBottom: '0'
           }}>
-            <h2 style={{ fontSize: '18px', fontWeight: '700', color: 'var(--text)', marginBottom: '8px' }}>
-              Complete Your Setup
-            </h2>
-            <p style={{ fontSize: '14px', color: 'var(--text-2)', marginBottom: '0' }}>
-              Choose a plan below to unlock advanced features and analysis
-            </p>
+            {tabs.map(tab => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                style={{
+                  padding: '12px 16px',
+                  background: 'none',
+                  border: 'none',
+                  fontSize: '14px',
+                  fontWeight: activeTab === tab.id ? '600' : '500',
+                  color: activeTab === tab.id ? 'var(--teal)' : 'var(--text-2)',
+                  cursor: 'pointer',
+                  borderBottom: activeTab === tab.id ? '2px solid var(--teal)' : '2px solid transparent',
+                  transition: 'all 0.2s',
+                  whiteSpace: 'nowrap'
+                }}
+              >
+                {tab.label}
+              </button>
+            ))}
           </div>
         )}
 
-        {/* Pricing Tiers for Free Users */}
-        {profile.tier === 0 && <PricingTiersForAccount />}
+        {/* Account & Plan Tab */}
+        {activeTab === 'account' && (
+          <div style={{ animation: 'fadeIn 0.2s ease-in' }}>
+            {/* Personal Information */}
+            <div style={{
+              background: 'var(--surface)',
+              border: '1px solid var(--border)',
+              borderRadius: '12px',
+              padding: '28px',
+              marginBottom: '24px'
+            }}>
+              <h2 style={{ fontSize: '18px', fontWeight: '600', marginBottom: '24px', color: 'var(--text)' }}>
+                Personal Information
+              </h2>
 
-        {/* Tier-specific Settings */}
-        {profile.tier > 0 && (
-          <div style={{
-            background: 'var(--surface)',
-            border: '1px solid var(--border)',
-            borderRadius: '12px',
-            padding: '24px',
-            marginBottom: '24px'
-          }}>
-            <h2 style={{ fontSize: '18px', fontWeight: '600', marginBottom: '16px', color: 'var(--text)' }}>
-              Your Plan Features
-            </h2>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '20px' }}>
-              <div>
-                <div style={{ fontSize: '12px', color: 'var(--text-3)', marginBottom: '8px', textTransform: 'uppercase' }}>
-                  Custom Watchlists
-                </div>
-                <div style={{ fontSize: '18px', fontWeight: '700', color: 'var(--text)' }}>
-                  {profile.tier === 1 ? '1' : profile.tier === 2 ? '3' : '5'}
-                </div>
-                <div style={{ fontSize: '12px', color: 'var(--text-2)', marginTop: '4px' }}>
-                  watchlists available
-                </div>
-                {profile.tier === 1 && (
-                  <a href="/my-watchlist" style={{
-                    display: 'inline-block',
-                    marginTop: '12px',
-                    padding: '8px 12px',
-                    borderRadius: '6px',
-                    background: 'rgba(0, 200, 180, 0.1)',
-                    color: 'var(--teal)',
-                    fontSize: '12px',
-                    fontWeight: '600',
-                    textDecoration: 'none'
-                  }}>
-                    View My Watchlist →
-                  </a>
-                )}
-              </div>
-              <div>
-                <div style={{ fontSize: '12px', color: 'var(--text-3)', marginBottom: '8px', textTransform: 'uppercase' }}>
-                  Saved Portfolios
-                </div>
-                <div style={{ fontSize: '18px', fontWeight: '700', color: 'var(--text)' }}>
-                  {profile.tier === 0 ? '1' : profile.tier === 1 ? '1' : profile.tier === 2 ? '3' : '5'}
-                </div>
-                <div style={{ fontSize: '12px', color: 'var(--text-2)', marginTop: '4px' }}>
-                  portfolios available
-                </div>
-                <a href="/my-portfolio" style={{
-                  display: 'inline-block',
-                  marginTop: '12px',
-                  padding: '8px 12px',
-                  borderRadius: '6px',
-                  background: 'rgba(0, 200, 180, 0.1)',
-                  color: 'var(--teal)',
-                  fontSize: '12px',
-                  fontWeight: '600',
-                  textDecoration: 'none'
-                }}>
-                  View My Portfolios →
-                </a>
-              </div>
-              {profile.tier === 1 && (
-                <div>
-                  <div style={{ fontSize: '12px', color: 'var(--text-3)', marginBottom: '8px', textTransform: 'uppercase' }}>
-                    Asset Swaps
-                  </div>
-                  <div style={{ fontSize: '18px', fontWeight: '700', color: 'var(--text)' }}>
-                    5 / month
-                  </div>
-                  <div style={{ fontSize: '12px', color: 'var(--text-2)', marginTop: '4px' }}>
-                    swap assets in watchlist
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-        )}
-
-        {/* Watchlist Management */}
-        {profile.tier >= 1 && (
-          <WatchlistManagement
-            userId={user.id}
-            tier={profile.tier}
-            maxWatchlists={profile.tier === 1 ? 1 : profile.tier === 2 ? 3 : 5}
-          />
-        )}
-
-        {/* Portfolio Management */}
-        {profile.tier >= 0 && (
-          <PortfolioManagement
-            userId={user.id}
-            tier={profile.tier}
-            maxPortfolios={profile.tier === 0 ? 1 : profile.tier === 1 ? 1 : profile.tier === 2 ? 3 : 5}
-          />
-        )}
-
-        {/* Signal Filter Preferences */}
-        {profile.tier >= 2 && (
-          <SignalPreferencesManagement userId={user.id} />
-        )}
-
-        {/* Tier 1 Assets Management */}
-        {profile.tier === 1 && (
-          <div style={{
-            background: 'var(--surface)',
-            border: '1px solid var(--border)',
-            borderRadius: '12px',
-            padding: '24px',
-            marginBottom: '24px'
-          }}>
-            <h2 style={{ fontSize: '18px', fontWeight: '600', marginBottom: '16px', color: 'var(--text)' }}>
-              Watchlist Assets
-            </h2>
-            <p style={{ fontSize: '14px', color: 'var(--text-2)', marginBottom: '16px' }}>
-              {assets.length} / 20 assets added. You can swap up to 5 times per month.
-            </p>
-
-            {/* Asset List */}
-            {assets.length > 0 && (
               <div style={{ marginBottom: '24px' }}>
+                <label style={{ fontSize: '12px', color: 'var(--text-3)', marginBottom: '8px', textTransform: 'uppercase', display: 'block', fontWeight: '600' }}>
+                  Display Name
+                </label>
+                <div style={{ display: 'flex', gap: '8px', alignItems: 'flex-start' }}>
+                  <input
+                    type="text"
+                    value={displayNameInput}
+                    onChange={(e) => {
+                      setDisplayNameInput(e.target.value);
+                      setDisplayNameSaved(false);
+                    }}
+                    placeholder="Enter your name"
+                    style={{
+                      flex: 1,
+                      padding: '10px 12px',
+                      borderRadius: '8px',
+                      border: '1px solid var(--border)',
+                      background: 'var(--bg)',
+                      color: 'var(--text)',
+                      fontSize: '14px',
+                      fontFamily: 'inherit',
+                      maxWidth: '400px',
+                      boxSizing: 'border-box'
+                    }}
+                  />
+                  <button
+                    onClick={handleSaveDisplayName}
+                    disabled={savingName || displayNameSaved}
+                    style={{
+                      padding: '10px 16px',
+                      borderRadius: '8px',
+                      border: 'none',
+                      background: displayNameSaved ? 'var(--teal)' : 'var(--teal)',
+                      color: 'var(--bg)',
+                      fontWeight: '600',
+                      fontSize: '13px',
+                      cursor: savingName || displayNameSaved ? 'not-allowed' : 'pointer',
+                      opacity: savingName ? 0.6 : 1,
+                      transition: 'all 0.2s',
+                      whiteSpace: 'nowrap'
+                    }}
+                  >
+                    {savingName ? 'Saving...' : displayNameSaved ? '✓ Saved' : 'Save'}
+                  </button>
+                </div>
+              </div>
+
+              <div style={{ marginBottom: '24px' }}>
+                <label style={{ fontSize: '12px', color: 'var(--text-3)', marginBottom: '8px', textTransform: 'uppercase', display: 'block', fontWeight: '600' }}>
+                  Email Address
+                </label>
+                <div style={{ fontSize: '14px', color: 'var(--text)', padding: '10px 12px', background: 'var(--bg)', borderRadius: '8px', border: '1px solid var(--border)' }}>
+                  {user.email}
+                </div>
+              </div>
+
+              <div>
+                <label style={{ fontSize: '12px', color: 'var(--text-3)', marginBottom: '8px', textTransform: 'uppercase', display: 'block', fontWeight: '600' }}>
+                  Current Plan
+                </label>
                 <div style={{
-                  display: 'grid',
-                  gridTemplateColumns: 'repeat(auto-fill, minmax(120px, 1fr))',
+                  display: 'inline-flex',
+                  alignItems: 'center',
                   gap: '12px'
                 }}>
-                  {assets.map(ticker => (
-                    <div
-                      key={ticker}
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'space-between',
-                        padding: '12px',
-                        borderRadius: '8px',
-                        background: 'var(--surface2)',
-                        border: '1px solid var(--border)',
-                        gap: '8px'
-                      }}
-                    >
-                      <span style={{ fontWeight: '600', color: 'var(--text)' }}>
-                        {ticker}
-                      </span>
-                      <button
-                        onClick={() => handleRemoveAsset(ticker)}
-                        style={{
-                          background: 'none',
-                          border: 'none',
-                          color: '#ff6b6b',
-                          cursor: 'pointer',
-                          fontSize: '18px',
-                          padding: '0',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center'
-                        }}
-                        title="Remove asset"
-                      >
-                        ×
-                      </button>
+                  <div style={{
+                    display: 'inline-block',
+                    padding: '8px 16px',
+                    borderRadius: '8px',
+                    background: `${tierColors[profile.tier]}20`,
+                    color: tierColors[profile.tier],
+                    fontWeight: '600',
+                    fontSize: '14px'
+                  }}>
+                    {tierNames[profile.tier]}
+                  </div>
+                  {profile.current_period_end && (
+                    <div style={{ fontSize: '12px', color: 'var(--text-2)' }}>
+                      Renews {new Date(profile.current_period_end).toLocaleDateString()}
                     </div>
-                  ))}
+                  )}
                 </div>
+              </div>
+            </div>
+
+            {/* Plan Features */}
+            {profile.tier > 0 && (
+              <div style={{
+                background: 'var(--surface)',
+                border: '1px solid var(--border)',
+                borderRadius: '12px',
+                padding: '28px',
+                marginBottom: '24px'
+              }}>
+                <h2 style={{ fontSize: '18px', fontWeight: '600', marginBottom: '24px', color: 'var(--text)' }}>
+                  Your Plan Features
+                </h2>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '24px', marginBottom: '24px' }}>
+                  <div style={{ padding: '20px', background: 'var(--bg)', borderRadius: '10px', border: '1px solid var(--border)' }}>
+                    <div style={{ fontSize: '11px', color: 'var(--text-3)', marginBottom: '8px', textTransform: 'uppercase', fontWeight: '600', letterSpacing: '0.05em' }}>
+                      Custom Watchlists
+                    </div>
+                    <div style={{ fontSize: '28px', fontWeight: '700', color: 'var(--text)', marginBottom: '4px' }}>
+                      {profile.tier === 1 ? '1' : profile.tier === 2 ? '3' : '5'}
+                    </div>
+                    <div style={{ fontSize: '13px', color: 'var(--text-2)', marginBottom: '16px' }}>
+                      {profile.tier === 1 ? 'watchlist' : 'watchlists'} available
+                    </div>
+                    <a href="/my-watchlist" style={{
+                      display: 'inline-block',
+                      padding: '8px 14px',
+                      borderRadius: '6px',
+                      background: 'var(--teal)',
+                      color: 'var(--bg)',
+                      fontSize: '12px',
+                      fontWeight: '600',
+                      textDecoration: 'none',
+                      transition: 'all 0.2s'
+                    }}>
+                      {profile.tier === 1 ? 'View My Watchlist' : 'Manage Watchlists'} →
+                    </a>
+                  </div>
+                  <div style={{ padding: '20px', background: 'var(--bg)', borderRadius: '10px', border: '1px solid var(--border)' }}>
+                    <div style={{ fontSize: '11px', color: 'var(--text-3)', marginBottom: '8px', textTransform: 'uppercase', fontWeight: '600', letterSpacing: '0.05em' }}>
+                      Saved Portfolios
+                    </div>
+                    <div style={{ fontSize: '28px', fontWeight: '700', color: 'var(--text)', marginBottom: '4px' }}>
+                      {profile.tier === 1 ? '1' : profile.tier === 2 ? '3' : '5'}
+                    </div>
+                    <div style={{ fontSize: '13px', color: 'var(--text-2)', marginBottom: '16px' }}>
+                      {profile.tier === 1 ? 'portfolio' : 'portfolios'} available
+                    </div>
+                    <a href="/my-portfolio" style={{
+                      display: 'inline-block',
+                      padding: '8px 14px',
+                      borderRadius: '6px',
+                      background: 'var(--teal)',
+                      color: 'var(--bg)',
+                      fontSize: '12px',
+                      fontWeight: '600',
+                      textDecoration: 'none',
+                      transition: 'all 0.2s'
+                    }}>
+                      View Portfolios →
+                    </a>
+                  </div>
+                  {profile.tier === 1 && (
+                    <div style={{ padding: '20px', background: 'var(--bg)', borderRadius: '10px', border: '1px solid var(--border)' }}>
+                      <div style={{ fontSize: '11px', color: 'var(--text-3)', marginBottom: '8px', textTransform: 'uppercase', fontWeight: '600', letterSpacing: '0.05em' }}>
+                        Asset Swaps
+                      </div>
+                      <div style={{ fontSize: '28px', fontWeight: '700', color: 'var(--text)', marginBottom: '4px' }}>
+                        5/mo
+                      </div>
+                      <div style={{ fontSize: '13px', color: 'var(--text-2)' }}>
+                        swap assets in watchlist
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {profile.tier === 2 && (
+                  <div style={{ marginTop: '32px', paddingTop: '24px', borderTop: '1px solid var(--border)' }}>
+                    <h3 style={{ fontSize: '14px', fontWeight: '600', marginBottom: '12px', color: 'var(--text)' }}>
+                      Full Access Features
+                    </h3>
+                    <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '12px' }}>
+                      <li style={{ display: 'flex', gap: '8px', fontSize: '13px', color: 'var(--text-2)' }}>
+                        <span style={{ color: 'var(--teal)', fontWeight: '700' }}>✓</span>
+                        <span>2,000+ stocks and ETFs</span>
+                      </li>
+                      <li style={{ display: 'flex', gap: '8px', fontSize: '13px', color: 'var(--text-2)' }}>
+                        <span style={{ color: 'var(--teal)', fontWeight: '700' }}>✓</span>
+                        <span>Sector analysis tools</span>
+                      </li>
+                      <li style={{ display: 'flex', gap: '8px', fontSize: '13px', color: 'var(--text-2)' }}>
+                        <span style={{ color: 'var(--teal)', fontWeight: '700' }}>✓</span>
+                        <span>Complete ranking table</span>
+                      </li>
+                      <li style={{ display: 'flex', gap: '8px', fontSize: '13px', color: 'var(--text-2)' }}>
+                        <span style={{ color: 'var(--teal)', fontWeight: '700' }}>✓</span>
+                        <span>DCA scores & backtests</span>
+                      </li>
+                    </ul>
+                  </div>
+                )}
+
+                {profile.tier === 3 && (
+                  <div style={{ marginTop: '32px', paddingTop: '24px', borderTop: '1px solid var(--border)' }}>
+                    <h3 style={{ fontSize: '14px', fontWeight: '600', marginBottom: '12px', color: 'var(--text)' }}>
+                      Pro Features
+                    </h3>
+                    <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '12px' }}>
+                      <li style={{ display: 'flex', gap: '8px', fontSize: '13px', color: 'var(--text-2)' }}>
+                        <span style={{ color: 'var(--teal)', fontWeight: '700' }}>✓</span>
+                        <span>Everything in Full Access</span>
+                      </li>
+                      <li style={{ display: 'flex', gap: '8px', fontSize: '13px', color: 'var(--text-2)' }}>
+                        <span style={{ color: 'var(--teal)', fontWeight: '700' }}>✓</span>
+                        <span>TradingView indicators</span>
+                      </li>
+                      <li style={{ display: 'flex', gap: '8px', fontSize: '13px', color: 'var(--text-2)' }}>
+                        <span style={{ color: 'var(--teal)', fontWeight: '700' }}>✓</span>
+                        <span>Advanced strategies</span>
+                      </li>
+                    </ul>
+                  </div>
+                )}
               </div>
             )}
 
-            {/* Add Asset Form */}
-            {assets.length < 20 && (
-              <form onSubmit={handleAddAsset} style={{ display: 'flex', gap: '12px' }}>
-                <input
-                  type="text"
-                  placeholder="Enter ticker (e.g., AAPL)"
-                  value={newAsset}
-                  onChange={(e) => setNewAsset(e.target.value)}
-                  disabled={adding}
-                  maxLength={5}
-                  style={{
-                    flex: 1,
-                    padding: '10px 12px',
-                    borderRadius: '8px',
-                    border: '1px solid var(--border)',
-                    background: 'var(--surface)',
-                    color: 'var(--text)',
-                    fontSize: '14px',
-                    fontFamily: 'inherit',
-                    fontWeight: '600',
-                    textTransform: 'uppercase'
-                  }}
+            {/* Upgrade Options for Lower Tiers */}
+            {profile.tier < 3 && profile.tier > 0 && (
+              <div style={{
+                background: 'var(--surface)',
+                border: '1px solid var(--border)',
+                borderRadius: '12px',
+                padding: '28px',
+                marginBottom: '24px'
+              }}>
+                <h2 style={{ fontSize: '18px', fontWeight: '600', marginBottom: '8px', color: 'var(--text)' }}>
+                  Upgrade Your Plan
+                </h2>
+                <p style={{ fontSize: '13px', color: 'var(--text-2)', marginBottom: '24px' }}>
+                  Unlock more features and take your investing to the next level
+                </p>
+                <PricingTiersForAccount />
+              </div>
+            )}
+
+            {/* Free User Upgrade Section */}
+            {profile.tier === 0 && (
+              <div style={{
+                background: 'linear-gradient(135deg, rgba(0, 200, 180, 0.1) 0%, rgba(0, 200, 180, 0.05) 100%)',
+                border: '2px solid var(--teal)',
+                borderRadius: '12px',
+                padding: '32px 28px',
+                marginBottom: '40px',
+                textAlign: 'center'
+              }}>
+                <h2 style={{ fontSize: '20px', fontWeight: '700', color: 'var(--text)', marginBottom: '8px' }}>
+                  Ready to unlock advanced features?
+                </h2>
+                <p style={{ fontSize: '14px', color: 'var(--text-2)', marginBottom: '0' }}>
+                  Choose a plan below to get started with professional-grade investing tools
+                </p>
+              </div>
+            )}
+
+            {/* Sign Out Button */}
+            <button
+              onClick={handleLogout}
+              style={{
+                padding: '12px 24px',
+                borderRadius: '8px',
+                border: '1px solid var(--border)',
+                background: 'transparent',
+                color: 'var(--text-2)',
+                fontWeight: '600',
+                fontSize: '14px',
+                cursor: 'pointer',
+                transition: 'all 0.2s'
+              }}
+              onMouseEnter={(e) => {
+                (e.currentTarget as HTMLButtonElement).style.background = 'var(--surface2)';
+                (e.currentTarget as HTMLButtonElement).style.color = 'var(--text)';
+              }}
+              onMouseLeave={(e) => {
+                (e.currentTarget as HTMLButtonElement).style.background = 'transparent';
+                (e.currentTarget as HTMLButtonElement).style.color = 'var(--text-2)';
+              }}
+            >
+              Sign out
+            </button>
+          </div>
+        )}
+
+
+        {/* Assets & Collections Tab */}
+        {activeTab === 'assets' && profile.tier > 0 && (
+          <div style={{ animation: 'fadeIn 0.2s ease-in' }}>
+            {/* Watchlist Management */}
+            {profile.tier >= 1 && (
+              <div style={{ marginBottom: '32px' }}>
+                <WatchlistManagement
+                  userId={user.id}
+                  tier={profile.tier}
+                  maxWatchlists={profile.tier === 1 ? 1 : profile.tier === 2 ? 3 : 5}
                 />
-                <button
-                  type="submit"
-                  disabled={!newAsset || adding}
-                  style={{
-                    padding: '10px 20px',
+              </div>
+            )}
+
+            {/* Portfolio Management */}
+            <div style={{ marginBottom: '32px' }}>
+              <PortfolioManagement
+                userId={user.id}
+                tier={profile.tier}
+                maxPortfolios={profile.tier === 0 ? 1 : profile.tier === 1 ? 1 : profile.tier === 2 ? 3 : 5}
+              />
+            </div>
+
+            {/* Signal Filter Preferences */}
+            {profile.tier >= 2 && (
+              <div style={{ marginBottom: '32px' }}>
+                <SignalPreferencesManagement userId={user.id} />
+              </div>
+            )}
+
+            {/* Tier 1 Watchlist Assets */}
+            {profile.tier === 1 && (
+              <div style={{
+                background: 'var(--surface)',
+                border: '1px solid var(--border)',
+                borderRadius: '12px',
+                padding: '28px',
+                marginBottom: '32px'
+              }}>
+                <h3 style={{ fontSize: '16px', fontWeight: '600', marginBottom: '8px', color: 'var(--text)' }}>
+                  Watchlist Assets
+                </h3>
+                <p style={{ fontSize: '13px', color: 'var(--text-2)', marginBottom: '20px' }}>
+                  Manage up to 20 assets in your watchlist ({assets.length}/20 added). You have <strong>5 swaps per month</strong> to adjust your portfolio.
+                </p>
+
+                {assets.length === 0 ? (
+                  <div style={{
+                    textAlign: 'center',
+                    padding: '40px 20px',
+                    background: 'var(--bg)',
                     borderRadius: '8px',
-                    border: 'none',
-                    background: 'var(--teal)',
-                    color: 'var(--bg)',
-                    fontWeight: '600',
-                    fontSize: '14px',
-                    cursor: adding || !newAsset ? 'not-allowed' : 'pointer',
-                    opacity: adding || !newAsset ? 0.6 : 1
-                  }}
-                >
-                  {adding ? 'Adding...' : 'Add'}
-                </button>
-              </form>
+                    border: '1px dashed var(--border)',
+                    marginBottom: '20px'
+                  }}>
+                    <div style={{ fontSize: '13px', color: 'var(--text-2)' }}>
+                      No assets added yet. Start by adding your first one below.
+                    </div>
+                  </div>
+                ) : (
+                  <div style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(auto-fill, minmax(110px, 1fr))',
+                    gap: '12px',
+                    marginBottom: '20px'
+                  }}>
+                    {assets.map(ticker => (
+                      <div
+                        key={ticker}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'space-between',
+                          padding: '12px 14px',
+                          borderRadius: '8px',
+                          background: 'var(--bg)',
+                          border: '1px solid var(--border)',
+                          gap: '8px'
+                        }}
+                      >
+                        <span style={{ fontWeight: '600', color: 'var(--text)', fontSize: '13px' }}>
+                          {ticker}
+                        </span>
+                        <button
+                          onClick={() => handleRemoveAsset(ticker)}
+                          style={{
+                            background: 'none',
+                            border: 'none',
+                            color: '#ff6b6b',
+                            cursor: 'pointer',
+                            fontSize: '16px',
+                            padding: '2px 4px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            transition: 'all 0.2s'
+                          }}
+                          title="Remove asset"
+                          onMouseEnter={(e) => (e.currentTarget as HTMLButtonElement).style.opacity = '0.7'}
+                          onMouseLeave={(e) => (e.currentTarget as HTMLButtonElement).style.opacity = '1'}
+                        >
+                          ✕
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {assets.length < 20 && (
+                  <form onSubmit={handleAddAsset} style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+                    <input
+                      type="text"
+                      placeholder="Enter ticker (e.g., AAPL)"
+                      value={newAsset}
+                      onChange={(e) => setNewAsset(e.target.value.toUpperCase())}
+                      disabled={adding}
+                      maxLength={5}
+                      style={{
+                        flex: 1,
+                        minWidth: '140px',
+                        padding: '10px 12px',
+                        borderRadius: '8px',
+                        border: '1px solid var(--border)',
+                        background: 'var(--bg)',
+                        color: 'var(--text)',
+                        fontSize: '14px',
+                        fontFamily: 'inherit',
+                        fontWeight: '600',
+                        textTransform: 'uppercase'
+                      }}
+                    />
+                    <button
+                      type="submit"
+                      disabled={!newAsset || adding}
+                      style={{
+                        padding: '10px 18px',
+                        borderRadius: '8px',
+                        border: 'none',
+                        background: 'var(--teal)',
+                        color: 'var(--bg)',
+                        fontWeight: '600',
+                        fontSize: '14px',
+                        cursor: adding || !newAsset ? 'not-allowed' : 'pointer',
+                        opacity: adding || !newAsset ? 0.6 : 1,
+                        transition: 'opacity 0.2s',
+                        whiteSpace: 'nowrap'
+                      }}
+                    >
+                      {adding ? 'Adding...' : 'Add Asset'}
+                    </button>
+                  </form>
+                )}
+              </div>
             )}
           </div>
         )}
@@ -500,38 +719,32 @@ export default function AccountPage({ user }: { user: AccountUser }) {
             background: 'rgba(255, 107, 107, 0.1)',
             color: '#ff6b6b',
             border: '1px solid rgba(255, 107, 107, 0.3)',
-            marginBottom: '24px'
+            marginBottom: '20px',
+            fontSize: '13px'
           }}>
-            {error}
+            ✕ {error}
           </div>
         )}
-
-        {/* Logout Button */}
-        <button
-          onClick={handleLogout}
-          style={{
-            padding: '12px 24px',
-            borderRadius: '8px',
-            border: '1px solid var(--border)',
-            background: 'transparent',
-            color: 'var(--text-2)',
-            fontWeight: '600',
-            fontSize: '14px',
-            cursor: 'pointer',
-            transition: 'all 0.2s'
-          }}
-          onMouseEnter={(e) => {
-            (e.currentTarget as HTMLButtonElement).style.background = 'var(--surface2)';
-            (e.currentTarget as HTMLButtonElement).style.color = 'var(--text)';
-          }}
-          onMouseLeave={(e) => {
-            (e.currentTarget as HTMLButtonElement).style.background = 'transparent';
-            (e.currentTarget as HTMLButtonElement).style.color = 'var(--text-2)';
-          }}
-        >
-          Sign out
-        </button>
       </div>
+
+      <style>{`
+        @keyframes fadeIn {
+          from {
+            opacity: 0;
+            transform: translateY(4px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+
+        @media (max-width: 640px) {
+          div[style*="gridTemplateColumns"] {
+            grid-template-columns: 1fr !important;
+          }
+        }
+      `}</style>
     </div>
   );
 }
