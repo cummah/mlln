@@ -750,7 +750,7 @@ export function PortfolioContent({
             {analytics && (
               <>
                 <div style={{ display: 'grid', gap: '12px', opacity: analyticsLoading ? 0.55 : 1, transition: 'opacity 0.15s' }}>
-                  <div className={`grid grid-cols-1 ${userTier >= 1 ? 'md:grid-cols-3' : 'md:grid-cols-2'}`} style={{ gap: '12px' }}>
+                  <div className={`grid grid-cols-1 ${userTier >= 1 ? 'md:grid-cols-2' : 'md:grid-cols-3'}`} style={{ gap: '12px' }}>
                     <SectorCompositionChart data={analytics.sectorComposition} />
                     <RiskDecompositionChart
                       assetMetrics={analytics.assetMetrics}
