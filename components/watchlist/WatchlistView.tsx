@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { dateCompact } from '@/lib/signals/format'
 import { LockedCell } from '@/components/gating/LockedCell'
 import type { DemoWatchlist, WatchFreq, WatchRow } from '@/lib/watchlist'
@@ -91,7 +91,8 @@ function Tile({ label, value, sub }: { label: string; value: string; sub?: strin
 }
 
 export function WatchlistView({ data, maxMonths }: { data: DemoWatchlist; maxMonths?: number }) {
-  const [freq, setFreq] = useState<WatchFreq>('monthly')
+  const [freq, setFreqState] = useState<WatchFreq>('monthly')
+  const setFreq = useCallback((f: WatchFreq) => setFreqState(f), [])
   const [amounts, setAmounts] = useState<Record<WatchFreq, string>>({
     weekly: String(data.baseAmount.weekly),
     monthly: String(data.baseAmount.monthly),
@@ -100,6 +101,7 @@ export function WatchlistView({ data, maxMonths }: { data: DemoWatchlist; maxMon
   const [entitlement, setEntitlement] = useState<Entitlement>({ tier: 0, assets: new Set() })
   const [showUpgrade, setShowUpgrade] = useState(false)
   const sort = useSort<SortKey>('amount', 'desc', ['ticker'])
+
 
   const word = FREQ_WORD[freq]
   const latest = data.latestDate[freq]
@@ -216,9 +218,13 @@ export function WatchlistView({ data, maxMonths }: { data: DemoWatchlist; maxMon
         )}
       </div>
 
-      {!latest || lines.length === 0 ? (
+      {!latest ? (
         <div style={{ ...card, color: 'var(--text-2)', fontSize: '13px' }}>
-          None of these assets has a {freq} signal in the latest {word.period}, so there is nothing to show. Nothing is shown rather than showing something wrong.
+          <strong>No {freq} signals available yet.</strong> The latest {freq} signal date is not available. Check back later for {freq} signals, or switch to monthly.
+        </div>
+      ) : lines.length === 0 ? (
+        <div style={{ ...card, color: 'var(--text-2)', fontSize: '13px' }}>
+          None of these assets has a {freq} signal in the latest {word.period}. This means the model did not generate buy signals for any of these assets in the latest {word.period}.
         </div>
       ) : (
         <>
