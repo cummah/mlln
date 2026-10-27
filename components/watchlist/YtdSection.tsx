@@ -158,7 +158,7 @@ function Tile({ label, value, sub, color }: { label: string; value: string; sub:
   )
 }
 
-export function YtdSection({ ytd, monthlyBase, startDate }: { ytd: YtdData; monthlyBase: number; startDate: string }) {
+export function YtdSection({ ytd, monthlyBase, startDate, freq = 'monthly' }: { ytd: YtdData; monthlyBase: number; startDate: string; freq?: 'weekly' | 'monthly' }) {
   // Returns do not depend on the base amount, only the dollar figures do, and they scale in proportion
   const k = ytd.baseAmount > 0 ? monthlyBase / ytd.baseAmount : 0
   const dollars = (t: YtdTotals) => ({ invested: t.invested * k, value: t.value * k })
@@ -166,6 +166,9 @@ export function YtdSection({ ytd, monthlyBase, startDate }: { ytd: YtdData; mont
   const vsStd = diff(ret.mlln, ret.std)
   const vsSpy = diff(ret.mlln, ret.spyMirror)
   const m = dollars(ytd.totals.mlln)
+
+  const freqLabel = freq === 'weekly' ? 'weekly' : 'monthly'
+  const freqPeriod = freq === 'weekly' ? 'week' : 'month'
 
   const windowLabel = useMemo(() => {
     const start = new Date(startDate)
@@ -182,7 +185,7 @@ export function YtdSection({ ytd, monthlyBase, startDate }: { ytd: YtdData; mont
       <div>
         <h2 style={{ fontSize: '20px', fontWeight: 500, color: 'var(--text)', margin: '0 0 6px 0' }}>{windowLabel}</h2>
         <p style={{ fontSize: '13px', color: 'var(--text-2)', margin: 0, lineHeight: 1.6, maxWidth: '820px' }}>
-          How the monthly plan above has done, as return on the money put in, against three benchmarks. Standard DCA buys a flat {usdWhole.format(monthlyBase)} of every asset each month. The SPY lines put the same dollars into SPY, once on the days mlln bought and once as a flat monthly plan.
+          How the {freqLabel} plan above has done, as return on the money put in, against three benchmarks. Standard DCA buys a flat {usdWhole.format(monthlyBase)} of every asset each {freqPeriod}. The SPY lines put the same dollars into SPY, once on the days mlln bought and once as a flat {freqLabel} plan.
         </p>
       </div>
 

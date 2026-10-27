@@ -43,6 +43,7 @@ export interface DemoWatchlist {
   latestDate: Record<WatchFreq, string | null> // newest signal date, which is the latest period
   baseAmount: Record<WatchFreq, number>
   ytd: YtdData | null // null when the prices or signals needed to work it out are missing
+  weeklyYtd: YtdData | null // weekly performance data, null when not available
 }
 
 const LOOKBACK_DAYS: Record<WatchFreq, number> = { weekly: 60, monthly: 130 }
@@ -115,6 +116,24 @@ async function weeklyFeed(tickers: string[], start: string): Promise<Map<string,
   return out
 }
 
+/** Every weekly signal since the start date with entry data, as ticker -> ISO week key -> FeedEntry. */
+async function weeklyFeedWithEntries(tickers: string[], start: string): Promise<Map<string, Record<string, FeedEntry>>> {
+  const { data, error } = await getSupabaseClient().from('signal_feed').select('ticker, signal_date, mult, entry_date, entry_price')
+    .eq('freq', 'weekly').in('ticker', tickers).gte('signal_date', start).order('signal_date')
+  if (error) throw new Error(`signal_feed weekly history with entries: ${error.message}`)
+  const out = new Map<string, Record<string, FeedEntry>>()
+  for (const r of (data as any[]) ?? []) {
+    const h = out.get(r.ticker) ?? {}
+    h[periodKey(r.signal_date, 'weekly')] = {
+      mult: round2(Number(r.mult)),
+      entryDate: r.entry_date ?? null,
+      entryPrice: r.entry_price === null || r.entry_price === undefined ? null : Number(r.entry_price),
+    }
+    out.set(r.ticker, h)
+  }
+  return out
+}
+
 /** Daily bars since the start date for the list and SPY, as ticker -> date -> bar. */
 async function dailyBars(tickers: string[], start: string): Promise<Map<string, Map<string, Bar>>> {
   const rows = await fetchAllPages<any>((a, b) =>
@@ -142,17 +161,33 @@ function monthRange(startDate: string, latest: string | null): string[] {
   return out
 }
 
+function weekRange(startDate: string, latest: string | null): string[] {
+  if (!latest) return []
+  const out: string[] = []
+  const startKey = isoWeekKey(startDate)
+  const endKey = isoWeekKey(latest)
+  let current = new Date(startDate + 'T12:00:00Z')
+  const end = new Date(latest + 'T12:00:00Z')
+  while (current <= end) {
+    const weekKey = isoWeekKey(current.toISOString().slice(0, 10))
+    if (!out.includes(weekKey)) out.push(weekKey)
+    current.setUTCDate(current.getUTCDate() + 7)
+  }
+  return out
+}
+
 async function getWatchlistUncached(config: WatchlistConfig): Promise<DemoWatchlist> {
   const db = getSupabaseClient()
   const { tickers, startDate, name, description } = config
   const [weeklyLatest, monthlyLatest] = await Promise.all([latestSignalDate('weekly'), latestSignalDate('monthly')])
-  const [assets, prices, weekly, monthly, feed, weeklyHistoryMap, bars] = await Promise.all([
+  const [assets, prices, weekly, monthly, feed, weeklyHistoryMap, weeklyFeedEntries, bars] = await Promise.all([
     db.from('assets').select('ticker, name, sector').eq('is_active', true).in('ticker', tickers),
     db.from('latest_prices').select('ticker, close').in('ticker', tickers),
     latestSignals(tickers, 'weekly', weeklyLatest),
     latestSignals(tickers, 'monthly', monthlyLatest),
     monthlyFeed(tickers, startDate),
     weeklyFeed(tickers, startDate),
+    weeklyFeedWithEntries(tickers, startDate),
     dailyBars([...tickers, 'SPY'], startDate),
   ])
   if (assets.error) throw new Error(`assets: ${assets.error.message}`)
@@ -178,6 +213,7 @@ async function getWatchlistUncached(config: WatchlistConfig): Promise<DemoWatchl
   })
 
   const months = monthRange(startDate, monthlyLatest)
+  const weeks = weekRange(startDate, weeklyLatest)
   const listed = rows.map(r => r.ticker)
 
   return {
@@ -189,6 +225,7 @@ async function getWatchlistUncached(config: WatchlistConfig): Promise<DemoWatchl
     latestDate: { weekly: weeklyLatest, monthly: monthlyLatest },
     baseAmount: { weekly: FREQ_SETTINGS.weekly.baseAmount, monthly: FREQ_SETTINGS.monthly.baseAmount },
     ytd: buildYtd(listed, months, feed, bars, FREQ_SETTINGS.monthly.baseAmount),
+    weeklyYtd: buildYtd(listed, weeks, weeklyFeedEntries, bars, FREQ_SETTINGS.weekly.baseAmount),
   }
 }
 
@@ -220,13 +257,14 @@ async function getUserWatchlistUncached(name: string, tickers: string[]): Promis
   const db = getSupabaseClient()
   const startDate = new Date().toISOString().split('T')[0]
   const [weeklyLatest, monthlyLatest] = await Promise.all([latestSignalDate('weekly'), latestSignalDate('monthly')])
-  const [assets, prices, weekly, monthly, feed, weeklyHistoryMap, bars] = await Promise.all([
+  const [assets, prices, weekly, monthly, feed, weeklyHistoryMap, weeklyFeedEntries, bars] = await Promise.all([
     db.from('assets').select('ticker, name, sector').eq('is_active', true).in('ticker', tickers),
     db.from('latest_prices').select('ticker, close').in('ticker', tickers),
     latestSignals(tickers, 'weekly', weeklyLatest),
     latestSignals(tickers, 'monthly', monthlyLatest),
     monthlyFeed(tickers, startDate),
     weeklyFeed(tickers, startDate),
+    weeklyFeedWithEntries(tickers, startDate),
     dailyBars([...tickers, 'SPY'], startDate),
   ])
   if (assets.error) throw new Error(`assets: ${assets.error.message}`)
@@ -251,6 +289,7 @@ async function getUserWatchlistUncached(name: string, tickers: string[]): Promis
   })
 
   const months = monthRange(startDate, monthlyLatest)
+  const weeks = weekRange(startDate, weeklyLatest)
   const listed = rows.map(r => r.ticker)
 
   return {
@@ -262,6 +301,7 @@ async function getUserWatchlistUncached(name: string, tickers: string[]): Promis
     latestDate: { weekly: weeklyLatest, monthly: monthlyLatest },
     baseAmount: { weekly: FREQ_SETTINGS.weekly.baseAmount, monthly: FREQ_SETTINGS.monthly.baseAmount },
     ytd: buildYtd(listed, months, feed, bars, FREQ_SETTINGS.monthly.baseAmount),
+    weeklyYtd: buildYtd(listed, weeks, weeklyFeedEntries, bars, FREQ_SETTINGS.weekly.baseAmount),
   }
 }
 
