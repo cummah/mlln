@@ -8,7 +8,7 @@ const LAUNCH_DISCOUNT = 0.5;
 const TIERS = [
   {
     id: 'watchlist',
-    name: 'Watchlist',
+    name: 'Essential',
     tagline: 'For investors who know what they own.',
     monthly: 12,
     features: [
@@ -17,11 +17,11 @@ const TIERS = [
       'How much to buy this period, per asset',
       'Watchlist YTD vs standard DCA and SPY',
     ],
-    cta: 'Start with Watchlist',
+    cta: 'Start with Essential',
   },
   {
     id: 'full',
-    name: 'Full access',
+    name: 'Premium',
     tagline: 'For investors who want to find the best places to put money.',
     monthly: 29,
     features: [
@@ -31,7 +31,7 @@ const TIERS = [
       'Backtests and DCA scores for every asset',
       'Unlimited watchlists',
     ],
-    cta: 'Get Full access',
+    cta: 'Get Premium',
     highlight: true,
   },
   {
@@ -40,7 +40,7 @@ const TIERS = [
     tagline: 'Active Traders and Investors.',
     monthly: 49,
     features: [
-      'Everything in Full access',
+      'Everything in Premium',
       'Institutional grade TradingView indicators and strategies',
       'Use them across any asset and timeframe',
     ],
