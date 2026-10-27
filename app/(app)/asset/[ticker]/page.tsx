@@ -171,6 +171,7 @@ export default async function TickerPage({ params }: PageProps) {
           currentWeekly={current.weekly}
           currentMonthly={current.monthly}
           universeCount={universeCount}
+          dcaSuitabilityScore={summary?.dca_suitability_score ?? null}
         />
 
         {/* Custom Backtest Tiles */}
@@ -191,7 +192,7 @@ export default async function TickerPage({ params }: PageProps) {
         )}
 
         {/* Alpha Advantage */}
-        {summary && <AlphaBanner backtestSummary={summary} />}
+        {summary && <AlphaBanner backtestSummary={summary} dcaSuitabilityScore={summary.dca_suitability_score} />}
 
         {/* Backtest Narrative */}
         {summary && has5y && <BacktestNarrative ticker={ticker} name={summary.name} data={summary} sector={asset.sector} spyReturn5y={spyReturn5y} />}

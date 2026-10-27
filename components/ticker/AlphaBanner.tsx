@@ -7,9 +7,10 @@ import { formatPercent, formatSignedPercent } from '@/lib/formatters';
 
 interface AlphaBannerProps {
   backtestSummary: TickerSummary;
+  dcaSuitabilityScore?: number | null;
 }
 
-export function AlphaBanner({ backtestSummary }: AlphaBannerProps) {
+export function AlphaBanner({ backtestSummary, dcaSuitabilityScore }: AlphaBannerProps) {
   const { frequency, baseAmount } = useAppStore();
   const summary = backtestSummary;
   const modelLabel = 'Enhanced';
@@ -20,6 +21,7 @@ export function AlphaBanner({ backtestSummary }: AlphaBannerProps) {
   };
 
   const isMonthly = frequency === 'monthly';
+  const isLowDCA = (dcaSuitabilityScore ?? null) !== null && dcaSuitabilityScore! < 50;
 
   // Only shown when a real five year result exists for this frequency
   if (!summary.available[frequency]['5y']) return null;
@@ -101,6 +103,7 @@ export function AlphaBanner({ backtestSummary }: AlphaBannerProps) {
             </motion.div>
             <div style={{ fontSize: '12.5px', color: 'var(--text-2)', marginTop: '2px' }}>
               {modelLabel} DCA {headline} — {lowerEntry ? 'with a lower average entry price than standard DCA' : 'with a higher average entry price than standard DCA'}
+              {isLowDCA && <div style={{ marginTop: '6px', fontSize: '11px', color: 'var(--text-3)' }}>Note: This asset has lower DCA suitability (score {Math.round(dcaSuitabilityScore!)}/100)</div>}
             </div>
           </div>
         </div>

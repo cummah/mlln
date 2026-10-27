@@ -16,14 +16,73 @@ export function EnhancedDCACTA({ ticker, name, monthlyAlpha5y, dca_suitability_s
   const isHighQuality = score >= 50
   const edcaWins = monthlyAlpha5y > 0
 
-  // Show if: high quality AND eDCA wins, OR low quality (regardless of eDCA)
-  const shouldShow = (isHighQuality && edcaWins) || !isHighQuality
-  if (!shouldShow) {
-    return null
-  }
 
   const isFree = tier === 0
   const isBasic = tier === 1
+
+  // High-quality asset where eDCA underperformed
+  if (isHighQuality && !edcaWins) {
+    return (
+      <div style={{
+        background: 'linear-gradient(135deg, var(--surface-elevated) 0%, var(--surface) 100%)',
+        border: '1px solid var(--border-elevated)',
+        borderRadius: '14px',
+        padding: '32px 28px',
+        textAlign: 'center',
+        boxShadow: 'var(--inset-top), var(--shadow-md)',
+      }}>
+        <div style={{ maxWidth: '600px', marginLeft: 'auto', marginRight: 'auto' }}>
+          <h2 style={{
+            fontSize: '28px',
+            fontWeight: '700',
+            letterSpacing: '-0.02em',
+            margin: '0 0 12px',
+            lineHeight: 1.2,
+          }}>
+            Even quality assets have seasons.
+          </h2>
+
+          <p style={{
+            fontSize: '15px',
+            color: 'var(--text-2)',
+            margin: '0 0 24px',
+            lineHeight: 1.6,
+          }}>
+            {ticker} scores high for DCA suitability, but Enhanced DCA lagged standard over the past 5 years. Markets are cyclical — volatility strategies don't always win.
+          </p>
+
+          <Link
+            href={isFree ? '/signup' : isBasic ? '/pricing' : '/portfolio'}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: '12px 22px',
+              borderRadius: '10px',
+              fontSize: '14px',
+              fontWeight: '600',
+              textDecoration: 'none',
+              background: 'var(--teal)',
+              color: 'var(--bg)',
+              transition: 'background 0.2s, box-shadow 0.2s, transform 0.2s',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = 'var(--teal-strong)'
+              e.currentTarget.style.boxShadow = 'var(--shadow-glow-teal)'
+              e.currentTarget.style.transform = 'translateY(-2px)'
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = 'var(--teal)'
+              e.currentTarget.style.boxShadow = 'none'
+              e.currentTarget.style.transform = 'translateY(0)'
+            }}
+          >
+            {isFree ? 'Get Started' : isBasic ? 'Explore More Assets' : 'View Your Watchlist'}
+          </Link>
+        </div>
+      </div>
+    )
+  }
 
   // High-quality asset where eDCA wins
   if (isHighQuality && edcaWins) {

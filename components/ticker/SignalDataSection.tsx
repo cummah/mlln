@@ -12,6 +12,7 @@ interface SignalDataSectionProps {
   currentWeekly: CurrentReading | null;
   currentMonthly: CurrentReading | null;
   universeCount: number;
+  dcaSuitabilityScore: number | null;
 }
 
 function formatPerformance(perf: number): string {
@@ -29,13 +30,18 @@ function formatDateForDisplay(dateStr: string): string {
   return date.toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' });
 }
 
-export function SignalDataSection({ ticker, weeklyMajor, monthlyMajor, currentWeekly, currentMonthly, universeCount }: SignalDataSectionProps) {
+export function SignalDataSection({ ticker, weeklyMajor, monthlyMajor, currentWeekly, currentMonthly, universeCount, dcaSuitabilityScore }: SignalDataSectionProps) {
   // Return to date is measured from the real fill price (next open) to the latest close. It stays empty
   // until that fill price exists, which is the day after the signal.
   const weeklyPerf = weeklyMajor && weeklyMajor.performance !== null ? { ...weeklyMajor, performance: weeklyMajor.performance as number, currentValue: weeklyMajor.currentValue as number } : null;
   const monthlyPerf = monthlyMajor && monthlyMajor.performance !== null ? { ...monthlyMajor, performance: monthlyMajor.performance as number, currentValue: monthlyMajor.currentValue as number } : null;
 
   const avgPerf = weeklyPerf && monthlyPerf ? (weeklyPerf.performance + monthlyPerf.performance) / 2 : weeklyPerf?.performance ?? monthlyPerf?.performance ?? null;
+  const isLowDCA = dcaSuitabilityScore !== null && dcaSuitabilityScore < 50;
+
+  // Don't show this section if asset has low DCA suitability
+  if (isLowDCA) return null;
+
   const heading = avgPerf !== null ? (avgPerf >= 0 ? 'Alpha you missed while unsubscribed' : 'Performance snapshot while unsubscribed') : 'Recent buy signals';
   const description = avgPerf !== null ? (avgPerf >= 0 ? 'Our Pro members bought these signals. Here\'s what the returns look like — and what was left on the table.' : 'Our Pro members bought these signals. Here\'s how they performed — a real look at what happened in the market.') : 'Our Pro members acted on these signals. Here\'s what happened.';
 
