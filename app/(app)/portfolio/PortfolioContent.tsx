@@ -441,28 +441,6 @@ export function PortfolioContent({
           </div>
         </Panel>
 
-        {!isAuthenticated && (
-          <button
-            onClick={() => setShowSaveModal(true)}
-            style={{
-              width: '100%',
-              padding: '12px 16px',
-              borderRadius: '8px',
-              border: 'none',
-              background: 'var(--teal)',
-              color: 'var(--bg)',
-              fontSize: '14px',
-              fontWeight: '600',
-              cursor: 'pointer',
-              transition: 'opacity 0.2s'
-            }}
-            onMouseEnter={(e) => (e.currentTarget.style.opacity = '0.9')}
-            onMouseLeave={(e) => (e.currentTarget.style.opacity = '1')}
-          >
-            Save Portfolio
-          </button>
-        )}
-
         <Panel
           title="Allocation"
           hint="Weights are rescaled to 100% automatically when you add or remove an asset. Edit any weight directly to override."
