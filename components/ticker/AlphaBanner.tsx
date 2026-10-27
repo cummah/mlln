@@ -103,8 +103,27 @@ export function AlphaBanner({ backtestSummary, dcaSuitabilityScore }: AlphaBanne
             </motion.div>
             <div style={{ fontSize: '12.5px', color: 'var(--text-2)', marginTop: '2px' }}>
               {modelLabel} DCA {headline} — {lowerEntry ? 'with a lower average entry price than standard DCA' : 'with a higher average entry price than standard DCA'}
-              {isLowDCA && <div style={{ marginTop: '6px', fontSize: '11px', color: 'var(--text-3)' }}>Note: This asset has lower DCA suitability (score {Math.round(dcaSuitabilityScore!)}/100)</div>}
             </div>
+            {isLowDCA && (
+              <div style={{
+                marginTop: '12px',
+                padding: '8px 12px',
+                borderRadius: '8px',
+                background: 'rgba(240,161,40,0.1)',
+                border: '1px solid rgba(240,161,40,0.3)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                gap: '12px'
+              }}>
+                <div style={{ fontSize: '12px', fontWeight: '600', color: '#f0a128' }}>
+                  ⚠ Lower DCA suitability (score {Math.round(dcaSuitabilityScore!)}/100)
+                </div>
+                <a href="/rank" style={{ fontSize: '12px', fontWeight: '600', color: '#f0a128', textDecoration: 'underline', cursor: 'pointer' }}>
+                  Find better assets →
+                </a>
+              </div>
+            )}
           </div>
         </div>
 
