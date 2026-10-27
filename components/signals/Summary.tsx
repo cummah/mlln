@@ -109,7 +109,7 @@ export function Results({ stats, base, strategy, setStrategy, settings }: Result
               hold={<span>{h.lossCount} positions · {signed(h.losses)}</span>}
               sell={<span>{s.openLossCount} positions · {signed(s.openLosses)}</span>}
             />
-            <Row label="Current P&L" hold={money(h.value)} sell={money(s.endingValue)} spy={money(spy.value)} />
+            <Row label="Current value" hold={money(h.value)} sell={money(s.endingValue)} spy={money(spy.value)} />
             <Row label="Win rate" hold={h.winRate === null ? NA : `${h.winRate.toFixed(0)}%`} sell={s.winRate === null ? NA : `${s.winRate.toFixed(0)}%`} />
             <Row label="Median return" hold={pct(h.medianPct)} sell={pct(s.medianPct)} />
             <Row label="Positions" hold={`${h.n.toLocaleString()} held`} sell={`${s.closedCount.toLocaleString()} sold · ${s.openCount.toLocaleString()} held`} />
@@ -118,9 +118,9 @@ export function Results({ stats, base, strategy, setStrategy, settings }: Result
           </tbody>
         </table>
         <div style={{ fontSize: '10.5px', color: 'var(--text-3)', margin: '4px 0 10px', lineHeight: 1.4 }}>
-          Hold side: gains {money(h.gains)} − losses {money(Math.abs(h.losses))} = Current P&L {money(h.value)}.
+          Hold side: gains {money(h.gains)} − losses {money(Math.abs(h.losses))} = current value {money(h.value)}.
           <br />
-          Sell side: minimum starting cash {money(s.minCapital)} + realised profit {money(s.closedProfit)} + unrealised gains {money(s.openGains)} − unrealised losses {money(Math.abs(s.openLosses))} = Current P&L {money(s.endingValue)}.
+          Sell side: minimum starting cash {money(s.minCapital)} + realised profit {money(s.closedProfit)} + unrealised gains {money(s.openGains)} − unrealised losses {money(Math.abs(s.openLosses))} = current value {money(s.endingValue)}.
         </div>
       </div>
 
