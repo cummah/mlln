@@ -178,7 +178,7 @@ export function Pricing() {
             e.currentTarget.style.boxShadow = 'none';
           }}
         >
-          Start mlln. Stop fear and greed.
+          Start mlln. Master fear and greed.
         </button>
       </div>
 
