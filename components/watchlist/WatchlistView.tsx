@@ -176,7 +176,9 @@ export function WatchlistView({ data, maxMonths }: { data: DemoWatchlist; maxMon
     if (!data.rows.length) return keys
     const allWeeks = new Set<string>()
     data.rows.forEach(row => {
-      Object.keys(row.weeklyHistory).forEach(k => allWeeks.add(k))
+      if (row.weeklyHistory) {
+        Object.keys(row.weeklyHistory).forEach(k => allWeeks.add(k))
+      }
     })
     return Array.from(allWeeks).sort()
   }, [data.rows])
@@ -186,7 +188,7 @@ export function WatchlistView({ data, maxMonths }: { data: DemoWatchlist; maxMon
       const displayWeeks = weekKeys.slice(-10) // rolling 10 weeks
       const cell = (mult: number | undefined) => (mult === undefined ? 0 : round2(weeklyBase * mult))
       const rows = data.rows.map(row => {
-        const byWeek = displayWeeks.map(w => cell(row.weeklyHistory[w]))
+        const byWeek = displayWeeks.map(w => cell((row.weeklyHistory ?? {})[w]))
         return { row, byWeek, total: round2(byWeek.reduce((a, b) => a + b, 0)), bought: byWeek.filter(v => v > 0).length }
       })
       const weekTotals = displayWeeks.map((_, i) => round2(rows.reduce((t, r) => t + r.byWeek[i], 0)))
@@ -386,7 +388,7 @@ export function WatchlistView({ data, maxMonths }: { data: DemoWatchlist; maxMon
                       <Link href={`/asset/${r.row.ticker.toLowerCase()}`} style={{ fontWeight: 500, color: 'var(--teal)' }}>{r.row.ticker}</Link>
                     </td>
                     {values.map((v: number, i: number) => {
-                      const mult = grid.isWeekly ? r.row.weeklyHistory[grid.periods[i]] : r.row.history[grid.periods[i]]
+                      const mult = grid.isWeekly ? (r.row.weeklyHistory ?? {})[grid.periods[i]] : r.row.history[grid.periods[i]]
                       const isLatest = i === grid.periods.length - 1
                       const isLocked = isLatest && isLatestLocked
                       return (
