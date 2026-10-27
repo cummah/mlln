@@ -26,6 +26,11 @@ const round2 = (v: number) => Math.round(v * 100) / 100
 const monthLabel = (ym: string) =>
   new Date(`${ym}-15T12:00:00Z`).toLocaleDateString('en-US', { month: 'short', timeZone: 'UTC' }) + " '" + ym.slice(2, 4)
 
+const weekLabel = (weekKey: string) => {
+  const [year, week] = weekKey.split('-W')
+  return `W${week} '${year.slice(2, 4)}`
+}
+
 const canAccessTicker = (ticker: string, entitlement: Entitlement): boolean => {
   if (entitlement.tier >= 2) return true
   if (entitlement.tier === 1) return entitlement.assets.has(ticker)
@@ -160,18 +165,42 @@ export function WatchlistView({ data, maxMonths }: { data: DemoWatchlist; maxMon
   const doneAmount = round2(lines.filter(l => bought[l.row.ticker]).reduce((t, l) => t + l.amount, 0))
   const next = nextExpected(latest, freq)
 
-  // Monthly distribution since the start date, always at the monthly base amount
+  // Historical distribution - monthly or weekly depending on freq
   const monthlyBase = amountFor('monthly')
+  const weeklyBase = amountFor('weekly')
   const displayMonths = maxMonths ? data.months.slice(-maxMonths) : data.months
-  const grid = useMemo(() => {
-    const cell = (mult: number | undefined) => (mult === undefined ? 0 : round2(monthlyBase * mult))
-    const rows = data.rows.map(row => {
-      const byMonth = displayMonths.map(m => cell(row.history[m]))
-      return { row, byMonth, total: round2(byMonth.reduce((a, b) => a + b, 0)), bought: byMonth.filter(v => v > 0).length }
+
+  // Generate week keys for weekly display
+  const weekKeys = useMemo(() => {
+    const keys: string[] = []
+    if (!data.rows.length) return keys
+    const allWeeks = new Set<string>()
+    data.rows.forEach(row => {
+      Object.keys(row.weeklyHistory).forEach(k => allWeeks.add(k))
     })
-    const monthTotals = displayMonths.map((_, i) => round2(rows.reduce((t, r) => t + r.byMonth[i], 0)))
-    return { rows, monthTotals, grand: round2(monthTotals.reduce((a, b) => a + b, 0)) }
-  }, [data.rows, displayMonths, monthlyBase])
+    return Array.from(allWeeks).sort()
+  }, [data.rows])
+
+  const grid = useMemo(() => {
+    if (freq === 'weekly') {
+      const displayWeeks = weekKeys.slice(-10) // rolling 10 weeks
+      const cell = (mult: number | undefined) => (mult === undefined ? 0 : round2(weeklyBase * mult))
+      const rows = data.rows.map(row => {
+        const byWeek = displayWeeks.map(w => cell(row.weeklyHistory[w]))
+        return { row, byWeek, total: round2(byWeek.reduce((a, b) => a + b, 0)), bought: byWeek.filter(v => v > 0).length }
+      })
+      const weekTotals = displayWeeks.map((_, i) => round2(rows.reduce((t, r) => t + r.byWeek[i], 0)))
+      return { rows, periods: displayWeeks, periodLabels: displayWeeks.map(weekLabel), totals: weekTotals, grand: round2(weekTotals.reduce((a, b) => a + b, 0)), isWeekly: true }
+    } else {
+      const cell = (mult: number | undefined) => (mult === undefined ? 0 : round2(monthlyBase * mult))
+      const rows = data.rows.map(row => {
+        const byMonth = displayMonths.map(m => cell(row.history[m]))
+        return { row, byMonth, total: round2(byMonth.reduce((a, b) => a + b, 0)), bought: byMonth.filter(v => v > 0).length }
+      })
+      const monthTotals = displayMonths.map((_, i) => round2(rows.reduce((t, r) => t + r.byMonth[i], 0)))
+      return { rows, periods: displayMonths, periodLabels: displayMonths.map(monthLabel), totals: monthTotals, grand: round2(monthTotals.reduce((a, b) => a + b, 0)), isWeekly: false }
+    }
+  }, [data.rows, displayMonths, weekKeys, freq, monthlyBase, weeklyBase])
 
   const th = { textAlign: 'right', padding: '10px 8px', fontWeight: 600, color: 'var(--text-2)', whiteSpace: 'nowrap' } as const
 
@@ -318,38 +347,43 @@ export function WatchlistView({ data, maxMonths }: { data: DemoWatchlist; maxMon
         </div>
       )}
 
-      {displayMonths.length > 0 && (
+      {grid.periods.length > 0 && (
         <div style={card}>
-          <h2 style={{ fontSize: '20px', fontWeight: 500, color: 'var(--text)', margin: '0 0 6px 0' }}>Monthly allocation {maxMonths ? `(last ${maxMonths} months)` : `since ${dateCompact(data.startDate)}`}</h2>
+          <h2 style={{ fontSize: '20px', fontWeight: 500, color: 'var(--text)', margin: '0 0 6px 0' }}>
+            {freq === 'weekly' ? 'Weekly allocation (rolling 10 weeks)' : `Monthly allocation ${maxMonths ? `(last ${maxMonths} months)` : `since ${dateCompact(data.startDate)}`}`}
+          </h2>
           <p style={{ fontSize: '13px', color: 'var(--text-2)', margin: '0 0 14px 0', lineHeight: 1.6, maxWidth: '820px' }}>
-            What a monthly plan on this list would have bought each month: the {usdWhole.format(monthlyBase)} base amount times that month&apos;s signal multiplier, and nothing in a month with no signal. Uses the monthly base amount above, whichever signals are selected.
+            {freq === 'weekly'
+              ? `What a weekly plan would have bought each week: ${usdWhole.format(weeklyBase)} base amount times that week's signal multiplier.`
+              : `What a monthly plan would have bought each month: ${usdWhole.format(monthlyBase)} base amount times that month's signal multiplier.`}
           </p>
           <div style={{ overflowX: 'auto' }}>
             <table style={{ width: '100%', fontSize: '13px' }}>
               <thead>
                 <tr style={{ borderBottom: '1px solid var(--border)' }}>
                   <th style={{ ...th, textAlign: 'left' }}>Asset</th>
-                  {displayMonths.map(m => <th key={m} style={th}>{monthLabel(m)}</th>)}
+                  {grid.periodLabels.map((label, i) => <th key={grid.periods[i]} style={th}>{label}</th>)}
                   <th style={{ ...th, color: 'var(--text)' }}>Total</th>
-                  <th style={th} title="Months with a buy, out of the months shown">Buys</th>
+                  <th style={th} title={`${freq === 'weekly' ? 'Weeks' : 'Months'} with a buy`}>Buys</th>
                 </tr>
               </thead>
               <tbody>
                 {grid.rows.map(r => {
-                  const isLatestLocked = displayMonths.length > 0 && !canAccessTicker(r.row.ticker, entitlement)
+                  const values = (grid.isWeekly ? (r as any).byWeek : (r as any).byMonth) || []
+                  const isLatestLocked = grid.periods.length > 0 && !canAccessTicker(r.row.ticker, entitlement)
                   return (
                   <tr key={r.row.ticker} style={{ borderBottom: '1px solid var(--border)' }}>
                     <td style={{ padding: '10px 8px' }}>
                       <Link href={`/asset/${r.row.ticker.toLowerCase()}`} style={{ fontWeight: 500, color: 'var(--teal)' }}>{r.row.ticker}</Link>
                     </td>
-                    {r.byMonth.map((v, i) => {
-                      const mult = r.row.history[displayMonths[i]]
-                      const isLatestMonth = i === displayMonths.length - 1
-                      const isLocked = isLatestMonth && isLatestLocked
+                    {values.map((v: number, i: number) => {
+                      const mult = grid.isWeekly ? r.row.weeklyHistory[grid.periods[i]] : r.row.history[grid.periods[i]]
+                      const isLatest = i === grid.periods.length - 1
+                      const isLocked = isLatest && isLatestLocked
                       return (
                         <td
-                          key={displayMonths[i]}
-                          title={mult === undefined ? 'No signal this month' : `${mult.toFixed(2)}×`}
+                          key={grid.periods[i]}
+                          title={mult === undefined ? `No signal this ${grid.isWeekly ? 'week' : 'month'}` : `${mult.toFixed(2)}×`}
                           style={{ textAlign: 'right', padding: '10px 8px', color: v > 0 ? 'var(--text)' : 'var(--text-3)', background: v > 0 ? 'var(--teal-dim)' : 'transparent', cursor: isLocked ? 'pointer' : 'default' }}
                           onClick={() => isLocked && setShowUpgrade(true)}
                         >
@@ -358,17 +392,17 @@ export function WatchlistView({ data, maxMonths }: { data: DemoWatchlist; maxMon
                       )
                     })}
                     <td style={{ textAlign: 'right', padding: '10px 8px', fontWeight: 600, color: 'var(--text)' }}>{r.total > 0 ? usdWhole.format(r.total) : '-'}</td>
-                    <td style={{ textAlign: 'right', padding: '10px 8px', color: 'var(--text-2)' }}>{r.bought} of {displayMonths.length}</td>
+                    <td style={{ textAlign: 'right', padding: '10px 8px', color: 'var(--text-2)' }}>{r.bought} of {grid.periods.length}</td>
                   </tr>
                   )
                 })}
                 <tr>
                   <td style={{ padding: '10px 8px', fontWeight: 600, color: 'var(--text)' }}>Total</td>
-                  {grid.monthTotals.map((v, i) => {
-                    const isLatestMonth = i === displayMonths.length - 1
-                    const isLocked = isLatestMonth && displayMonths.length > 0 && !canAccessTicker('', entitlement)
+                  {grid.totals.map((v, i) => {
+                    const isLatest = i === grid.periods.length - 1
+                    const isLocked = isLatest && grid.periods.length > 0 && !canAccessTicker('', entitlement)
                     return (
-                      <td key={displayMonths[i]} style={{ textAlign: 'right', padding: '10px 8px', fontWeight: 600, color: 'var(--text)', cursor: isLocked ? 'pointer' : 'default' }} onClick={() => isLocked && setShowUpgrade(true)}>
+                      <td key={grid.periods[i]} style={{ textAlign: 'right', padding: '10px 8px', fontWeight: 600, color: 'var(--text)', cursor: isLocked ? 'pointer' : 'default' }} onClick={() => isLocked && setShowUpgrade(true)}>
                         {isLocked ? <MaskedCell onUnlock={() => setShowUpgrade(true)} /> : (v > 0 ? usdWhole.format(v) : '-')}
                       </td>
                     )

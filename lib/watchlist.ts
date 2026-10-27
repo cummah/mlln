@@ -31,6 +31,7 @@ export interface WatchRow {
   weekly: WatchSignal | null
   monthly: WatchSignal | null
   history: Record<string, number> // monthly signal multiplier by YYYY-MM since the start date, a month with no signal is absent
+  weeklyHistory: Record<string, number> // weekly signal multiplier by ISO week key since the start date
 }
 
 export interface DemoWatchlist {
@@ -100,6 +101,20 @@ async function monthlyFeed(tickers: string[], start: string): Promise<Map<string
   return out
 }
 
+/** Every weekly signal since the start date, as ticker -> ISO week key -> multiplier. */
+async function weeklyFeed(tickers: string[], start: string): Promise<Map<string, Record<string, number>>> {
+  const { data, error } = await getSupabaseClient().from('signal_feed').select('ticker, signal_date, mult')
+    .eq('freq', 'weekly').in('ticker', tickers).gte('signal_date', start).order('signal_date')
+  if (error) throw new Error(`signal_feed weekly history: ${error.message}`)
+  const out = new Map<string, Record<string, number>>()
+  for (const r of (data as any[]) ?? []) {
+    const h = out.get(r.ticker) ?? {}
+    h[periodKey(r.signal_date, 'weekly')] = round2(Number(r.mult))
+    out.set(r.ticker, h)
+  }
+  return out
+}
+
 /** Daily bars since the start date for the list and SPY, as ticker -> date -> bar. */
 async function dailyBars(tickers: string[], start: string): Promise<Map<string, Map<string, Bar>>> {
   const rows = await fetchAllPages<any>((a, b) =>
@@ -131,12 +146,13 @@ async function getWatchlistUncached(config: WatchlistConfig): Promise<DemoWatchl
   const db = getSupabaseClient()
   const { tickers, startDate, name, description } = config
   const [weeklyLatest, monthlyLatest] = await Promise.all([latestSignalDate('weekly'), latestSignalDate('monthly')])
-  const [assets, prices, weekly, monthly, feed, bars] = await Promise.all([
+  const [assets, prices, weekly, monthly, feed, weeklyHistoryMap, bars] = await Promise.all([
     db.from('assets').select('ticker, name, sector').eq('is_active', true).in('ticker', tickers),
     db.from('latest_prices').select('ticker, close').in('ticker', tickers),
     latestSignals(tickers, 'weekly', weeklyLatest),
     latestSignals(tickers, 'monthly', monthlyLatest),
     monthlyFeed(tickers, startDate),
+    weeklyFeed(tickers, startDate),
     dailyBars([...tickers, 'SPY'], startDate),
   ])
   if (assets.error) throw new Error(`assets: ${assets.error.message}`)
@@ -157,6 +173,7 @@ async function getWatchlistUncached(config: WatchlistConfig): Promise<DemoWatchl
       weekly: weekly.get(t) ?? null,
       monthly: monthly.get(t) ?? null,
       history: Object.fromEntries(Object.entries(feed.get(t) ?? {}).map(([m, e]) => [m, e.mult])),
+      weeklyHistory: weeklyHistoryMap.get(t) ?? {},
     }
   })
 
@@ -203,12 +220,13 @@ async function getUserWatchlistUncached(name: string, tickers: string[]): Promis
   const db = getSupabaseClient()
   const startDate = new Date().toISOString().split('T')[0]
   const [weeklyLatest, monthlyLatest] = await Promise.all([latestSignalDate('weekly'), latestSignalDate('monthly')])
-  const [assets, prices, weekly, monthly, feed, bars] = await Promise.all([
+  const [assets, prices, weekly, monthly, feed, weeklyHistoryMap, bars] = await Promise.all([
     db.from('assets').select('ticker, name, sector').eq('is_active', true).in('ticker', tickers),
     db.from('latest_prices').select('ticker, close').in('ticker', tickers),
     latestSignals(tickers, 'weekly', weeklyLatest),
     latestSignals(tickers, 'monthly', monthlyLatest),
     monthlyFeed(tickers, startDate),
+    weeklyFeed(tickers, startDate),
     dailyBars([...tickers, 'SPY'], startDate),
   ])
   if (assets.error) throw new Error(`assets: ${assets.error.message}`)
@@ -228,6 +246,7 @@ async function getUserWatchlistUncached(name: string, tickers: string[]): Promis
       weekly: weekly.get(t) ?? null,
       monthly: monthly.get(t) ?? null,
       history: Object.fromEntries(Object.entries(feed.get(t) ?? {}).map(([m, e]) => [m, e.mult])),
+      weeklyHistory: weeklyHistoryMap.get(t) ?? {},
     }
   })
 
