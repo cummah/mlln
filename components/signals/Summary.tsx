@@ -91,7 +91,7 @@ export function Results({ stats, base, strategy, setStrategy, settings }: Result
               spy={money(spy.invested)}
             />
             <Row
-              label="Profit"
+              label="Profit/Loss"
               hint="Buy and hold: all unrealised gains/losses. Sell: realised gains from closed positions + unrealised from open positions. SPY: unrealised gains/losses."
               hold={signed(holdProfit)}
               sell={signed(s.profit)}
@@ -99,13 +99,13 @@ export function Results({ stats, base, strategy, setStrategy, settings }: Result
             />
             <Row
               label="Unrealised gains"
-              hint="Buy and hold: gains from all held positions. Sell: gains from open positions only (closed positions counted in Profit)."
+              hint="Buy and hold: gains from all held positions. Sell: gains from open positions only (closed positions counted in Profit/Loss)."
               hold={<span>{h.gainCount} positions · {signed(h.gains)}</span>}
               sell={<span>{s.openGainCount} positions · {signed(s.openGains)}</span>}
             />
             <Row
               label="Unrealised losses"
-              hint="Buy and hold: losses from all held positions. Sell: losses from open positions only (closed positions counted in Profit)."
+              hint="Buy and hold: losses from all held positions. Sell: losses from open positions only (closed positions counted in Profit/Loss)."
               hold={<span>{h.lossCount} positions · {signed(h.losses)}</span>}
               sell={<span>{s.openLossCount} positions · {signed(s.openLosses)}</span>}
             />
