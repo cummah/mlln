@@ -330,7 +330,16 @@ export function WatchlistView({ data, maxMonths }: { data: DemoWatchlist; maxMon
         </>
       )}
 
-      {data.ytd && <YtdSection ytd={data.ytd} monthlyBase={monthlyBase} startDate={data.startDate} />}
+      {freq === 'monthly' ? (
+        data.ytd && <YtdSection ytd={data.ytd} monthlyBase={monthlyBase} startDate={data.startDate} />
+      ) : (
+        <div style={card}>
+          <h2 style={{ fontSize: '20px', fontWeight: 500, color: 'var(--text)', margin: '0 0 6px 0' }}>Weekly performance</h2>
+          <p style={{ fontSize: '13px', color: 'var(--text-2)', margin: '0 0 14px 0', lineHeight: 1.6, maxWidth: '820px' }}>
+            Weekly performance tracking and comparison to benchmarks is coming soon. For now, you can see the allocation history above and the monthly performance below.
+          </p>
+        </div>
+      )}
 
       {showUpgrade && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100 }}>
