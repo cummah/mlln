@@ -8,6 +8,7 @@ import type { Period } from '@/types';
 import { Panel, T, MONO, RADIUS } from './ui';
 import { EfficiencyFrontierChart } from './EfficiencyFrontierChart';
 import { PortfolioPerformanceChart } from './PortfolioPerformanceChart';
+import { InvestedValueChart } from './InvestedValueChart';
 
 interface PerformanceResult {
   period: Period;
@@ -280,7 +281,7 @@ export function PortfolioPerformanceSection({
       <div className="grid grid-cols-1 lg:grid-cols-2" style={{ gap: '12px' }}>
         {results.length > 0 && (
           <Panel title="5-Year Performance">
-            <PortfolioPerformanceChart data={results.filter(r => r.frequency === 'monthly')} />
+            <InvestedValueChart data={rows} />
           </Panel>
         )}
 
