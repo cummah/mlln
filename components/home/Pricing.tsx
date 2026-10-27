@@ -178,7 +178,7 @@ export function Pricing() {
             e.currentTarget.style.boxShadow = 'none';
           }}
         >
-          Start mlln. Get rich slow.
+          Start mlln. Stop fear and greed.
         </button>
       </div>
 
