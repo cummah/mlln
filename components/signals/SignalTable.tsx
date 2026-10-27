@@ -103,6 +103,7 @@ interface Props {
   onSelect: (r: SigRow) => void
   latestDate: string | null
   entitlement: Entitlement
+  asOf: string | null
 }
 
 const canAccess = (ticker: string, entitlement: Entitlement): boolean => {
@@ -126,7 +127,7 @@ const isLatestAndLocked = (row: TRow, latestDate: string | null, entitlement: En
   return row.r.d === latestDate && !canAccessTicker
 }
 
-export function SignalTable({ rows, tickers, strategy, base, freq, onSelect, latestDate, entitlement }: Props) {
+export function SignalTable({ rows, tickers, strategy, base, freq, onSelect, latestDate, entitlement, asOf }: Props) {
   const [sortKey, setSortKey] = useState('date')
   const [desc, setDesc] = useState(true)
   const [page, setPage] = useState(0)
@@ -154,10 +155,10 @@ export function SignalTable({ rows, tickers, strategy, base, freq, onSelect, lat
   const trows = useMemo<TRow[]>(() => rows.map(r => ({
     r,
     t: tickers[r.i],
-    eff: effective(r, strategy),
+    eff: effective(r, strategy, asOf),
     invested: base * r.m,
     pnl: r.p === null ? null : base * r.m * (r.p / 100),
-  })), [rows, tickers, strategy, base])
+  })), [rows, tickers, strategy, base, asOf])
 
   const sorted = useMemo(() => {
     const col = COLS.find(c => c.key === sortKey) ?? COLS[1]

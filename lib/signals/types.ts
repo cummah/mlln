@@ -53,6 +53,8 @@ export interface Strategy {
   nextOpen: boolean // sell at the next open instead of the exit day's close
   atrIdx: number | null // index into ATR_MULTIPLIERS, daily page only
   fee: number // dollars per closed trade
+  sellIfNegativeDays: number | null // sell if negative after X days
+  sellIfDownPct: number | null // sell if down X percent
   base?: number // base amount for saving/restoring preferences
 }
 

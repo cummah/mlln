@@ -103,7 +103,7 @@ export function SignalExplorer({ data }: { data: FeedPayload }) {
       if (dFilters.returns === 'positive' && !(r.p !== null && r.p >= 0)) return false
       if (dFilters.returns === 'negative' && !(r.p !== null && r.p < 0)) return false
       if (dFilters.status !== 'all') {
-        const closed = effective(r, dStrategy).closed
+        const closed = effective(r, dStrategy, data.asOf).closed
         if (dFilters.status === 'open' && closed) return false
         if (dFilters.status === 'closed' && !closed) return false
       }
@@ -111,8 +111,8 @@ export function SignalExplorer({ data }: { data: FeedPayload }) {
     })
   }, [data.rows, data.tickers, dFilters, dStrategy])
 
-  const stats = useMemo(() => computeStats(rows, dBase, dStrategy, spy), [rows, dBase, dStrategy, spy])
-  const chart = useMemo(() => cohorts(rows, dBase, dStrategy, freq), [rows, dBase, dStrategy, freq])
+  const stats = useMemo(() => computeStats(rows, dBase, dStrategy, spy, data.asOf), [rows, dBase, dStrategy, spy, data.asOf])
+  const chart = useMemo(() => cohorts(rows, dBase, dStrategy, freq, 12, data.asOf), [rows, dBase, dStrategy, freq, data.asOf])
 
   const reset = () => { setFilters(DEFAULT_FILTERS); setDatePreset(null); setBase(settings.baseAmount); setStrategy(DEFAULT_STRATEGY) }
 
@@ -207,14 +207,16 @@ export function SignalExplorer({ data }: { data: FeedPayload }) {
       <div className="grid grid-cols-1 lg:grid-cols-[270px_minmax(0,1fr)]" style={{ gap: '14px', alignItems: 'start' }}>
         <FilterRail
           settings={settings} filters={filters} setFilters={setFilters} base={base} setBase={setBase}
-          datePreset={datePreset} setDatePreset={setDatePreset} sectors={sectors} years={years} onReset={reset}
+          datePreset={datePreset} setDatePreset={setDatePreset} sectors={sectors} years={years}
+          strategy={strategy} setStrategy={setStrategy}
+          onReset={reset}
           onSave={savePreferences} onUpgrade={handleUpgradeClick} isSaving={isSaving} userTier={entitlement.tier} saveMessage={saveMessage}
         />
 
         <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr)', gap: '12px', minWidth: 0 }}>
-          <Results stats={stats} base={dBase} strategy={strategy} setStrategy={setStrategy} settings={settings} />
+          <Results stats={stats} base={dBase} />
           <CohortChart data={chart} unit={settings.unit} />
-          <SignalTable rows={rows} tickers={data.tickers} strategy={dStrategy} base={dBase} freq={freq} onSelect={setSelected} latestDate={data.latestDate} entitlement={entitlement} />
+          <SignalTable rows={rows} tickers={data.tickers} strategy={dStrategy} base={dBase} freq={freq} onSelect={setSelected} latestDate={data.latestDate} entitlement={entitlement} asOf={data.asOf} />
         </div>
       </div>
 

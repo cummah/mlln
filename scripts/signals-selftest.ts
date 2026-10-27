@@ -166,4 +166,41 @@ test('cohorts group by ISO week and keep only the latest periods', () => {
   assert.equal(cohorts(rows, 100, DEFAULT_STRATEGY, 'weekly', 1).length, 1)
 })
 
+test('sell if negative after X days closes underwater positions', () => {
+  const r = row({ d: '2026-01-01', p: -5 })
+  const asOf = '2026-02-01' // 31 days later
+  // Not triggered without the rule
+  assert.equal(effective(r, sell({ sellIfNegativeDays: null }), asOf).closed, false)
+  // Triggered when held >= days and negative
+  assert.deepEqual(effective(r, sell({ sellIfNegativeDays: 30 }), asOf), { closed: true, date: '2026-02-01', retPct: -5, reason: 'signal' })
+  // Not triggered if not held long enough
+  assert.equal(effective(r, sell({ sellIfNegativeDays: 40 }), asOf).closed, false)
+  // Not triggered if not negative
+  assert.equal(effective(row({ d: '2026-01-01', p: 5 }), sell({ sellIfNegativeDays: 30 }), asOf).closed, false)
+})
+
+test('sell if down X percent closes losing positions regardless of time', () => {
+  const r = row({ d: '2026-01-01', p: -15 })
+  const asOf = '2026-01-05'
+  // Not triggered without the rule
+  assert.equal(effective(r, sell({ sellIfDownPct: null }), asOf).closed, false)
+  // Triggered when down >= percent
+  assert.deepEqual(effective(r, sell({ sellIfDownPct: 10 }), asOf), { closed: true, date: '2026-01-05', retPct: -15, reason: 'signal' })
+  // Not triggered if loss is smaller
+  assert.equal(effective(r, sell({ sellIfDownPct: 20 }), asOf).closed, false)
+})
+
+test('both stop-loss rules can be used independently or together', () => {
+  const r = row({ d: '2026-01-01', p: -8 })
+  const asOf = '2026-02-01'
+  // Time rule only
+  assert.equal(effective(r, sell({ sellIfNegativeDays: 20, sellIfDownPct: null }), asOf).closed, true)
+  // Percent rule only
+  assert.equal(effective(r, sell({ sellIfNegativeDays: null, sellIfDownPct: 5 }), asOf).closed, true)
+  // Both rules (both triggered)
+  assert.equal(effective(r, sell({ sellIfNegativeDays: 20, sellIfDownPct: 5 }), asOf).closed, true)
+  // Both rules (only one triggered)
+  assert.equal(effective(r, sell({ sellIfNegativeDays: 40, sellIfDownPct: 5 }), asOf).closed, true)
+})
+
 console.log(`\nALL ${passed} CHECKS PASSED`)

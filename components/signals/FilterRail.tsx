@@ -1,8 +1,8 @@
 'use client'
 
 import { useState } from 'react'
-import { RANGES, type FreqSettings } from '@/lib/signals/config'
-import type { Filters } from '@/lib/signals/types'
+import { ATR_MULTIPLIERS, RANGES, type FreqSettings } from '@/lib/signals/config'
+import type { Filters, Strategy } from '@/lib/signals/types'
 import { Card, Chip, Label, RangeRow } from './ui'
 
 interface Props {
@@ -15,6 +15,8 @@ interface Props {
   setDatePreset: (d: number | null) => void
   sectors: string[]
   years: number[]
+  strategy: Strategy
+  setStrategy: (s: Strategy) => void
   onReset: () => void
   onSave?: () => void
   onUpgrade?: () => void
@@ -25,10 +27,12 @@ interface Props {
 
 const NA_NOTE = 'Signals with no value for this indicator are hidden only while this is narrowed.'
 
-export function FilterRail({ settings, filters, setFilters, base, setBase, datePreset, setDatePreset, sectors, years, onReset, onSave, onUpgrade, isSaving, userTier = 0, saveMessage }: Props) {
+export function FilterRail({ settings, filters, setFilters, base, setBase, datePreset, setDatePreset, sectors, years, strategy, setStrategy, onReset, onSave, onUpgrade, isSaving, userTier = 0, saveMessage }: Props) {
   const [sectorsOpen, setSectorsOpen] = useState(false)
   const [moreOpen, setMoreOpen] = useState(false)
+  const [sellRulesOpen, setSellRulesOpen] = useState(false)
   const set = (patch: Partial<Filters>) => setFilters({ ...filters, ...patch })
+  const setStrat = (patch: Partial<Strategy>) => setStrategy({ ...strategy, ...patch })
   const toggleSector = (s: string) => set({ sectors: filters.sectors.includes(s) ? filters.sectors.filter(x => x !== s) : [...filters.sectors, s] })
 
   return (
@@ -134,6 +138,70 @@ export function FilterRail({ settings, filters, setFilters, base, setBase, dateP
                   {sectors.map(s => <Chip key={s} active={filters.sectors.includes(s)} onClick={() => toggleSector(s)}>{s}</Chip>)}
                 </div>
               )}
+            </div>
+          </div>
+        )}
+      </Card>
+
+      <Card pad={0} style={{ overflow: 'hidden' }}>
+        <button
+          onClick={() => setSellRulesOpen(!sellRulesOpen)}
+          style={{ display: 'flex', justifyContent: 'space-between', width: '100%', padding: '12px 14px', background: 'transparent', border: 'none', cursor: 'pointer', fontFamily: 'inherit' }}
+        >
+          <span style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', color: 'var(--text-2)' }}>Sell rules</span>
+          <span style={{ fontSize: '10px', color: 'var(--text-2)', transform: sellRulesOpen ? 'rotate(180deg)' : 'none' }}>▼</span>
+        </button>
+        {sellRulesOpen && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', padding: '0 14px 14px' }}>
+            <div>
+              <Label right={strategy.minExit.toFixed(1) + (strategy.maxExit >= RANGES.exit[1] ? '+' : ` to ${strategy.maxExit.toFixed(1)}`)}>Exit score</Label>
+              <input type="range" min={2} max={RANGES.exit[1]} step={0.5} value={strategy.minExit} onChange={e => setStrat({ minExit: Number(e.target.value) })} />
+              <div style={{ fontSize: '10px', color: 'var(--text-3)', marginTop: '3px' }}>2 is the model&apos;s own exit threshold</div>
+            </div>
+
+            <div>
+              <Label>Sell price</Label>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '4px' }}>
+                <Chip active={!strategy.nextOpen} onClick={() => setStrat({ nextOpen: false })}>Close</Chip>
+                <Chip active={strategy.nextOpen} onClick={() => setStrat({ nextOpen: true })}>Next open</Chip>
+              </div>
+            </div>
+
+            {settings.hasAtrStops && (
+              <div>
+                <Label right={strategy.atrIdx === null ? 'off' : `${ATR_MULTIPLIERS[strategy.atrIdx]}× ATR`}>Stop loss</Label>
+                <input
+                  type="range" min={0} max={ATR_MULTIPLIERS.length} step={1}
+                  value={strategy.atrIdx === null ? 0 : strategy.atrIdx + 1}
+                  onChange={e => { const v = Number(e.target.value); setStrat({ atrIdx: v === 0 ? null : v - 1 }) }}
+                />
+                <div style={{ fontSize: '10px', color: 'var(--text-3)', marginTop: '3px' }}>Below the highest close since the signal. First trigger wins.</div>
+              </div>
+            )}
+
+            <div>
+              <Label right={strategy.sellIfNegativeDays === null ? 'off' : `${strategy.sellIfNegativeDays} d`}>Sell if negative after</Label>
+              <input
+                type="range" min={0} max={365} step={1}
+                value={strategy.sellIfNegativeDays === null ? 0 : strategy.sellIfNegativeDays}
+                onChange={e => { const v = Number(e.target.value); setStrat({ sellIfNegativeDays: v === 0 ? null : v }) }}
+              />
+              <div style={{ fontSize: '10px', color: 'var(--text-3)', marginTop: '3px' }}>Exit underwater positions after N days. First trigger wins.</div>
+            </div>
+
+            <div>
+              <Label right={strategy.sellIfDownPct === null ? 'off' : `${strategy.sellIfDownPct}%`}>Sell if down</Label>
+              <input
+                type="range" min={0} max={50} step={1}
+                value={strategy.sellIfDownPct === null ? 0 : strategy.sellIfDownPct}
+                onChange={e => { const v = Number(e.target.value); setStrat({ sellIfDownPct: v === 0 ? null : v }) }}
+              />
+              <div style={{ fontSize: '10px', color: 'var(--text-3)', marginTop: '3px' }}>Exit if down X% from entry. First trigger wins.</div>
+            </div>
+
+            <div>
+              <Label right={`$${strategy.fee}`}>Fee per sale</Label>
+              <input type="range" min={0} max={20} step={1} value={strategy.fee} onChange={e => setStrat({ fee: Number(e.target.value) })} />
             </div>
           </div>
         )}

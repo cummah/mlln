@@ -47,7 +47,26 @@ export function applyFilters(rows: SigRow[], tickers: TickerInfo[], f: Filters):
  * known yet, such as a next-open sale that has not opened, is reported as still open rather than
  * guessed. Buy and hold has no such rules, it is simply the return to the latest close.
  */
-export function effective(r: SigRow, s: Strategy): Effective {
+export function effective(r: SigRow, s: Strategy, asOf: string | null = null): Effective {
+  let closeDate: string | null = null
+  let closeRet: number | null = null
+
+  // Check stop-loss rules: negative-after-days or down-X-percent
+  if (asOf !== null && r.p !== null) {
+    if (s.sellIfNegativeDays !== null && r.p < 0 && daysBetween(r.d, asOf) >= s.sellIfNegativeDays) {
+      closeDate = asOf
+      closeRet = r.p
+    }
+    if (s.sellIfDownPct !== null && r.p < -s.sellIfDownPct) {
+      closeDate = asOf
+      closeRet = r.p
+    }
+  }
+
+  if (closeDate !== null && closeRet !== null) {
+    return { closed: true, date: closeDate, retPct: closeRet, reason: 'signal' }
+  }
+
   let sigDate: string | null = null
   let sigRet: number | null = null
   if (r.xd && r.xs !== null && r.xs >= s.minExit && r.xs <= s.maxExit) {
@@ -144,7 +163,7 @@ function daysBetween(a: string, b: string): number {
   return Math.round((new Date(b + 'T12:00:00Z').getTime() - new Date(a + 'T12:00:00Z').getTime()) / 86400000)
 }
 
-export function computeStats(rows: SigRow[], base: number, strat: Strategy, spy: SpyReturn): Stats {
+export function computeStats(rows: SigRow[], base: number, strat: Strategy, spy: SpyReturn, asOf: string | null = null): Stats {
   const known = rows.filter(r => r.p !== null)
   const pending = rows.length - known.length
 
@@ -218,7 +237,7 @@ export function computeStats(rows: SigRow[], base: number, strat: Strategy, spy:
     const sellRets: number[] = []
     for (const r of known) {
       const inv = base * r.m
-      const eff = effective(r, strat)
+      const eff = effective(r, strat, asOf)
       events.push({ date: r.d, amount: -inv })
       if (eff.closed && eff.retPct !== null && eff.date) {
         const proceeds = inv * (1 + eff.retPct / 100) - strat.fee
@@ -317,11 +336,11 @@ function periodLabel(firstDate: string, freq: Freq): string {
 }
 
 /** The last `limit` periods that have signals, oldest first, with both the held and the sold return. */
-export function cohorts(rows: SigRow[], base: number, strat: Strategy, freq: Freq, limit = 12): Cohort[] {
+export function cohorts(rows: SigRow[], base: number, strat: Strategy, freq: Freq, limit = 12, asOf: string | null = null): Cohort[] {
   const groups = new Map<string, { first: string; n: number; inv: number; hold: number; sell: number }>()
   for (const r of rows) {
     if (r.p === null) continue
-    const eff = effective(r, strat)
+    const eff = effective(r, strat, asOf)
     const sellRet = eff.closed && eff.retPct !== null ? eff.retPct : r.p
     const inv = base * r.m
     const k = periodKey(r.d, freq)

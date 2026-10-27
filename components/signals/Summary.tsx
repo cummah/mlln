@@ -1,11 +1,9 @@
 'use client'
 
 import type { CSSProperties, ReactNode } from 'react'
-import { ATR_MULTIPLIERS, RANGES, type FreqSettings } from '@/lib/signals/config'
 import { money, NA, num, pct, tone } from '@/lib/signals/format'
 import type { Cohort, Stats } from '@/lib/signals/model'
-import type { Strategy } from '@/lib/signals/types'
-import { Card, Label, Segmented } from './ui'
+import { Card } from './ui'
 
 const th = { padding: '8px 10px', fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--text-2)', textAlign: 'right', whiteSpace: 'nowrap' } as const
 const td = { padding: '7px 10px', textAlign: 'right', fontFamily: 'DM Mono, monospace', whiteSpace: 'nowrap' } as const
@@ -32,17 +30,13 @@ const signed = (v: number | null, f: (n: number) => string = n => money(n)): Rea
 interface ResultsProps {
   stats: Stats
   base: number
-  strategy: Strategy
-  setStrategy: (s: Strategy) => void
-  settings: FreqSettings
 }
 
-/** Buy and hold, sell on exit signal and SPY side by side, with the sell rules directly beneath. */
-export function Results({ stats, base, strategy, setStrategy, settings }: ResultsProps) {
+/** Buy and hold, sell on exit signal and SPY side by side. */
+export function Results({ stats, base }: ResultsProps) {
   const h = stats.hold
   const s = stats.sell
   const spy = stats.spy
-  const set = (patch: Partial<Strategy>) => setStrategy({ ...strategy, ...patch })
   const holdProfit = h.value - h.invested
   const vsHold = s.returnOnCapital !== null && h.returnPct !== null ? s.returnOnCapital - h.returnPct : null
 
@@ -114,7 +108,7 @@ export function Results({ stats, base, strategy, setStrategy, settings }: Result
             <Row label="Median return" hold={pct(h.medianPct)} sell={pct(s.medianPct)} />
             <Row label="Positions" hold={`${h.n.toLocaleString()} held`} sell={`${s.closedCount.toLocaleString()} sold · ${s.openCount.toLocaleString()} held`} />
             <Row label="Average days held when sold" sell={s.avgHoldDays === null ? NA : `${num(s.avgHoldDays, 0)} d`} />
-            {strategy.atrIdx !== null && <Row label="Sold by signal / stop" sell={`${s.bySignal.toLocaleString()} / ${s.byAtr.toLocaleString()}`} />}
+            {s.byAtr > 0 && <Row label="Sold by signal / stop" sell={`${s.bySignal.toLocaleString()} / ${s.byAtr.toLocaleString()}`} />}
           </tbody>
         </table>
         <div style={{ fontSize: '10.5px', color: 'var(--text-3)', margin: '4px 0 10px', lineHeight: 1.4 }}>
@@ -124,39 +118,6 @@ export function Results({ stats, base, strategy, setStrategy, settings }: Result
         </div>
       </div>
 
-      <div style={{ borderTop: '1px solid var(--border)', background: 'var(--surface2)', borderRadius: '0 0 12px 12px', padding: '12px 18px 14px' }}>
-        <div style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--teal)', marginBottom: '8px' }}>Sell rules</div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(190px, 1fr))', gap: '16px' }}>
-          <div>
-            <Label right={`${strategy.minExit.toFixed(1)}${strategy.maxExit >= RANGES.exit[1] ? '+' : ` to ${strategy.maxExit.toFixed(1)}`}`}>Exit score</Label>
-            <input type="range" min={2} max={RANGES.exit[1]} step={0.5} value={strategy.minExit} onChange={e => set({ minExit: Number(e.target.value) })} />
-            <div style={{ fontSize: '10px', color: 'var(--text-3)', marginTop: '3px' }}>2 is the model&apos;s own exit threshold</div>
-          </div>
-          <div>
-            <Label>Sell price</Label>
-            <Segmented
-              value={strategy.nextOpen ? 'open' : 'close'}
-              onChange={v => set({ nextOpen: v === 'open' })}
-              options={[{ key: 'close', label: 'Close' }, { key: 'open', label: 'Next open' }]}
-            />
-          </div>
-          {settings.hasAtrStops && (
-            <div>
-              <Label right={strategy.atrIdx === null ? 'off' : `${ATR_MULTIPLIERS[strategy.atrIdx]}× ATR`}>Stop loss</Label>
-              <input
-                type="range" min={0} max={ATR_MULTIPLIERS.length} step={1}
-                value={strategy.atrIdx === null ? 0 : strategy.atrIdx + 1}
-                onChange={e => { const v = Number(e.target.value); set({ atrIdx: v === 0 ? null : v - 1 }) }}
-              />
-              <div style={{ fontSize: '10px', color: 'var(--text-3)', marginTop: '3px' }}>Below the highest close since the signal. First trigger wins.</div>
-            </div>
-          )}
-          <div>
-            <Label right={`$${strategy.fee}`}>Fee per sale</Label>
-            <input type="range" min={0} max={20} step={1} value={strategy.fee} onChange={e => set({ fee: Number(e.target.value) })} />
-          </div>
-        </div>
-      </div>
     </Card>
   )
 }

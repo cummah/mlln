@@ -90,4 +90,6 @@ export const DEFAULT_STRATEGY: Strategy = {
   nextOpen: false,
   atrIdx: null,
   fee: 0,
+  sellIfNegativeDays: null,
+  sellIfDownPct: null,
 }
