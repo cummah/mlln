@@ -12,6 +12,13 @@ interface UserInfo {
   tier: number;
 }
 
+// Expose a function to refresh user info globally
+declare global {
+  interface Window {
+    refreshUserNav?: () => Promise<void>;
+  }
+}
+
 const TIER_NAMES: Record<number, string> = {
   0: 'Free',
   1: 'Essential',
@@ -35,12 +42,19 @@ export function GlobalNav() {
   useEffect(() => {
     loadUserInfo();
 
+    // Expose refresh function globally for dynamic updates
+    (window as any).refreshUserNav = loadUserInfo;
+
     const { data: { subscription } } = supabase.auth.onAuthStateChange(() => {
       loadUserInfo();
     });
 
-    return () => subscription?.unsubscribe();
+    return () => {
+      subscription?.unsubscribe();
+      delete (window as any).refreshUserNav;
+    };
   }, []);
+
 
   const loadUserInfo = async () => {
     try {
@@ -168,43 +182,40 @@ export function GlobalNav() {
           icon={<WatchlistIcon />}
         />
 
-        <div style={{
-          fontSize: '11px',
-          fontWeight: '700',
-          letterSpacing: '0.08em',
-          textTransform: 'uppercase',
-          color: 'var(--text-3)',
-          padding: '12px 12px',
-          marginTop: '8px',
-          marginBottom: '4px'
-        }}>
-          Tools
-        </div>
+        {(user && user.tier >= 1) || user ? (
+          <>
+            <div style={{
+              fontSize: '11px',
+              fontWeight: '700',
+              letterSpacing: '0.08em',
+              textTransform: 'uppercase',
+              color: 'var(--text-3)',
+              padding: '12px 12px',
+              marginTop: '8px',
+              marginBottom: '4px'
+            }}>
+              Tools
+            </div>
 
-        {user && user.tier >= 1 && (
-          <NavItem
-            href="/my-watchlist"
-            label="My Watchlist"
-            active={isActive('/my-watchlist')}
-            icon={<WatchlistIcon />}
-          />
-        )}
+            {user && user.tier >= 1 && (
+              <NavItem
+                href="/my-watchlist"
+                label="My Watchlist"
+                active={isActive('/my-watchlist')}
+                icon={<WatchlistIcon />}
+              />
+            )}
 
-        <NavItem
-          href="/portfolio"
-          label="Portfolio"
-          active={isActive('/portfolio')}
-          icon={<PortfolioIcon />}
-        />
-
-        {user && (
-          <NavItem
-            href="/my-portfolio"
-            label="My Portfolios"
-            active={isActive('/my-portfolio')}
-            icon={<PortfolioIcon />}
-          />
-        )}
+            {user && (
+              <NavItem
+                href="/my-portfolio"
+                label="My Portfolios"
+                active={isActive('/my-portfolio')}
+                icon={<PortfolioIcon />}
+              />
+            )}
+          </>
+        ) : null}
 
         {user && user.tier === 4 && (
           <>

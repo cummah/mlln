@@ -94,10 +94,16 @@ export default function AccountPage({ user }: { user: AccountUser }) {
       setProfile({ ...profile, display_name: displayNameInput });
       setDisplayNameSaved(true);
       setSuccess('Display name updated');
+
+      // Refresh the global nav with the new display name
+      if (typeof window !== 'undefined' && (window as any).refreshUserNav) {
+        await (window as any).refreshUserNav();
+      }
+
       setTimeout(() => setSuccess(null), 2000);
     } catch (err) {
       setError('Failed to save display name');
-      console.error(err);
+      console.error('[AccountPage] Error saving display name:', err);
       setDisplayNameInput(profile.display_name || '');
     } finally {
       setSavingName(false);
