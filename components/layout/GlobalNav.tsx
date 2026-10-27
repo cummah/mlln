@@ -132,12 +132,6 @@ export function GlobalNav() {
         </div>
 
         <NavItem
-          href="/asset/daily"
-          label="Daily"
-          active={isActive('/asset/daily')}
-          icon={<DailyIcon />}
-        />
-        <NavItem
           href="/asset/weekly"
           label="Weekly"
           active={isActive('/asset/weekly')}
@@ -226,6 +220,12 @@ export function GlobalNav() {
             }}>
               Admin
             </div>
+            <NavItem
+              href="/asset/daily"
+              label="Daily"
+              active={isActive('/asset/daily')}
+              icon={<DailyIcon />}
+            />
             <NavItem
               href="/admin/permissions"
               label="Tier Permissions"
