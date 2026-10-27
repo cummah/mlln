@@ -59,6 +59,7 @@ const COLS: Col[] = [
       ? <span title={`Sold ${x.eff.date}${x.eff.reason === 'atr' ? ' by stop loss' : ''}`} style={{ color: tone(x.eff.retPct), fontWeight: 600 }}>{pct(x.eff.retPct)}{x.eff.reason === 'atr' ? ' ◦' : ''}</span>
       : <span style={{ color: 'var(--text-3)' }}>Held</span>,
   },
+  { key: 'exitDate', label: 'Exit date', pri: 2, align: 'left', sort: x => x.eff.date, csv: x => x.eff.date, cell: x => x.eff.date ? dateCompact(x.eff.date) : <span style={{ color: 'var(--text-3)' }}>-</span>, hint: 'Date the exit signal fired, or - if still held' },
   { key: 'mult', label: 'Mult', pri: 2, align: 'right', sort: x => x.r.m, csv: x => x.r.m, cell: x => mult(x.r.m), hint: 'Buy multiplier', off: true },
   { key: 'ret', label: 'Return held', pri: 2, align: 'right', sort: x => x.r.p, csv: x => x.r.p, cell: x => (x.r.p === null ? pendingCell : <span style={{ color: tone(x.r.p), fontWeight: 600 }}>{pct(x.r.p)}</span>), hint: 'Return if held to the latest close', off: true },
   { key: 'factor', label: 'Factor', pri: 2, align: 'right', sort: x => x.r.f, csv: x => x.r.f, cell: x => <span style={{ color: tone(x.r.f) }}>{fracPct(x.r.f)}</span>, hint: 'Factor regime', off: true },
