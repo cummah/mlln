@@ -183,7 +183,7 @@ export function Pricing() {
       </div>
 
       <div style={{ textAlign: 'center', fontSize: '12px', color: 'var(--text-3)', marginTop: '22px' }}>
-        Prices in GBP. All plans are annual, with the monthly rate shown for comparison.
+        Prices in GBP. All plans are annual, with the monthly rate shown for comparison (excluding VAT)
       </div>
 
       <SignupModal isOpen={signupOpen} onClose={() => setSignupOpen(false)} />
