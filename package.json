@@ -23,6 +23,7 @@
     "assets:mark-inactive": "npx ts-node --project tsconfig.scripts.json scripts/mark-inactive.ts"
   },
   "dependencies": {
+    "@sentry/nextjs": "^7.100.0",
     "@supabase/ssr": "^0.12.7",
     "@supabase/supabase-js": "^2.104.0",
     "framer-motion": "^12.38.0",
