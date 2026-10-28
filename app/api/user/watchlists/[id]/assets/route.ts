@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server';
+import { canSwapAsset } from '@/lib/quotas';
 
 export async function POST(req: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -26,6 +27,23 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
 
     if (watchlistError || !watchlist) {
       return Response.json({ error: 'Watchlist not found' }, { status: 404 });
+    }
+
+    // Get user tier for quota checking
+    const { data: profile, error: profileError } = await supabase
+      .from('profiles')
+      .select('tier')
+      .eq('user_id', user.id)
+      .single();
+
+    if (profileError || !profile) {
+      return Response.json({ error: 'Profile not found' }, { status: 500 });
+    }
+
+    // Check asset swap quota
+    const quotaCheck = await canSwapAsset(user.id, profile.tier);
+    if (!quotaCheck.allowed) {
+      return Response.json({ error: quotaCheck.reason || 'Asset swap limit reached' }, { status: 403 });
     }
 
     // Validate ticker exists and is active
@@ -63,7 +81,27 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
       .single();
 
     if (error) throw error;
-    return Response.json(data);
+
+    // Log to audit table for monthly quota tracking
+    const { error: auditError } = await supabase
+      .from('watchlist_assets_audit')
+      .insert([{
+        user_id: user.id,
+        watchlist_id: id,
+        ticker: ticker.toUpperCase(),
+        action: 'add',
+      }]);
+
+    if (auditError) {
+      console.error('Failed to log audit:', auditError);
+    }
+
+    // Return remaining swaps this month
+    const remainingSwaps = quotaCheck.remaining || 999;
+    return Response.json({
+      ...data,
+      remaining_swaps_this_month: Math.max(0, remainingSwaps - 1),
+    });
   } catch (err) {
     console.error('Failed to add asset:', err);
     return Response.json({ error: 'Failed to add asset' }, { status: 500 });
@@ -98,6 +136,23 @@ export async function DELETE(req: Request, { params }: { params: Promise<{ id: s
       return Response.json({ error: 'Watchlist not found' }, { status: 404 });
     }
 
+    // Get user tier for quota checking
+    const { data: profile, error: profileError } = await supabase
+      .from('profiles')
+      .select('tier')
+      .eq('user_id', user.id)
+      .single();
+
+    if (profileError || !profile) {
+      return Response.json({ error: 'Profile not found' }, { status: 500 });
+    }
+
+    // Check asset swap quota (removals also count as swaps)
+    const quotaCheck = await canSwapAsset(user.id, profile.tier);
+    if (!quotaCheck.allowed) {
+      return Response.json({ error: quotaCheck.reason || 'Asset swap limit reached' }, { status: 403 });
+    }
+
     const { error } = await supabase
       .from('watchlist_assets')
       .delete()
@@ -105,7 +160,27 @@ export async function DELETE(req: Request, { params }: { params: Promise<{ id: s
       .eq('ticker', ticker.toUpperCase());
 
     if (error) throw error;
-    return Response.json({ success: true });
+
+    // Log to audit table for monthly quota tracking
+    const { error: auditError } = await supabase
+      .from('watchlist_assets_audit')
+      .insert([{
+        user_id: user.id,
+        watchlist_id: id,
+        ticker: ticker.toUpperCase(),
+        action: 'remove',
+      }]);
+
+    if (auditError) {
+      console.error('Failed to log audit:', auditError);
+    }
+
+    // Return remaining swaps this month
+    const remainingSwaps = quotaCheck.remaining || 999;
+    return Response.json({
+      success: true,
+      remaining_swaps_this_month: Math.max(0, remainingSwaps - 1),
+    });
   } catch (err) {
     console.error('Failed to remove asset:', err);
     return Response.json({ error: 'Failed to remove asset' }, { status: 500 });

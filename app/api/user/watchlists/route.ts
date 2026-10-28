@@ -49,6 +49,13 @@ export async function POST(req: Request) {
       return Response.json({ error: 'Custom watchlists require a paid subscription' }, { status: 403 });
     }
 
+    // Check quota
+    const { canCreateWatchlist } = await import('@/lib/quotas');
+    const quotaCheck = await canCreateWatchlist(user.id, profile.tier);
+    if (!quotaCheck.allowed) {
+      return Response.json({ error: quotaCheck.reason || 'Watchlist limit reached' }, { status: 403 });
+    }
+
     // Validate inception_date if provided
     if (inception_date) {
       if (!/^\d{4}-\d{2}-\d{2}$/.test(inception_date)) {
