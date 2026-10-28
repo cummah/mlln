@@ -13,7 +13,7 @@ const pct = (v: number) => `${v >= 0 ? '+' : ''}${Math.round(v)}%`
 export async function GET(_req: Request, { params }: { params: { ticker: string } }) {
   const ticker = params.ticker.toUpperCase()
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL
-  const key = process.env.SUPABASE_SERVICE_ROLE_KEY
+  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
   if (!url || !key) return new Response('Not configured', { status: 500 })
 
   const cols = ['ticker', 'name', ...WINDOWS.flatMap(w => [`enh_return_${w}`, `std_return_${w}`])].join(',')

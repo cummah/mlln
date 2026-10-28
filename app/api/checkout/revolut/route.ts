@@ -1,8 +1,11 @@
 import { createClient } from '@/lib/supabase/server';
+import { getRateLimiter, checkRateLimit } from '@/lib/rate-limit';
 
 const REVOLUT_API_URL = process.env.REVOLUT_API_URL || 'https://merchant.revolut.com/api';
 const REVOLUT_API_KEY = process.env.REVOLUT_API_KEY || '';
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://mlln.ai';
+
+const checkoutLimiter = getRateLimiter(60000, 5);
 
 const TIER_PRICES: Record<number, { amount: number; currency: string; name: string }> = {
   1: { amount: 14400, currency: 'GBP', name: 'Essential' },    // £144/year = 14400 pence
@@ -17,6 +20,9 @@ const TIER_METADATA: Record<number, { id: string; name: string }> = {
 };
 
 export async function POST(req: Request) {
+  const rateLimitResponse = checkRateLimit(req, checkoutLimiter);
+  if (rateLimitResponse) return rateLimitResponse;
+
   try {
     const { tier } = await req.json();
 

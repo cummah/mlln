@@ -1,7 +1,9 @@
 import { createClient } from '@/lib/supabase/server';
 import crypto from 'crypto';
+import { getRateLimiter, checkRateLimit } from '@/lib/rate-limit';
 
 const REVOLUT_WEBHOOK_SECRET = process.env.REVOLUT_WEBHOOK_SECRET || '';
+const webhookLimiter = getRateLimiter(60000, 100);
 
 function verifyRevolutSignature(payload: string, signature: string): boolean {
   const hash = crypto
@@ -13,6 +15,9 @@ function verifyRevolutSignature(payload: string, signature: string): boolean {
 }
 
 export async function POST(req: Request) {
+  const rateLimitResponse = checkRateLimit(req, webhookLimiter);
+  if (rateLimitResponse) return rateLimitResponse;
+
   try {
     const signature = req.headers.get('revolut-signature');
     const body = await req.text();
