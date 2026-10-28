@@ -467,8 +467,7 @@ export function WatchlistView({ data, maxMonths, watchlistId, isCustom }: { data
             watchlistId={watchlistId}
             currentAssets={data.rows.map(r => r.ticker)}
             onAssetsChanged={() => {
-              // Page will refresh via server state, but we close the modal immediately
-              setShowAssetModal(false)
+              // Modal stays open for bulk edits; page data will refresh when closed
             }}
           />
         </>
