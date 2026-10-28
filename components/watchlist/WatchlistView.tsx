@@ -174,7 +174,7 @@ export function WatchlistView({ data, maxMonths, watchlistId, isCustom }: { data
   // Historical distribution - monthly or weekly depending on freq
   const monthlyBase = amountFor('monthly')
   const weeklyBase = amountFor('weekly')
-  const displayMonths = maxMonths ? data.months.slice(-maxMonths) : data.months
+  const displayMonths = data.months.slice(-10) // always rolling 10 months
 
   // Generate week keys for weekly display
   const weekKeys = useMemo(() => {
@@ -388,7 +388,7 @@ export function WatchlistView({ data, maxMonths, watchlistId, isCustom }: { data
       {grid.periods.length > 0 && (
         <div style={card}>
           <h2 style={{ fontSize: '20px', fontWeight: 500, color: 'var(--text)', margin: '0 0 6px 0' }}>
-            {freq === 'weekly' ? 'Weekly allocation (rolling 10 weeks)' : `Monthly allocation ${maxMonths ? `(last ${maxMonths} months)` : `since ${dateCompact(data.startDate)}`}`}
+            {freq === 'weekly' ? 'Weekly allocation (rolling 10 weeks)' : 'Monthly allocation (rolling 10 months)'}
           </h2>
           <p style={{ fontSize: '13px', color: 'var(--text-2)', margin: '0 0 14px 0', lineHeight: 1.6, maxWidth: '820px' }}>
             {freq === 'weekly'
