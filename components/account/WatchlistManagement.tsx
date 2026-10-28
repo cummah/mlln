@@ -28,6 +28,8 @@ export default function WatchlistManagement({ userId, tier, maxWatchlists }: Wat
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const [tickerSuggestions, setTickerSuggestions] = useState<string[]>([]);
+  const [showTickerSuggestions, setShowTickerSuggestions] = useState(false);
 
   useEffect(() => {
     loadWatchlists();
@@ -93,6 +95,29 @@ export default function WatchlistManagement({ userId, tier, maxWatchlists }: Wat
     }
   };
 
+  const handleTickerInput = async (value: string) => {
+    const upperValue = value.toUpperCase();
+    setNewAssetTicker(upperValue);
+
+    if (value.length < 1) {
+      setTickerSuggestions([]);
+      setShowTickerSuggestions(false);
+      return;
+    }
+
+    try {
+      const res = await fetch(`/api/assets/search?q=${encodeURIComponent(value)}&limit=5`);
+      if (res.ok) {
+        const data = await res.json();
+        const currentTickers = assets.map(a => a.ticker);
+        setTickerSuggestions((data.tickers || []).filter((t: string) => !currentTickers.includes(t)));
+        setShowTickerSuggestions(true);
+      }
+    } catch (err) {
+      console.error('Failed to fetch suggestions:', err);
+    }
+  };
+
   const handleAddAsset = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newAssetTicker.trim() || !selectedWatchlistId) return;
@@ -112,6 +137,8 @@ export default function WatchlistManagement({ userId, tier, maxWatchlists }: Wat
       }
 
       setNewAssetTicker('');
+      setTickerSuggestions([]);
+      setShowTickerSuggestions(false);
       setSuccess('Asset added!');
       await loadWatchlistAssets();
       setTimeout(() => setSuccess(null), 2000);
@@ -326,26 +353,76 @@ export default function WatchlistManagement({ userId, tier, maxWatchlists }: Wat
 
               {/* Add Asset Form */}
               {assets.length < 20 && (
-                <form onSubmit={handleAddAsset} style={{ display: 'flex', gap: '8px', marginBottom: '16px' }}>
-                  <input
-                    type="text"
-                    placeholder="Add ticker (e.g., AAPL)"
-                    value={newAssetTicker}
-                    onChange={(e) => setNewAssetTicker(e.target.value.toUpperCase())}
-                    disabled={loading}
-                    maxLength={5}
-                    style={{
-                      flex: 1,
-                      padding: '8px 10px',
-                      borderRadius: '6px',
-                      border: '1px solid var(--border)',
-                      background: 'var(--bg)',
-                      color: 'var(--text)',
-                      fontSize: '13px',
-                      fontFamily: 'inherit',
-                      textTransform: 'uppercase'
-                    }}
-                  />
+                <form onSubmit={handleAddAsset} style={{ display: 'flex', gap: '8px', marginBottom: '16px', position: 'relative' }}>
+                  <div style={{ flex: 1, position: 'relative' }}>
+                    <input
+                      type="text"
+                      placeholder="Add ticker (e.g., AAPL)"
+                      value={newAssetTicker}
+                      onChange={(e) => handleTickerInput(e.target.value)}
+                      onFocus={() => newAssetTicker.length > 0 && setShowTickerSuggestions(true)}
+                      disabled={loading}
+                      maxLength={5}
+                      style={{
+                        width: '100%',
+                        padding: '8px 10px',
+                        borderRadius: '6px',
+                        border: '1px solid var(--border)',
+                        background: 'var(--bg)',
+                        color: 'var(--text)',
+                        fontSize: '13px',
+                        fontFamily: 'inherit',
+                        textTransform: 'uppercase',
+                        boxSizing: 'border-box'
+                      }}
+                    />
+                    {/* Autocomplete suggestions */}
+                    {showTickerSuggestions && tickerSuggestions.length > 0 && (
+                      <div
+                        style={{
+                          position: 'absolute',
+                          top: '100%',
+                          left: 0,
+                          right: 0,
+                          background: 'var(--surface-elevated)',
+                          border: '1px solid var(--border)',
+                          borderRadius: '6px',
+                          marginTop: '4px',
+                          zIndex: 10,
+                          maxHeight: '200px',
+                          overflowY: 'auto',
+                        }}
+                      >
+                        {tickerSuggestions.map((ticker) => (
+                          <button
+                            key={ticker}
+                            type="button"
+                            onClick={() => {
+                              setNewAssetTicker(ticker);
+                              setShowTickerSuggestions(false);
+                              setTickerSuggestions([]);
+                            }}
+                            style={{
+                              width: '100%',
+                              padding: '8px 10px',
+                              border: 'none',
+                              background: 'transparent',
+                              color: 'var(--text)',
+                              fontSize: '13px',
+                              fontWeight: '500',
+                              textAlign: 'left',
+                              cursor: 'pointer',
+                              borderBottom: '1px solid var(--border)',
+                            }}
+                            onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--surface2)')}
+                            onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
+                          >
+                            {ticker}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
                   <button
                     type="submit"
                     disabled={!newAssetTicker || loading}

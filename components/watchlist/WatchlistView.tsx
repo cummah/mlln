@@ -10,6 +10,7 @@ import { SignalCell } from '@/components/sectors/SignalCell'
 import { SortTh, sortBy, useSort } from '@/components/sectors/sorting'
 import { YtdSection } from './YtdSection'
 import { EditWatchlistModal } from './EditWatchlistModal'
+import { AssetManagementModal } from './AssetManagementModal'
 
 type SortKey = 'ticker' | 'date' | 'mult' | 'amount' | 'ret'
 
@@ -100,6 +101,7 @@ export function WatchlistView({ data, maxMonths, watchlistId, isCustom }: { data
   const [freq, setFreqState] = useState<WatchFreq>('monthly')
   const setFreq = useCallback((f: WatchFreq) => setFreqState(f), [])
   const [showEditModal, setShowEditModal] = useState(false)
+  const [showAssetModal, setShowAssetModal] = useState(false)
   const [amounts, setAmounts] = useState<Record<WatchFreq, string>>({
     weekly: String(data.baseAmount.weekly),
     monthly: String(data.baseAmount.monthly),
@@ -216,12 +218,20 @@ export function WatchlistView({ data, maxMonths, watchlistId, isCustom }: { data
           <p style={{ fontSize: '14px', color: 'var(--text-2)', margin: '6px 0 0 0', maxWidth: '620px', lineHeight: 1.6 }}>{data.description}</p>
         </div>
         {isCustom && watchlistId ? (
-          <button
-            onClick={() => setShowEditModal(true)}
-            style={pill(false)}
-          >
-            Edit watchlist
-          </button>
+          <div style={{ display: 'flex', gap: '8px' }}>
+            <button
+              onClick={() => setShowEditModal(true)}
+              style={pill(false)}
+            >
+              Edit watchlist
+            </button>
+            <button
+              onClick={() => setShowAssetModal(true)}
+              style={pill(false)}
+            >
+              Manage assets
+            </button>
+          </div>
         ) : (
           <button
             disabled
@@ -443,13 +453,25 @@ export function WatchlistView({ data, maxMonths, watchlistId, isCustom }: { data
       )}
 
       {isCustom && watchlistId && (
-        <EditWatchlistModal
-          isOpen={showEditModal}
-          onClose={() => setShowEditModal(false)}
-          watchlistId={watchlistId}
-          currentName={data.name}
-          currentInceptionDate={data.startDate}
-        />
+        <>
+          <EditWatchlistModal
+            isOpen={showEditModal}
+            onClose={() => setShowEditModal(false)}
+            watchlistId={watchlistId}
+            currentName={data.name}
+            currentInceptionDate={data.startDate}
+          />
+          <AssetManagementModal
+            isOpen={showAssetModal}
+            onClose={() => setShowAssetModal(false)}
+            watchlistId={watchlistId}
+            currentAssets={data.rows.map(r => r.ticker)}
+            onAssetsChanged={() => {
+              // Page will refresh via server state, but we close the modal immediately
+              setShowAssetModal(false)
+            }}
+          />
+        </>
       )}
     </div>
   )
