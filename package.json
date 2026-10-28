@@ -29,11 +29,11 @@
     "lightweight-charts": "^4.1.1",
     "lucide-react": "^1.11.0",
     "ml-pca": "^4.1.1",
-    "next": "14.2.35",
+    "next": "^16.4.3",
     "react": "^18",
     "react-dom": "^18",
     "recharts": "^3.8.1",
-    "yahoo-finance2": "^4.0.2",
+    "yahoo-finance2": "^3.14.3",
     "zustand": "^5.0.12"
   },
   "devDependencies": {
