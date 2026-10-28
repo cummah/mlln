@@ -28,8 +28,8 @@ const BLOCKS: Block[] = [
   {
     title: 'The short version',
     body: [
-      'mlln.ai has no accounts and no sign-up. We do not ask for your name, email address or payment details, and the site does not include advertising or third-party analytics trackers.',
-      'Your watchlist, portfolio and display settings are stored in your own browser, not on our servers.',
+      'mlln.ai has optional accounts and sign-up. You can use the free tier without an account, or create an account to save watchlists and access paid tiers. We do not collect advertising data or use third-party analytics trackers.',
+      'Your watchlist, portfolio and display settings can be stored in your own browser (for free users) or synced to our servers (for account holders). Analytics data about your usage is collected only when you consent.',
     ],
   },
   {
@@ -40,9 +40,30 @@ const BLOCKS: Block[] = [
         <li>your watchlist;</li>
         <li>a portfolio you import or build on the Portfolio page;</li>
         <li>display settings such as signal frequency, base contribution amount and chart range;</li>
-        <li>the time of your last watchlist visit, so the page can show what changed since.</li>
+        <li>the time of your last watchlist visit, so the page can show what changed since;</li>
+        <li>your analytics consent preference (stored in the <code>mlln_consent</code> cookie).</li>
       </ul>,
-      'This data stays on your device. Clearing your browser\'s site data removes it, and we cannot recover it for you. Because it is not synced, it will not appear on another browser or device.',
+      'This data stays on your device. Clearing your browser\'s site data removes it, and we cannot recover it for you. Because it is not synced to an account, it will not appear on another browser or device.',
+    ],
+  },
+  {
+    title: 'Accounts and authentication',
+    body: [
+      'If you create an account, we collect:',
+      <ul key="auth" style={listStyle}>
+        <li>your email address (used for login and notifications);</li>
+        <li>a password hash (never stored in plain text);</li>
+        <li>your tier (free, Essential, Full Access, or Pro);</li>
+        <li>your saved watchlists and portfolios, synced to our servers.</li>
+      </ul>,
+      'Your account data is protected by row-level security (RLS) in our database. Only you can access your own data.',
+    ],
+  },
+  {
+    title: 'Analytics and consent',
+    body: [
+      'mlln.ai collects first-party analytics to understand how the site is used and improve the product. This includes events like signup, account activation, tier upgrades, and account deletion.',
+      'You control this via the consent banner at the bottom of the page. When you decline, no analytics data is collected from your browser. Server-side events (like signups and upgrades) are logged regardless of consent, as they are part of our operational records, not behavioral tracking.',
     ],
   },
   {
@@ -54,7 +75,7 @@ const BLOCKS: Block[] = [
         <li>the percentage weights you give each holding in a portfolio, so we can calculate portfolio-level analytics;</li>
         <li>the sector of each holding, which comes from our own data.</li>
       </ul>,
-      'These details are sent in the web address of the request. The site itself does not save them to a database or link them to you. We do not receive share counts, account numbers or brokerage logins.',
+      'These details are sent in the web address of the request. We do not save them to a database or link them to you personally (for free users). For account holders, we link this data to your account to provide sync across devices.',
     ],
   },
   {
@@ -89,8 +110,9 @@ const BLOCKS: Block[] = [
         <li><strong>Data portability:</strong> Download all your data as JSON from your account settings</li>
         <li><strong>Data deletion:</strong> Permanently delete your account and all associated data from your account settings</li>
         <li><strong>Email change:</strong> Update your email address at any time</li>
+        <li><strong>Consent withdrawal:</strong> Opt out of analytics at any time via the consent banner</li>
       </ul>,
-      'For users without accounts, you can delete everything the site stores about you at any time by clearing site data in your browser. You can also use the site without importing a portfolio or building a watchlist, in which case no personal inputs are sent to us.',
+      'For users without accounts, you can delete everything the site stores about you at any time by clearing site data in your browser, or by withdrawing consent via the banner. You can also use the site without creating an account or building a watchlist, in which case no personal data is sent to us beyond standard server logs.',
     ],
   },
   {

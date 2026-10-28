@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server';
+import { trackServerEvent } from '@/lib/analytics';
 import { NextResponse } from 'next/server';
 import { checkRateLimit, authRateLimiters } from '@/lib/rate-limit';
 
@@ -17,6 +18,8 @@ export async function POST(req: Request) {
         { status: 401 }
       );
     }
+
+    await trackServerEvent(user.id, 'churn', { reason: 'account_deletion' });
 
     // Delete user-related data
     await supabase

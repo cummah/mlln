@@ -1,6 +1,7 @@
 import { createServerClient } from '@supabase/ssr';
 import type { EmailOtpType } from '@supabase/supabase-js';
 import { NextRequest, NextResponse } from 'next/server';
+import { trackServerEvent } from '@/lib/analytics';
 
 export async function GET(request: NextRequest) {
   const { searchParams, origin } = new URL(request.url);
@@ -35,7 +36,7 @@ export async function GET(request: NextRequest) {
     }
   );
 
-  const { error } = code
+  const { error, data } = code
     ? await supabase.auth.exchangeCodeForSession(code)
     : await supabase.auth.verifyOtp({ type: type!, token_hash: tokenHash! });
 
@@ -44,6 +45,10 @@ export async function GET(request: NextRequest) {
     // Typically: link opened in a different browser than signup (PKCE verifier
     // cookie missing), or link expired/already used. Send them to login.
     return NextResponse.redirect(new URL('/login?error=verification_failed', origin));
+  }
+
+  if (data?.user?.id) {
+    await trackServerEvent(data.user.id, 'signup', { email: data.user.email });
   }
 
   return response;

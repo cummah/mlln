@@ -33,10 +33,11 @@ const BLOCKS: Block[] = [
   {
     title: 'Cookies we use',
     body: [
-      'mlln.ai uses only essential authentication cookies. These cookies are necessary for the service to function and cannot be disabled:',
+      'mlln.ai uses the following cookies:',
       <ul key="cookies" style={listStyle}>
-        <li><strong>Authentication cookies:</strong> Used by Supabase to maintain your login session and remember you when you return to the site. These contain session tokens that allow us to verify your identity.</li>
-        <li><strong>Session state:</strong> Temporary cookies used to maintain your preferences and settings during your visit.</li>
+        <li><strong>Authentication cookies:</strong> Used by Supabase to maintain your login session and remember you when you return to the site. These contain session tokens that allow us to verify your identity. (Essential)</li>
+        <li><strong>Session state:</strong> Temporary cookies used to maintain your preferences and settings during your visit. (Essential)</li>
+        <li><strong>mlln_consent:</strong> Stores your analytics consent preference (accept or decline). This allows us to respect your choice when collecting usage data. (Consent preference)</li>
       </ul>,
       'We do not use:',
       <ul key="nocookies" style={listStyle}>
@@ -57,10 +58,17 @@ const BLOCKS: Block[] = [
     ],
   },
   {
-    title: 'Cookie consent',
+    title: 'Analytics consent',
     body: [
-      'Because mlln.ai only uses essential cookies necessary for authentication and service operation, we do not require explicit consent before setting them. These cookies are exempt from cookie consent requirements in most jurisdictions because they are strictly necessary for the service to function.',
-      'If you prefer not to accept cookies, you can adjust your browser settings to decline them. However, this may prevent you from using certain features of mlln.ai, such as logging in to your account.',
+      'mlln.ai uses first-party analytics to understand how the site is used and improve the product. When you visit, a consent banner appears at the bottom of the page. You can choose to accept or decline analytics data collection.',
+      'If you accept, mlln.ai will store your preference in the mlln_consent cookie and collect events like page visits, account actions, and feature usage. This data is used only internally and not shared with third parties.',
+      'If you decline, mlln.ai will not collect behavioral analytics from your browser. You can change your preference at any time via the banner.',
+    ],
+  },
+  {
+    title: 'Essential cookies',
+    body: [
+      'mlln.ai uses essential authentication and session cookies that are necessary for the service to function. These cookies are exempt from consent requirements in most jurisdictions and will be set regardless of your analytics preference.',
     ],
   },
   {

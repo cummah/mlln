@@ -54,4 +54,5 @@ export const authRateLimiters = {
   changeEmail: getRateLimiter(86400000, 5),    // 5 per day
   deleteAccount: getRateLimiter(3600000, 1),   // 1 per hour
   login: getRateLimiter(900000, 10),           // 10 per 15 min
+  support: getRateLimiter(3600000, 5),         // 5 per hour
 };

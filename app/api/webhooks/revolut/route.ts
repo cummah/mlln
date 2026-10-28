@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server';
+import { trackServerEvent } from '@/lib/analytics';
 import crypto from 'crypto';
 import { getRateLimiter, checkRateLimit } from '@/lib/rate-limit';
 
@@ -62,6 +63,12 @@ export async function POST(req: Request) {
         console.error('Failed to update tier:', error);
         return new Response('Failed to update tier', { status: 500 });
       }
+
+      await trackServerEvent(metadata.user_id, 'upgrade', {
+        tier,
+        orderId: data.id,
+        provider: 'revolut',
+      });
 
       return new Response('OK', { status: 200 });
     }

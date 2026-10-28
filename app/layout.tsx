@@ -1,5 +1,6 @@
 import '@/styles/globals.css'
 import { inter, dmSans } from '@/lib/fonts'
+import { ConsentBanner } from '@/components/layout/ConsentBanner'
 
 export const metadata = {
   title: 'Enhanced DCA | mlln.ai',
@@ -25,7 +26,10 @@ export default function RootLayout({
           />
         )}
       </head>
-      <body>{children}</body>
+      <body>
+        {children}
+        <ConsentBanner />
+      </body>
     </html>
   )
 }
