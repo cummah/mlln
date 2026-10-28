@@ -9,6 +9,7 @@ import type { Entitlement } from '@/types'
 import { SignalCell } from '@/components/sectors/SignalCell'
 import { SortTh, sortBy, useSort } from '@/components/sectors/sorting'
 import { YtdSection } from './YtdSection'
+import { EditWatchlistModal } from './EditWatchlistModal'
 
 type SortKey = 'ticker' | 'date' | 'mult' | 'amount' | 'ret'
 
@@ -95,9 +96,10 @@ function Tile({ label, value, sub }: { label: string; value: string; sub?: strin
   )
 }
 
-export function WatchlistView({ data, maxMonths }: { data: DemoWatchlist; maxMonths?: number }) {
+export function WatchlistView({ data, maxMonths, watchlistId, isCustom }: { data: DemoWatchlist; maxMonths?: number; watchlistId?: string; isCustom?: boolean }) {
   const [freq, setFreqState] = useState<WatchFreq>('monthly')
   const setFreq = useCallback((f: WatchFreq) => setFreqState(f), [])
+  const [showEditModal, setShowEditModal] = useState(false)
   const [amounts, setAmounts] = useState<Record<WatchFreq, string>>({
     weekly: String(data.baseAmount.weekly),
     monthly: String(data.baseAmount.monthly),
@@ -213,13 +215,22 @@ export function WatchlistView({ data, maxMonths }: { data: DemoWatchlist; maxMon
           <h1 style={{ fontSize: '28px', fontWeight: 500, color: 'var(--text)', margin: 0 }}>{data.name}</h1>
           <p style={{ fontSize: '14px', color: 'var(--text-2)', margin: '6px 0 0 0', maxWidth: '620px', lineHeight: 1.6 }}>{data.description}</p>
         </div>
-        <button
-          disabled
-          title="Custom watchlists are coming soon"
-          style={{ ...pill(false), cursor: 'not-allowed', opacity: 0.6 }}
-        >
-          Create your own watchlist · soon
-        </button>
+        {isCustom && watchlistId ? (
+          <button
+            onClick={() => setShowEditModal(true)}
+            style={pill(false)}
+          >
+            Edit watchlist
+          </button>
+        ) : (
+          <button
+            disabled
+            title="Custom watchlists are coming soon"
+            style={{ ...pill(false), cursor: 'not-allowed', opacity: 0.6 }}
+          >
+            Create your own watchlist · soon
+          </button>
+        )}
       </div>
 
       <div style={{ display: 'flex', gap: '12px', alignItems: 'center', flexWrap: 'wrap' }}>
@@ -429,6 +440,16 @@ export function WatchlistView({ data, maxMonths }: { data: DemoWatchlist; maxMon
             </table>
           </div>
         </div>
+      )}
+
+      {isCustom && watchlistId && (
+        <EditWatchlistModal
+          isOpen={showEditModal}
+          onClose={() => setShowEditModal(false)}
+          watchlistId={watchlistId}
+          currentName={data.name}
+          currentInceptionDate={data.startDate}
+        />
       )}
     </div>
   )

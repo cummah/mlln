@@ -32,7 +32,7 @@ export async function POST(req: Request) {
   }
 
   try {
-    const { name } = await req.json();
+    const { name, inception_date } = await req.json();
 
     if (!name || typeof name !== 'string') {
       return Response.json({ error: 'Name is required' }, { status: 400 });
@@ -49,9 +49,32 @@ export async function POST(req: Request) {
       return Response.json({ error: 'Custom watchlists require a paid subscription' }, { status: 403 });
     }
 
+    // Validate inception_date if provided
+    if (inception_date) {
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(inception_date)) {
+        return Response.json({ error: 'inception_date must be in YYYY-MM-DD format' }, { status: 400 });
+      }
+      const date = new Date(inception_date + 'T00:00:00Z');
+      const today = new Date();
+      today.setUTCHours(0, 0, 0, 0);
+      if (date > today) {
+        return Response.json({ error: 'inception_date cannot be in the future' }, { status: 400 });
+      }
+      const sixYearsAgo = new Date(today);
+      sixYearsAgo.setUTCFullYear(sixYearsAgo.getUTCFullYear() - 6);
+      if (date < sixYearsAgo) {
+        return Response.json({ error: 'inception_date cannot be earlier than 6 years ago' }, { status: 400 });
+      }
+    }
+
+    const insertData: any = { user_id: user.id, name };
+    if (inception_date) {
+      insertData.inception_date = inception_date;
+    }
+
     const { data, error } = await supabase
       .from('user_watchlists')
-      .insert([{ user_id: user.id, name }])
+      .insert([insertData])
       .select()
       .single();
 

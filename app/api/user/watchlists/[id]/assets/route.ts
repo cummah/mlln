@@ -27,6 +27,29 @@ export async function POST(req: Request, { params }: { params: { id: string } })
       return Response.json({ error: 'Watchlist not found' }, { status: 404 });
     }
 
+    // Validate ticker exists and is active
+    const { data: asset, error: assetError } = await supabase
+      .from('assets')
+      .select('ticker')
+      .eq('ticker', ticker.toUpperCase())
+      .eq('is_active', true)
+      .single();
+
+    if (assetError || !asset) {
+      return Response.json({ error: 'Ticker not found or is inactive' }, { status: 400 });
+    }
+
+    // Check asset count (20 asset cap)
+    const { count, error: countError } = await supabase
+      .from('watchlist_assets')
+      .select('*', { count: 'exact' })
+      .eq('watchlist_id', params.id);
+
+    if (countError) throw countError;
+    if (count && count >= 20) {
+      return Response.json({ error: 'Watchlist has reached the maximum of 20 assets' }, { status: 400 });
+    }
+
     // Add asset to watchlist
     const { data, error } = await supabase
       .from('watchlist_assets')

@@ -39,6 +39,7 @@ export default function AccountPage({ user }: { user: AccountUser }) {
   const [displayNameSaved, setDisplayNameSaved] = useState(true);
   const [displayNameInput, setDisplayNameInput] = useState('');
   const [savingName, setSavingName] = useState(false);
+  const [tierLimits, setTierLimits] = useState<Record<number, any> | null>(null);
 
   const loadData = async () => {
     try {
@@ -69,6 +70,16 @@ export default function AccountPage({ user }: { user: AccountUser }) {
           .select('ticker')
           .eq('user_id', user.id);
         setAssets((assetsData || []).map(a => a.ticker));
+      }
+
+      // Fetch tier limits
+      const { data: limitsData } = await supabase
+        .from('tier_limits')
+        .select('tier, max_watchlists');
+
+      if (limitsData) {
+        const limitsMap = Object.fromEntries(limitsData.map(l => [l.tier, l]));
+        setTierLimits(limitsMap);
       }
     } catch (err) {
       setError('Failed to load profile');
@@ -569,7 +580,7 @@ export default function AccountPage({ user }: { user: AccountUser }) {
                 <WatchlistManagement
                   userId={user.id}
                   tier={profile.tier}
-                  maxWatchlists={profile.tier === 1 ? 1 : profile.tier === 2 ? 3 : 5}
+                  maxWatchlists={tierLimits?.[profile.tier]?.max_watchlists ?? (profile.tier === 1 ? 1 : profile.tier === 2 ? 3 : 5)}
                 />
               </div>
             )}

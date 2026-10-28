@@ -21,7 +21,7 @@ export default async function MyWatchlistsPage() {
 
   const { data: watchlists, error } = await supabase
     .from('user_watchlists')
-    .select('id, name, created_at, watchlist_assets(ticker)')
+    .select('id, name, created_at, inception_date, watchlist_assets(ticker)')
     .eq('user_id', user.id)
     .order('created_at', { ascending: false })
 

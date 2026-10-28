@@ -22,7 +22,7 @@ export default async function UserWatchlistPage({ params }: { params: { id: stri
   // Fetch user watchlist
   const { data: watchlist, error } = await supabase
     .from('user_watchlists')
-    .select('id, name, created_at, watchlist_assets(ticker)')
+    .select('id, name, created_at, inception_date, watchlist_assets(ticker)')
     .eq('id', params.id)
     .eq('user_id', user.id)
     .single()
@@ -43,7 +43,7 @@ export default async function UserWatchlistPage({ params }: { params: { id: stri
   }
 
   // Fetch watchlist data
-  const data = await getUserWatchlist(watchlist.id, watchlist.name, tickers)
+  const data = await getUserWatchlist(watchlist.id, watchlist.name, tickers, watchlist.inception_date)
 
-  return <WatchlistView data={data} />
+  return <WatchlistView data={data} watchlistId={watchlist.id} isCustom />
 }

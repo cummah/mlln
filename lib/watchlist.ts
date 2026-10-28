@@ -253,9 +253,9 @@ export function getWatchlist(id: string) {
 export const getDemoWatchlist = () => getWatchlist('top-10')
 
 /** Get watchlist data for a user custom watchlist by tickers */
-async function getUserWatchlistUncached(name: string, tickers: string[]): Promise<DemoWatchlist> {
+async function getUserWatchlistUncached(name: string, tickers: string[], inceptionDate: string): Promise<DemoWatchlist> {
   const db = getSupabaseClient()
-  const startDate = new Date().toISOString().split('T')[0]
+  const startDate = inceptionDate
   const [weeklyLatest, monthlyLatest] = await Promise.all([latestSignalDate('weekly'), latestSignalDate('monthly')])
   const [assets, prices, weekly, monthly, feed, weeklyHistoryMap, weeklyFeedEntries, bars] = await Promise.all([
     db.from('assets').select('ticker, name, sector').eq('is_active', true).in('ticker', tickers),
@@ -307,13 +307,16 @@ async function getUserWatchlistUncached(name: string, tickers: string[]): Promis
 
 const userWatchlistCaches = new Map<string, () => Promise<DemoWatchlist>>()
 
-export function getUserWatchlist(id: string, name: string, tickers: string[]) {
-  if (!userWatchlistCaches.has(id)) {
-    const cached = unstable_cache(() => getUserWatchlistUncached(name, tickers), ['v5', `user-watchlist-${id}`], {
+export function getUserWatchlist(id: string, name: string, tickers: string[], inceptionDate: string) {
+  const sortedTickers = [...tickers].sort().join(',')
+  const cacheKey = `user-watchlist-${id}-${inceptionDate}-${sortedTickers}`
+
+  if (!userWatchlistCaches.has(cacheKey)) {
+    const cached = unstable_cache(() => getUserWatchlistUncached(name, tickers, inceptionDate), ['v5', cacheKey], {
       revalidate: 24 * 60 * 60,
       tags: ['user-watchlist', id],
     })
-    userWatchlistCaches.set(id, cached)
+    userWatchlistCaches.set(cacheKey, cached)
   }
-  return userWatchlistCaches.get(id)!()
+  return userWatchlistCaches.get(cacheKey)!()
 }
