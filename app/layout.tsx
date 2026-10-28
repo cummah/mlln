@@ -8,6 +8,21 @@ export const metadata = {
   icons: {
     icon: '/favicon.svg',
   },
+  openGraph: {
+    title: 'Enhanced DCA | mlln.ai',
+    description: 'Intelligent Dollar Cost Averaging with signal-driven buying',
+    url: 'https://mlln.ai',
+    siteName: 'mlln.ai',
+    images: [
+      {
+        url: 'https://mlln.ai/og-image.png',
+        width: 1200,
+        height: 630,
+        alt: 'mlln.ai Enhanced DCA',
+      },
+    ],
+    type: 'website',
+  },
 }
 
 export default function RootLayout({
