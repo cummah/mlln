@@ -8,6 +8,7 @@ import PricingTiersForAccount from './PricingTiersForAccount';
 import WatchlistManagement from './WatchlistManagement';
 import PortfolioManagement from './PortfolioManagement';
 import SignalPreferencesManagement from './SignalPreferencesManagement';
+import AccountSecurityPanel from './AccountSecurityPanel';
 import type { UserProfile } from '@/types';
 
 interface AccountUser {
@@ -15,7 +16,7 @@ interface AccountUser {
   email?: string;
 }
 
-type Tab = 'account' | 'assets';
+type Tab = 'account' | 'assets' | 'security';
 
 const TIER_NAMES: Record<number, string> = {
   0: 'Free',
@@ -214,6 +215,7 @@ export default function AccountPage({ user }: { user: AccountUser }) {
 
   const tabs = [
     { id: 'account' as const, label: 'Account & Plan', show: true },
+    { id: 'security' as const, label: 'Security', show: true },
     { id: 'assets' as const, label: 'Assets & Collections', show: profile && profile.tier > 0 }
   ].filter(t => t.show) as { id: Tab; label: string; show: boolean }[];
 
@@ -570,6 +572,13 @@ export default function AccountPage({ user }: { user: AccountUser }) {
           </div>
         )}
 
+
+        {/* Security Tab */}
+        {activeTab === 'security' && (
+          <div style={{ animation: 'fadeIn 0.2s ease-in' }}>
+            <AccountSecurityPanel email={user.email} />
+          </div>
+        )}
 
         {/* Assets & Collections Tab */}
         {activeTab === 'assets' && profile.tier > 0 && (

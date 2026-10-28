@@ -95,14 +95,18 @@ export async function POST(req: Request) {
 
       const tier = pendingPayment.tier;
 
-      // Update user tier
+      // Calculate new period end
+      const newPeriodEnd = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString();
+
+      // Update user tier and reset quota counters on renewal
       const { error: updateError } = await supabase
         .from('profiles')
         .update({
           tier,
           billing_provider: 'revolut',
           billing_customer_id: order_id,
-          current_period_end: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(),
+          current_period_end: newPeriodEnd,
+          quota_reset_date: new Date().toISOString(), // Reset monthly quota counters
           updated_at: new Date().toISOString(),
         })
         .eq('user_id', user.id);

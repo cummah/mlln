@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { createClient } from '@/lib/supabase/browser';
 import { useRouter } from 'next/navigation';
+import TurnstileWidget from './TurnstileWidget';
 
 interface SignupFormProps {
   showLabel?: boolean;
@@ -12,6 +13,7 @@ export default function SignupForm({ showLabel = false }: SignupFormProps) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [captchaToken, setCaptchaToken] = useState<string>('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [sent, setSent] = useState(false);
@@ -41,17 +43,17 @@ export default function SignupForm({ showLabel = false }: SignupFormProps) {
         password,
         options: {
           emailRedirectTo: `${siteUrl}/auth/callback?next=/account`,
+          data: {
+            captcha_token: captchaToken,
+          },
         },
       });
 
       if (error) {
         setError(error.message);
       } else if (data.session) {
-        // Email confirmation disabled: already signed in.
-        // The profile will be auto-created by the trigger with tier 0
         router.push('/account');
       } else {
-        // Confirmation required: no session yet, /account would bounce to /login.
         setSent(true);
       }
     } catch (err) {
@@ -139,9 +141,16 @@ export default function SignupForm({ showLabel = false }: SignupFormProps) {
         }}
       />
 
+      {process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY && (
+        <TurnstileWidget
+          onToken={setCaptchaToken}
+          onError={() => setError('CAPTCHA verification failed')}
+        />
+      )}
+
       <button
         type="submit"
-        disabled={loading || !email || !password || !confirmPassword}
+        disabled={loading || !email || !password || !confirmPassword || (!!process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY && !captchaToken)}
         style={{
           padding: '12px',
           borderRadius: '8px',

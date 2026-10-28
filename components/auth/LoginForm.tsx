@@ -185,21 +185,32 @@ export default function LoginForm() {
         </div>
       )}
 
-      <p style={{
+      <div style={{
         textAlign: 'center',
         fontSize: '12px',
         color: 'var(--text-2)',
         marginTop: '8px'
       }}>
-        Don't have an account?{' '}
-        <a href="/signup" style={{
-          color: 'var(--teal)',
-          textDecoration: 'none',
-          fontWeight: '600'
-        }}>
-          Sign up
-        </a>
-      </p>
+        <p style={{ margin: 0 }}>
+          Don't have an account?{' '}
+          <a href="/signup" style={{
+            color: 'var(--teal)',
+            textDecoration: 'none',
+            fontWeight: '600'
+          }}>
+            Sign up
+          </a>
+        </p>
+        <p style={{ margin: '8px 0 0 0' }}>
+          <a href="/auth/reset-password" style={{
+            color: 'var(--teal)',
+            textDecoration: 'none',
+            fontWeight: '600'
+          }}>
+            Forgot your password?
+          </a>
+        </p>
+      </div>
     </div>
   );
 }

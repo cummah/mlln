@@ -1,14 +1,45 @@
 import { createClient } from '@/lib/supabase/server';
+import { checkRateLimit, authRateLimiters } from '@/lib/rate-limit';
 
 export async function POST(req: Request) {
+  const limitCheck = checkRateLimit(req, authRateLimiters.signup);
+  if (limitCheck) return limitCheck;
+
   try {
-    const { email, password, display_name } = await req.json();
+    const { email, password, display_name, captchaToken } = await req.json();
 
     if (!email || !password) {
       return Response.json(
         { error: 'Email and password are required' },
         { status: 400 }
       );
+    }
+
+    if (captchaToken && process.env.TURNSTILE_SECRET_KEY) {
+      try {
+        const captchaResponse = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            secret: process.env.TURNSTILE_SECRET_KEY,
+            response: captchaToken,
+          }),
+        });
+
+        const captchaData = await captchaResponse.json() as { success: boolean };
+        if (!captchaData.success) {
+          return Response.json(
+            { error: 'CAPTCHA verification failed' },
+            { status: 400 }
+          );
+        }
+      } catch (err) {
+        console.error('CAPTCHA verification error:', err);
+        return Response.json(
+          { error: 'CAPTCHA verification failed' },
+          { status: 400 }
+        );
+      }
     }
 
     if (password.length < 6) {

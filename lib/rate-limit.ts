@@ -47,3 +47,11 @@ export function checkRateLimit(
 
   return null;
 }
+
+export const authRateLimiters = {
+  signup: getRateLimiter(3600000, 5),           // 5 per hour
+  passwordReset: getRateLimiter(86400000, 3),  // 3 per day
+  changeEmail: getRateLimiter(86400000, 5),    // 5 per day
+  deleteAccount: getRateLimiter(3600000, 1),   // 1 per hour
+  login: getRateLimiter(900000, 10),           // 10 per 15 min
+};
