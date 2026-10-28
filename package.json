@@ -34,7 +34,6 @@
     "react": "^18",
     "react-dom": "^18",
     "recharts": "^3.8.1",
-    "nodemailer": "^6.9.13",
     "yahoo-finance2": "^3.14.3",
     "zustand": "^5.0.12"
   },

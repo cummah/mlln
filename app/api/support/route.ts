@@ -24,34 +24,12 @@ async function verifyTurnstile(token: string): Promise<boolean> {
 }
 
 async function sendEmail(email: string, subject: string, message: string): Promise<boolean> {
-  const smtpHost = process.env.SMTP_HOST;
-  const smtpPort = process.env.SMTP_PORT ? parseInt(process.env.SMTP_PORT) : 587;
-  const smtpUser = process.env.SMTP_USER;
-  const smtpPass = process.env.SMTP_PASS;
-  const smtpFrom = process.env.SMTP_FROM || process.env.SUPPORT_EMAIL || 'support@mlln.ai';
   const supportEmail = process.env.SUPPORT_EMAIL || 'support@mlln.ai';
 
-  if (!smtpHost || !smtpUser || !smtpPass) {
-    console.warn('[support] SMTP not configured, email skipped');
-    return false;
-  }
-
   try {
-    const nodemailer = await import('nodemailer');
-    const transporter = nodemailer.default.createTransport({
-      host: smtpHost,
-      port: smtpPort,
-      secure: smtpPort === 465,
-      auth: {
-        user: smtpUser,
-        pass: smtpPass,
-      },
-    });
-
-    await transporter.sendMail({
-      from: smtpFrom,
-      to: supportEmail,
-      replyTo: email,
+    const supabase = getSupabaseClient();
+    await supabase.auth.admin.sendEmail({
+      email: supportEmail,
       subject: `Support: ${subject}`,
       html: `
         <p><strong>From:</strong> ${email}</p>
