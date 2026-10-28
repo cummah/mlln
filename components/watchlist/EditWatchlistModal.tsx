@@ -68,7 +68,7 @@ export function EditWatchlistModal({ isOpen, onClose, watchlistId, currentName, 
         throw new Error('Failed to delete watchlist')
       }
 
-      router.push('/my-watchlist')
+      router.push(`/my-watchlist?t=${Date.now()}`)
     } catch (err: any) {
       setError(err.message || 'Failed to delete watchlist')
       setLoading(false)
