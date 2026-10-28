@@ -2,6 +2,7 @@
 
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
+import { ConfirmDeleteModal } from './ConfirmDeleteModal'
 
 interface EditWatchlistModalProps {
   isOpen: boolean
@@ -19,6 +20,7 @@ export function EditWatchlistModal({ isOpen, onClose, watchlistId, currentName, 
   const [inceptionDate, setInceptionDate] = useState(currentInceptionDate)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [showConfirmDelete, setShowConfirmDelete] = useState(false)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -49,11 +51,11 @@ export function EditWatchlistModal({ isOpen, onClose, watchlistId, currentName, 
     }
   }
 
-  const handleDelete = async () => {
-    if (!confirm('Are you sure you want to delete this watchlist? This cannot be undone.')) {
-      return
-    }
+  const handleDelete = () => {
+    setShowConfirmDelete(true)
+  }
 
+  const handleConfirmDelete = async () => {
     setError(null)
     setLoading(true)
 
@@ -70,6 +72,7 @@ export function EditWatchlistModal({ isOpen, onClose, watchlistId, currentName, 
     } catch (err: any) {
       setError(err.message || 'Failed to delete watchlist')
       setLoading(false)
+      setShowConfirmDelete(false)
     }
   }
 
@@ -336,6 +339,14 @@ export function EditWatchlistModal({ isOpen, onClose, watchlistId, currentName, 
           </button>
         </form>
       </div>
+
+      <ConfirmDeleteModal
+        isOpen={showConfirmDelete}
+        onConfirm={handleConfirmDelete}
+        onCancel={() => setShowConfirmDelete(false)}
+        watchlistName={name}
+        loading={loading}
+      />
     </div>
   )
 }
