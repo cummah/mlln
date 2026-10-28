@@ -1,5 +1,12 @@
 import { createClient } from '@/lib/supabase/server';
-import { revalidateTag } from 'next/cache';
+
+let revalidateTag: ((tag: string) => void) | null = null;
+try {
+  const nextCache = require('next/cache');
+  revalidateTag = nextCache.revalidateTag;
+} catch (e) {
+  // revalidateTag may not be available in all contexts
+}
 
 export async function GET(req: Request, { params }: { params: { id: string } }) {
   const supabase = await createClient();
@@ -97,8 +104,10 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
       throw error;
     }
 
-    revalidateTag(params.id);
-    revalidateTag('user-watchlist');
+    if (revalidateTag) {
+      revalidateTag(params.id);
+      revalidateTag('user-watchlist');
+    }
 
     return Response.json(data);
   } catch (err) {
@@ -124,8 +133,10 @@ export async function DELETE(req: Request, { params }: { params: { id: string } 
 
     if (error) throw error;
 
-    revalidateTag(params.id);
-    revalidateTag('user-watchlist');
+    if (revalidateTag) {
+      revalidateTag(params.id);
+      revalidateTag('user-watchlist');
+    }
 
     return Response.json({ success: true });
   } catch (err) {
