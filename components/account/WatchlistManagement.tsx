@@ -1,6 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useUpgradeFromError } from '@/hooks/useUpgradePrompt';
+import UpgradePrompt from '@/components/upgrade/UpgradePrompt';
 
 interface Watchlist {
   id: string;
@@ -30,6 +32,7 @@ export default function WatchlistManagement({ userId, tier, maxWatchlists }: Wat
   const [success, setSuccess] = useState<string | null>(null);
   const [tickerSuggestions, setTickerSuggestions] = useState<string[]>([]);
   const [showTickerSuggestions, setShowTickerSuggestions] = useState(false);
+  const { isOpen, props, close, handleError } = useUpgradeFromError();
 
   useEffect(() => {
     loadWatchlists();
@@ -82,7 +85,15 @@ export default function WatchlistManagement({ userId, tier, maxWatchlists }: Wat
       });
 
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Failed to create watchlist');
+      if (!res.ok) {
+        const err = new Error(data.error || 'Failed to create watchlist');
+        if (res.status === 403) {
+          handleError(err, tier);
+        } else {
+          throw err;
+        }
+        return;
+      }
 
       setNewWatchlistName('');
       setSuccess('Watchlist created!');
@@ -133,7 +144,13 @@ export default function WatchlistManagement({ userId, tier, maxWatchlists }: Wat
 
       if (!res.ok) {
         const data = await res.json();
-        throw new Error(data.error || 'Failed to add asset');
+        const err = new Error(data.error || 'Failed to add asset');
+        if (res.status === 403) {
+          handleError(err, tier);
+        } else {
+          throw err;
+        }
+        return;
       }
 
       setNewAssetTicker('');
@@ -462,6 +479,10 @@ export default function WatchlistManagement({ userId, tier, maxWatchlists }: Wat
             </div>
           )}
         </>
+      )}
+
+      {isOpen && props && (
+        <UpgradePrompt {...props} onClose={close} />
       )}
     </div>
   );
