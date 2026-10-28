@@ -49,6 +49,30 @@ export function EditWatchlistModal({ isOpen, onClose, watchlistId, currentName, 
     }
   }
 
+  const handleDelete = async () => {
+    if (!confirm('Are you sure you want to delete this watchlist? This cannot be undone.')) {
+      return
+    }
+
+    setError(null)
+    setLoading(true)
+
+    try {
+      const res = await fetch(`/api/user/watchlists/${watchlistId}`, {
+        method: 'DELETE',
+      })
+
+      if (!res.ok) {
+        throw new Error('Failed to delete watchlist')
+      }
+
+      router.push('/my-watchlist')
+    } catch (err: any) {
+      setError(err.message || 'Failed to delete watchlist')
+      setLoading(false)
+    }
+  }
+
   if (!isOpen) return null
 
   const today = new Date().toISOString().split('T')[0]
@@ -288,6 +312,28 @@ export function EditWatchlistModal({ isOpen, onClose, watchlistId, currentName, 
               {loading ? 'Saving...' : 'Save'}
             </button>
           </div>
+
+          {/* Delete button */}
+          <button
+            type="button"
+            onClick={handleDelete}
+            disabled={loading}
+            style={{
+              width: '100%',
+              padding: '12px',
+              borderRadius: '8px',
+              border: '1px solid #ff6b6b',
+              background: 'transparent',
+              color: '#ff6b6b',
+              fontSize: '14px',
+              fontWeight: '600',
+              cursor: loading ? 'not-allowed' : 'pointer',
+              marginTop: '12px',
+              opacity: loading ? 0.6 : 1,
+            }}
+          >
+            Delete Watchlist
+          </button>
         </form>
       </div>
     </div>
