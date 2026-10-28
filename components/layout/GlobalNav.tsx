@@ -295,6 +295,18 @@ export function GlobalNav() {
           active={isActive('/privacy')}
           icon={<PrivacyIcon />}
         />
+        <NavItem
+          href="/terms"
+          label="Terms"
+          active={isActive('/terms')}
+          icon={<TermsIcon />}
+        />
+        <NavItem
+          href="/cookie-policy"
+          label="Cookies"
+          active={isActive('/cookie-policy')}
+          icon={<CookieIcon />}
+        />
       </div>
 
       {/* Account Section */}
@@ -630,6 +642,26 @@ function SettingsIcon() {
     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
       <circle cx="12" cy="12" r="3" />
       <path d="M12 1v6m0 6v6M4.22 4.22l4.24 4.24m0 4.24l4.24 4.24M19.78 4.22l-4.24 4.24m0 4.24l-4.24 4.24" />
+    </svg>
+  );
+}
+
+function TermsIcon() {
+  return (
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
+      <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
+    </svg>
+  );
+}
+
+function CookieIcon() {
+  return (
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <circle cx="12" cy="12" r="9" />
+      <path d="M7 14s1.5 2 5 2 5-2 5-2" />
+      <circle cx="9" cy="9" r="1" />
+      <circle cx="15" cy="9" r="1" />
     </svg>
   );
 }

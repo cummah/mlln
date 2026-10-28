@@ -9,7 +9,7 @@ export const metadata: Metadata = {
 
 export const dynamic = 'force-static'
 
-const UPDATED = '12 October 2026'
+const UPDATED = '28 October 2026'
 
 const listStyle = {
   margin: 0,
@@ -82,9 +82,15 @@ const BLOCKS: Block[] = [
     ],
   },
   {
-    title: 'Your choices',
+    title: 'Your choices and rights',
     body: [
-      'You can delete everything the site stores about you at any time by clearing site data in your browser. You can also use the site without importing a portfolio or building a watchlist, in which case no personal inputs are sent to us.',
+      'For users with accounts, you have the following rights under GDPR and data protection laws:',
+      <ul key="rights" style={listStyle}>
+        <li><strong>Data portability:</strong> Download all your data as JSON from your account settings</li>
+        <li><strong>Data deletion:</strong> Permanently delete your account and all associated data from your account settings</li>
+        <li><strong>Email change:</strong> Update your email address at any time</li>
+      </ul>,
+      'For users without accounts, you can delete everything the site stores about you at any time by clearing site data in your browser. You can also use the site without importing a portfolio or building a watchlist, in which case no personal inputs are sent to us.',
     ],
   },
   {
@@ -97,6 +103,16 @@ const BLOCKS: Block[] = [
     title: 'Not investment advice',
     body: [
       'Information on mlln.ai is provided for general information and education. It is not investment, tax or legal advice, and past results do not predict future ones.',
+    ],
+  },
+  {
+    title: 'Related policies',
+    body: [
+      'For more information, see our:',
+      <ul key="policies" style={listStyle}>
+        <li><a href="/terms" style={{ color: 'var(--teal)', textDecoration: 'none', fontWeight: 500 }}>Terms of Service</a> — covers subscriptions, billing, and usage rights</li>
+        <li><a href="/cookie-policy" style={{ color: 'var(--teal)', textDecoration: 'none', fontWeight: 500 }}>Cookie Policy</a> — details about cookies and tracking</li>
+      </ul>,
     ],
   },
 ]
