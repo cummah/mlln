@@ -5,10 +5,10 @@ import { getSkeletonLoadersCount, getTableRowsLimit } from '@/lib/ui-settings'
 
 export async function GET(
   _request: NextRequest,
-  { params }: { params: { sector: string } }
+  { params }: { params: Promise<{ sector: string }> }
 ) {
   try {
-    const sector = params.sector
+    const { sector } = await params
     const sectorNames = new Set(await getAllSectors())
     if (!sectorNames.has(slugToSector(sector))) {
       return NextResponse.json({ error: 'Sector not found' }, { status: 404 })

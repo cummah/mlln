@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server';
 
-export async function POST(req: Request, { params }: { params: { id: string } }) {
+export async function POST(req: Request, { params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
@@ -19,7 +20,7 @@ export async function POST(req: Request, { params }: { params: { id: string } })
     const { data: watchlist, error: watchlistError } = await supabase
       .from('user_watchlists')
       .select('id')
-      .eq('id', params.id)
+      .eq('id', id)
       .eq('user_id', user.id)
       .single();
 
@@ -43,7 +44,7 @@ export async function POST(req: Request, { params }: { params: { id: string } })
     const { count, error: countError } = await supabase
       .from('watchlist_assets')
       .select('*', { count: 'exact' })
-      .eq('watchlist_id', params.id);
+      .eq('watchlist_id', id);
 
     if (countError) throw countError;
     if (count && count >= 20) {
@@ -54,7 +55,7 @@ export async function POST(req: Request, { params }: { params: { id: string } })
     const { data, error } = await supabase
       .from('watchlist_assets')
       .insert([{
-        watchlist_id: params.id,
+        watchlist_id: id,
         ticker: ticker.toUpperCase(),
         position: position || 0
       }])
@@ -69,7 +70,8 @@ export async function POST(req: Request, { params }: { params: { id: string } })
   }
 }
 
-export async function DELETE(req: Request, { params }: { params: { id: string } }) {
+export async function DELETE(req: Request, { params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
@@ -88,7 +90,7 @@ export async function DELETE(req: Request, { params }: { params: { id: string } 
     const { data: watchlist, error: watchlistError } = await supabase
       .from('user_watchlists')
       .select('id')
-      .eq('id', params.id)
+      .eq('id', id)
       .eq('user_id', user.id)
       .single();
 
@@ -99,7 +101,7 @@ export async function DELETE(req: Request, { params }: { params: { id: string } 
     const { error } = await supabase
       .from('watchlist_assets')
       .delete()
-      .eq('watchlist_id', params.id)
+      .eq('watchlist_id', id)
       .eq('ticker', ticker.toUpperCase());
 
     if (error) throw error;

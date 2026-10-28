@@ -8,7 +8,8 @@ try {
   // revalidateTag may not be available in all contexts
 }
 
-export async function GET(req: Request, { params }: { params: { id: string } }) {
+export async function GET(req: Request, { params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
@@ -20,7 +21,7 @@ export async function GET(req: Request, { params }: { params: { id: string } }) 
     const { data, error } = await supabase
       .from('user_watchlists')
       .select('*, watchlist_assets(*)')
-      .eq('id', params.id)
+      .eq('id', id)
       .eq('user_id', user.id)
       .single();
 
@@ -36,7 +37,8 @@ export async function GET(req: Request, { params }: { params: { id: string } }) 
   }
 }
 
-export async function PUT(req: Request, { params }: { params: { id: string } }) {
+export async function PUT(req: Request, { params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
@@ -92,7 +94,7 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
     const { data, error } = await supabase
       .from('user_watchlists')
       .update(updateData)
-      .eq('id', params.id)
+      .eq('id', id)
       .eq('user_id', user.id)
       .select()
       .single();
@@ -105,7 +107,7 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
     }
 
     if (revalidateTag) {
-      revalidateTag(params.id);
+      revalidateTag(id);
       revalidateTag('user-watchlist');
     }
 
@@ -116,7 +118,8 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
   }
 }
 
-export async function DELETE(req: Request, { params }: { params: { id: string } }) {
+export async function DELETE(req: Request, { params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
@@ -128,13 +131,13 @@ export async function DELETE(req: Request, { params }: { params: { id: string } 
     const { error } = await supabase
       .from('user_watchlists')
       .delete()
-      .eq('id', params.id)
+      .eq('id', id)
       .eq('user_id', user.id);
 
     if (error) throw error;
 
     if (revalidateTag) {
-      revalidateTag(params.id);
+      revalidateTag(id);
       revalidateTag('user-watchlist');
     }
 

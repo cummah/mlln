@@ -10,14 +10,15 @@ const LABEL = { '5y': '5 year', '3y': '3 year', '1y': '1 year' } as const
 const isNum = (v: unknown): v is number => typeof v === 'number' && Number.isFinite(v)
 const pct = (v: number) => `${v >= 0 ? '+' : ''}${Math.round(v)}%`
 
-export async function GET(_req: Request, { params }: { params: { ticker: string } }) {
-  const ticker = params.ticker.toUpperCase()
+export async function GET(_req: Request, { params }: { params: Promise<{ ticker: string }> }) {
+  const { ticker } = await params;
+  const tickerUpper = ticker.toUpperCase()
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL
   const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
   if (!url || !key) return new Response('Not configured', { status: 500 })
 
   const cols = ['ticker', 'name', ...WINDOWS.flatMap(w => [`enh_return_${w}`, `std_return_${w}`])].join(',')
-  const res = await fetch(`${url}/rest/v1/backtest_summary?select=${cols}&ticker=eq.${encodeURIComponent(ticker)}&limit=1`, {
+  const res = await fetch(`${url}/rest/v1/backtest_summary?select=${cols}&ticker=eq.${encodeURIComponent(tickerUpper)}&limit=1`, {
     headers: { apikey: key, Authorization: `Bearer ${key}` },
   })
   if (!res.ok) return new Response('Data unavailable', { status: 502 })
@@ -40,7 +41,7 @@ export async function GET(_req: Request, { params }: { params: { ticker: string 
     (
       <div style={{ width: '1200px', height: '630px', background: '#0f0f0f', display: 'flex', flexDirection: 'column', padding: '60px' }}>
         <div style={{ fontSize: 22, color: '#9c9a92', marginBottom: 8 }}>Dollar Cost Averaging Backtest</div>
-        <div style={{ fontSize: 72, fontWeight: 500, color: '#f0ede6', marginBottom: 4 }}>{ticker}</div>
+        <div style={{ fontSize: 72, fontWeight: 500, color: '#f0ede6', marginBottom: 4 }}>{tickerUpper}</div>
         <div style={{ fontSize: 26, color: '#9c9a92', marginBottom: 48 }}>{String(row.name ?? '')}</div>
         {w && enh !== null && std !== null ? (
           <div style={{ display: 'flex', gap: 56 }}>

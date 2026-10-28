@@ -1,4 +1,4 @@
-import { revalidatePath, revalidateTag } from 'next/cache'
+import { revalidatePath } from 'next/cache'
 import { NextRequest, NextResponse } from 'next/server'
 import { getRateLimiter, checkRateLimit } from '@/lib/rate-limit'
 
@@ -15,12 +15,10 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'unauthorised' }, { status: 401 })
   }
   revalidatePath('/asset', 'layout')
-  revalidatePath('/rank')
-  revalidatePath('/portfolio')
-  revalidatePath('/watchlist')
+  revalidatePath('/rank', 'page')
+  revalidatePath('/portfolio', 'page')
+  revalidatePath('/watchlist', 'page')
   revalidatePath('/sectors', 'layout')
-  revalidatePath('/sitemap.xml')
-  revalidateTag('sectors')
-  revalidateTag('watchlist')
+  revalidatePath('/sitemap.xml', 'page')
   return NextResponse.json({ revalidated: true, at: new Date().toISOString() })
 }
