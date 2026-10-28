@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { dateCompact } from '@/lib/signals/format'
 import { LockedCell } from '@/components/gating/LockedCell'
@@ -98,6 +99,7 @@ function Tile({ label, value, sub }: { label: string; value: string; sub?: strin
 }
 
 export function WatchlistView({ data, maxMonths, watchlistId, isCustom }: { data: DemoWatchlist; maxMonths?: number; watchlistId?: string; isCustom?: boolean }) {
+  const router = useRouter()
   const [freq, setFreqState] = useState<WatchFreq>('monthly')
   const setFreq = useCallback((f: WatchFreq) => setFreqState(f), [])
   const [showEditModal, setShowEditModal] = useState(false)
@@ -463,7 +465,10 @@ export function WatchlistView({ data, maxMonths, watchlistId, isCustom }: { data
           />
           <AssetManagementModal
             isOpen={showAssetModal}
-            onClose={() => setShowAssetModal(false)}
+            onClose={() => {
+              setShowAssetModal(false)
+              router.refresh()
+            }}
             watchlistId={watchlistId}
             currentAssets={data.rows.map(r => r.ticker)}
             onAssetsChanged={() => {
