@@ -24,20 +24,32 @@ async function verifyTurnstile(token: string): Promise<boolean> {
 }
 
 async function sendEmail(email: string, subject: string, message: string): Promise<boolean> {
-  const apiKey = process.env.RESEND_API_KEY;
+  const smtpHost = process.env.SMTP_HOST;
+  const smtpPort = process.env.SMTP_PORT ? parseInt(process.env.SMTP_PORT) : 587;
+  const smtpUser = process.env.SMTP_USER;
+  const smtpPass = process.env.SMTP_PASS;
+  const smtpFrom = process.env.SMTP_FROM || process.env.SUPPORT_EMAIL || 'support@mlln.ai';
   const supportEmail = process.env.SUPPORT_EMAIL || 'support@mlln.ai';
 
-  if (!apiKey) {
-    console.warn('[support] Resend API key not configured, email skipped');
+  if (!smtpHost || !smtpUser || !smtpPass) {
+    console.warn('[support] SMTP not configured, email skipped');
     return false;
   }
 
   try {
-    const { Resend } = await import('resend');
-    const resend = new Resend(apiKey);
+    const nodemailer = await import('nodemailer');
+    const transporter = nodemailer.default.createTransport({
+      host: smtpHost,
+      port: smtpPort,
+      secure: smtpPort === 465,
+      auth: {
+        user: smtpUser,
+        pass: smtpPass,
+      },
+    });
 
-    await resend.emails.send({
-      from: 'support@mlln.ai',
+    await transporter.sendMail({
+      from: smtpFrom,
       to: supportEmail,
       replyTo: email,
       subject: `Support: ${subject}`,
