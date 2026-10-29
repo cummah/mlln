@@ -11,7 +11,8 @@ export const metadata: Metadata = {
 
 export const revalidate = 3600
 
-export default async function UserWatchlistPage({ params }: { params: { id: string } }) {
+export default async function UserWatchlistPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
@@ -23,7 +24,7 @@ export default async function UserWatchlistPage({ params }: { params: { id: stri
   const { data: watchlist, error } = await supabase
     .from('user_watchlists')
     .select('id, name, created_at, inception_date, watchlist_assets(ticker)')
-    .eq('id', params.id)
+    .eq('id', id)
     .eq('user_id', user.id)
     .single()
 
