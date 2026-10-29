@@ -27,7 +27,9 @@ jobs:
           node-version: 22
           cache: npm
 
-      - run: npm ci
+      # --legacy-peer-deps: @sentry/nextjs@7 declares a peer range that excludes next@16, so a strict
+      # install fails with ERESOLVE. Scoped to this job so Vercel builds are unaffected.
+      - run: npm ci --legacy-peer-deps
 
       # Exits non-zero if prices are stale, VIX is stale, or any integrity check fails.
       # In that case no signal rows are written and the run shows as failed in the Actions tab.
