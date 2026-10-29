@@ -164,7 +164,7 @@ export function ContactForm() {
         </div>
       </div>
 
-      <TurnstileWidget onVerify={setCaptchaToken} />
+      <TurnstileWidget onToken={setCaptchaToken} />
 
       <button
         type="submit"

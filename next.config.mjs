@@ -5,6 +5,9 @@ const nextConfig = {
   reactStrictMode: true,
   // Lets a production check build run without touching the folder a running dev server uses
   distDir: process.env.NEXT_DIST_DIR || '.next',
+  // withSentryConfig (@sentry/nextjs 7) adds a webpack config, and Next 16 refuses to build
+  // with a webpack config under its default Turbopack bundler unless this is set.
+  turbopack: {},
   // The old /dashboard section was removed. Old links, bookmarks and search results still land somewhere useful.
   async redirects() {
     return [
