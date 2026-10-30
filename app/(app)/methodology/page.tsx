@@ -1,7 +1,7 @@
 import { Metadata } from 'next'
 import { colors } from '@/lib/designSystem'
 import { Reveal } from '@/components/home/Motion'
-import { CtaBand, Eyebrow, MarketingFooter, MarketingStyles, PageHero } from '@/components/marketing/MarketingKit'
+import { CtaBand, Eyebrow, MarketingStyles, PageHero } from '@/components/marketing/MarketingKit'
 
 export const metadata: Metadata = {
   title: 'Methodology | How Enhanced DCA Works',
@@ -375,7 +375,6 @@ export default function MethodologyPage() {
         ]}
       />
 
-      <MarketingFooter />
     </div>
   )
 }

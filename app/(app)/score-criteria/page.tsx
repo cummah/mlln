@@ -2,7 +2,7 @@ import { Metadata } from 'next'
 import Link from 'next/link'
 import { colors } from '@/lib/designSystem'
 import { Reveal } from '@/components/home/Motion'
-import { CtaBand, MarketingFooter, MarketingStyles, PageHero } from '@/components/marketing/MarketingKit'
+import { CtaBand, MarketingStyles, PageHero } from '@/components/marketing/MarketingKit'
 
 export const metadata: Metadata = {
   title: 'Score Criteria | How the DCA Score Is Calculated',
@@ -281,7 +281,6 @@ export default function ScoreCriteriaPage() {
         ]}
       />
 
-      <MarketingFooter />
     </div>
   )
 }

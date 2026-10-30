@@ -176,11 +176,11 @@ export function MarketingFooter() {
         <span>© {new Date().getFullYear()} mlln.ai. Not financial advice. Past performance does not predict future results.</span>
         <nav className="lp-footer-links" aria-label="Footer">
           <Link href="/pricing" className="lp-link">Pricing</Link>
-          <Link href="/methodology" className="lp-link">Methodology</Link>
-          <Link href="/score-criteria" className="lp-link">Score criteria</Link>
+          <Link href="/about" className="lp-link">About</Link>
           <Link href="/support" className="lp-link">Support</Link>
           <Link href="/privacy" className="lp-link">Privacy</Link>
           <Link href="/terms" className="lp-link">Terms</Link>
+          <Link href="/cookie-policy" className="lp-link">Cookies</Link>
         </nav>
       </div>
     </footer>

@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { colors } from '@/lib/designSystem';
 import { Reveal } from '@/components/home/Motion';
 import { ContactForm } from '@/components/support/ContactForm';
-import { FaqList, MarketingFooter, MarketingStyles, PageHero } from '@/components/marketing/MarketingKit';
+import { FaqList, MarketingStyles, PageHero } from '@/components/marketing/MarketingKit';
 
 export const metadata: Metadata = {
   title: 'Support | mlln.ai',
@@ -137,7 +137,6 @@ export default function SupportPage() {
         </div>
       </section>
 
-      <MarketingFooter />
     </div>
   );
 }

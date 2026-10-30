@@ -1,7 +1,7 @@
 import { Metadata } from 'next'
 import { colors } from '@/lib/designSystem'
 import { Reveal } from '@/components/home/Motion'
-import { CtaBand, MarketingFooter, MarketingStyles, PageHero } from '@/components/marketing/MarketingKit'
+import { CtaBand, MarketingStyles, PageHero } from '@/components/marketing/MarketingKit'
 
 export const metadata: Metadata = {
   title: 'About | mlln.ai',
@@ -136,7 +136,6 @@ export default function AboutPage() {
         ]}
       />
 
-      <MarketingFooter />
     </div>
   )
 }
