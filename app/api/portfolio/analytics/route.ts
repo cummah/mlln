@@ -58,12 +58,18 @@ const PAGE_SIZE = 1000
  *
  * One ticker per request keeps each series whole and lets them run in parallel.
  */
+/**
+ * A failed read must not look like an empty one. Previously an error was logged
+ * and the series treated as empty, so a transient DB failure was reported to the
+ * user as "No price history" for those tickers. Errors now throw (after one retry)
+ * and the route answers 500.
+ */
 async function fetchTickerPrices(ticker: string, cutoff: string): Promise<Array<{ date: string; close: number }>> {
   const supabase = getSupabaseClient()
   const rows: Array<{ date: string; close: number }> = []
 
   for (let page = 0; ; page++) {
-    const { data, error } = await supabase
+    let result = await supabase
       .from('daily_prices')
       .select('date, close')
       .eq('ticker', ticker)
@@ -71,11 +77,19 @@ async function fetchTickerPrices(ticker: string, cutoff: string): Promise<Array<
       .order('date', { ascending: true })
       .range(page * PAGE_SIZE, (page + 1) * PAGE_SIZE - 1)
 
-    if (error) {
-      console.error(`Error fetching prices for ${ticker}:`, error)
-      break
+    if (result.error) {
+      console.error(`Error fetching prices for ${ticker} (page ${page}), retrying:`, result.error)
+      result = await supabase
+        .from('daily_prices')
+        .select('date, close')
+        .eq('ticker', ticker)
+        .gte('date', cutoff)
+        .order('date', { ascending: true })
+        .range(page * PAGE_SIZE, (page + 1) * PAGE_SIZE - 1)
+      if (result.error) throw new Error(`Price fetch failed for ${ticker}: ${result.error.message}`)
     }
-    const batch = (data ?? []) as Array<{ date: string; close: number | null }>
+
+    const batch = (result.data ?? []) as Array<{ date: string; close: number | null }>
     for (const row of batch) {
       // Null and zero closes exist in daily_prices and would yield Infinity returns.
       if (row.close == null || !Number.isFinite(row.close) || row.close <= 0) continue
