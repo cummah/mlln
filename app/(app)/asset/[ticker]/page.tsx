@@ -25,13 +25,13 @@ export const revalidate = 86400;
 export const dynamic = 'force-static';
 
 interface PageProps {
-  params: {
+  params: Promise<{
     ticker: string;
-  };
+  }>;
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
-  const ticker = params.ticker.toUpperCase();
+  const ticker = (await params).ticker.toUpperCase();
   const domain = process.env.NEXT_PUBLIC_DOMAIN || 'mlln.ai';
   const data = await getTickerPageData(ticker).catch(() => null);
   const s = data?.summary;
@@ -98,7 +98,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 }
 
 export default async function TickerPage({ params }: PageProps) {
-  const ticker = params.ticker.toUpperCase();
+  const ticker = (await params).ticker.toUpperCase();
 
   // Throws if the data cannot be read, so a database outage is never cached as a page of wrong numbers
   const data = await getTickerPageData(ticker);
