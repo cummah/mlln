@@ -1,7 +1,8 @@
-import { createClient } from '@supabase/supabase-js';
+import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import type { OHLCData } from '@/types';
 
-let supabase: ReturnType<typeof createClient> | null = null;
+// No generated Database type exists, so the schema is `any`. Without it, inserts are typed `never`.
+let supabase: SupabaseClient<any, any, any> | null = null;
 
 function getSupabaseClient() {
   if (!supabase) {

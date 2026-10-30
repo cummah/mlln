@@ -16,9 +16,9 @@ const RelatedSectorsList = nextDynamic(() => import('@/components/sectors/Relate
 export const dynamic = 'force-dynamic'
 
 interface PageProps {
-  params: {
+  params: Promise<{
     sector: string
-  }
+  }>
 }
 
 export async function generateStaticParams() {
@@ -29,7 +29,8 @@ export async function generateStaticParams() {
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
-  const sectorName = slugToSector(params.sector)
+  const { sector } = await params
+  const sectorName = slugToSector(sector)
   const sectors = await getAllSectors()
 
   if (!sectors.includes(sectorName)) {
@@ -43,7 +44,8 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 }
 
 export default async function SectorPage({ params }: PageProps) {
-  const sectorName = slugToSector(params.sector)
+  const { sector } = await params
+  const sectorName = slugToSector(sector)
   const sectors = await getAllSectors()
 
   if (!sectors.includes(sectorName)) {
@@ -51,7 +53,7 @@ export default async function SectorPage({ params }: PageProps) {
   }
 
   const [stats, relatedCount] = await Promise.all([
-    getSectorStats(params.sector),
+    getSectorStats(sector),
     getRelatedSectorsCount(),
   ])
 
@@ -82,7 +84,7 @@ export default async function SectorPage({ params }: PageProps) {
 
         {/* Insight Text */}
         <div>
-          <SectorInsightText sector={params.sector} />
+          <SectorInsightText sector={sector} />
         </div>
 
         {/* Signals */}
@@ -90,7 +92,7 @@ export default async function SectorPage({ params }: PageProps) {
           <h2 style={{ fontSize: typography.fontSize['2xl'], fontWeight: 500, color: colors.text, marginBottom: spacing.lg, margin: 0 }}>
             {sectorName} Signals
           </h2>
-          <SectorSignalsTable sector={params.sector} />
+          <SectorSignalsTable sector={sector} />
         </div>
 
         {/* Related Sectors */}
