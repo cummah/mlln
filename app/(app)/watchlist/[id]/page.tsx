@@ -21,10 +21,11 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
 }
 
 export default async function WatchlistDetailPage({ params }: { params: Promise<{ id: string }> }) {
-  const config = getWatchlistConfig((await params).id)
+  const { id } = await params
+  const config = getWatchlistConfig(id)
   if (!config) notFound()
 
-  const data = await getWatchlist(params.id)
-  const maxMonths = (params.id === 'ai' || params.id === 'etfs' || params.id === 'defence') ? 10 : undefined
+  const data = await getWatchlist(id)
+  const maxMonths = (id === 'ai' || id === 'etfs' || id === 'defence') ? 10 : undefined
   return <WatchlistView data={data} maxMonths={maxMonths} />
 }
