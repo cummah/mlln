@@ -1,5 +1,7 @@
 import { Metadata } from 'next'
-import { colors, spacing, typography } from '@/lib/designSystem'
+import { colors } from '@/lib/designSystem'
+import { Reveal } from '@/components/home/Motion'
+import { CtaBand, Eyebrow, MarketingFooter, MarketingStyles, PageHero } from '@/components/marketing/MarketingKit'
 
 export const metadata: Metadata = {
   title: 'Methodology | How Enhanced DCA Works',
@@ -20,6 +22,11 @@ interface Principle {
   idea: string
   why: string
   refs: Reference[]
+}
+
+interface Measure {
+  title: string
+  body: string
 }
 
 const PRINCIPLES: Principle[] = [
@@ -114,15 +121,38 @@ const PRINCIPLES: Principle[] = [
   },
 ]
 
+const MEASURES: Measure[] = [
+  {
+    title: 'Point-in-time',
+    body: 'Every signal uses only information that existed on its own date. Nothing is recomputed using later data, so history does not change when new prices arrive.',
+  },
+  {
+    title: 'Compared with plain DCA',
+    body: 'Results are measured against a standard fixed-amount schedule on the same asset and dates, so the difference reflects the sizing logic rather than the market.',
+  },
+  {
+    title: 'Trading friction included',
+    body: 'A small allowance for slippage is applied to every simulated trade.',
+  },
+  {
+    title: 'End-of-day data',
+    body: 'Signals update once per evening after the market close. They are not intraday alerts.',
+  },
+  {
+    title: 'Enough history first',
+    body: 'No signal is produced until an asset has a meaningful track record, so new listings stay blank rather than showing noisy output.',
+  },
+]
+
 const FOUNDATION_REFS: Reference[] = [
   {
     url: 'https://doi.org/10.2307/2330513',
-        cite: 'Constantinides, G. M. (1979). A Note on the Suboptimality of Dollar-Cost Averaging as an Investment Policy. Journal of Financial and Quantitative Analysis, 14(2).',
+    cite: 'Constantinides, G. M. (1979). A Note on the Suboptimality of Dollar-Cost Averaging as an Investment Policy. Journal of Financial and Quantitative Analysis, 14(2).',
     note: 'The honest baseline: if a lump sum is available, fixed-schedule DCA is not optimal. It is a behavioural and cash-flow tool, which is the setting this model is built for.',
   },
   {
     url: 'https://doi.org/10.1111/0022-1082.00265',
-        cite: 'Lo, A., Mamaysky, H. & Wang, J. (2000). Foundations of Technical Analysis. Journal of Finance, 55(4).',
+    cite: 'Lo, A., Mamaysky, H. & Wang, J. (2000). Foundations of Technical Analysis. Journal of Finance, 55(4).',
     note: 'Computational evidence that some technical patterns carry incremental information, while stressing the need for rigorous testing.',
   },
 ]
@@ -130,35 +160,31 @@ const FOUNDATION_REFS: Reference[] = [
 const CAUTION_REFS: Reference[] = [
   {
     url: 'https://doi.org/10.1090/noti1105',
-        cite: 'Bailey, D., Borwein, J., López de Prado, M. & Zhu, Q. (2014). Pseudo-Mathematics and Financial Charlatanism. Notices of the American Mathematical Society, 61(5).',
+    cite: 'Bailey, D., Borwein, J., López de Prado, M. & Zhu, Q. (2014). Pseudo-Mathematics and Financial Charlatanism. Notices of the American Mathematical Society, 61(5).',
     note: 'How trying many variants on the same history produces impressive backtests that do not survive.',
   },
   {
     url: 'https://doi.org/10.1093/rfs/hhv059',
-        cite: 'Harvey, C., Liu, Y. & Zhu, H. (2016). ...and the Cross-Section of Expected Returns. Review of Financial Studies, 29(1).',
+    cite: 'Harvey, C., Liu, Y. & Zhu, H. (2016). ...and the Cross-Section of Expected Returns. Review of Financial Studies, 29(1).',
     note: 'Why a claimed edge needs a higher bar of evidence after decades of data mining.',
   },
 ]
 
-function SectionTitle({ children }: { children: React.ReactNode }) {
-  return (
-    <h2 style={{ fontSize: typography.fontSize['5xl'], fontWeight: 500, color: colors.text, margin: 0 }}>
-      {children}
-    </h2>
-  )
-}
-
-function Para({ children }: { children: React.ReactNode }) {
-  return (
-    <p style={{ fontSize: '14px', lineHeight: 1.7, color: colors.text2, margin: 0 }}>{children}</p>
-  )
-}
+const SECTIONS = [
+  { id: 'problem', label: 'The problem it addresses' },
+  { id: 'sizing', label: 'How a purchase is sized' },
+  { id: 'ideas', label: 'The five ideas' },
+  { id: 'exits', label: 'Taking profit' },
+  { id: 'cadence', label: 'Cadences and settings' },
+  { id: 'measurement', label: 'How results are measured' },
+  { id: 'limits', label: 'What it cannot tell you' },
+]
 
 function RefList({ refs }: { refs: Reference[] }) {
   return (
-    <ul style={{ listStyle: 'none', margin: 0, padding: 0, display: 'flex', flexDirection: 'column', gap: spacing.lg }}>
+    <ul style={{ listStyle: 'none', margin: 0, padding: 0, display: 'flex', flexDirection: 'column', gap: '12px' }}>
       {refs.map(r => (
-        <li key={r.cite} style={{ fontSize: typography.fontSize.base, lineHeight: 1.6, color: colors.text3 }}>
+        <li key={r.cite} className="lp-small" style={{ lineHeight: 1.6 }}>
           {r.url ? (
             <a href={r.url} target="_blank" rel="noopener noreferrer" style={{ color: colors.teal, textDecoration: 'none' }}>
               {r.cite} ↗
@@ -173,36 +199,10 @@ function RefList({ refs }: { refs: Reference[] }) {
   )
 }
 
-function Card({ children }: { children: React.ReactNode }) {
+function Labelled({ label, children }: { label: string; children: React.ReactNode }) {
   return (
-    <div
-      style={{
-        background: colors.surface,
-        border: `1px solid ${colors.border}`,
-        borderRadius: '12px',
-        padding: '20px 24px',
-        display: 'flex',
-        flexDirection: 'column',
-        gap: spacing['2xl'],
-      }}
-    >
-      {children}
-    </div>
-  )
-}
-
-function Label({ children }: { children: React.ReactNode }) {
-  return (
-    <div
-      style={{
-        fontSize: typography.fontSize.sm,
-        fontWeight: 700,
-        letterSpacing: typography.tracking.widest,
-        textTransform: 'uppercase',
-        color: colors.teal,
-        marginBottom: spacing.sm,
-      }}
-    >
+    <div className="lp-stack" style={{ gap: '8px' }}>
+      <div className="lp-eyebrow" style={{ margin: 0, fontSize: '10px' }}>{label}</div>
       {children}
     </div>
   )
@@ -210,170 +210,172 @@ function Label({ children }: { children: React.ReactNode }) {
 
 export default function MethodologyPage() {
   return (
-    <div style={{ minHeight: '100vh', background: colors.bg }}>
-      <div
-        style={{
-          maxWidth: '820px',
-          marginLeft: 'auto',
-          marginRight: 'auto',
-          padding: `${spacing['5xl']} ${spacing['4xl']}`,
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '36px',
-        }}
-      >
-        <header style={{ display: 'flex', flexDirection: 'column', gap: spacing.lg }}>
-          <h1 style={{ fontSize: '32px', fontWeight: 500, color: colors.text, margin: 0 }}>Methodology</h1>
-          <p style={{ fontSize: '15px', lineHeight: 1.7, color: colors.text2, margin: 0 }}>
-            How the Enhanced DCA model decides how much to buy, and why. This page explains the ideas and the
-            research behind them. It does not publish the exact indicator settings, thresholds or weights.
-          </p>
-        </header>
+    <div style={{ minHeight: '100vh', background: colors.bg, color: colors.text, fontFamily: 'var(--font-dm-sans), DM Sans, sans-serif' }}>
+      <MarketingStyles />
 
-        <section style={{ display: 'flex', flexDirection: 'column', gap: spacing['2xl'] }}>
-          <SectionTitle>The problem it addresses</SectionTitle>
-          <Para>
-            Dollar-cost averaging (DCA) means investing on a fixed schedule regardless of price. It is simple, it
-            removes the temptation to wait for a better moment, and it is easy to stick with. Its weakness is that it
-            treats every purchase date as equal, even when some dates are plainly better than others for a long-term
-            buyer.
-          </Para>
-          <Para>
-            Enhanced DCA keeps what is good about the schedule and changes only the size of each purchase. It never
-            tries to predict a crash or call a bottom. On every scheduled date, it asks a narrower question: given
-            what this asset has just done, should this contribution be smaller, normal, or larger than usual?
-          </Para>
-        </section>
+      <PageHero
+        eyebrow="Methodology"
+        title="How Enhanced DCA decides what to buy"
+        lead="This page explains the ideas behind the Enhanced DCA model and the research behind them. It does not publish the exact indicator settings, thresholds or weights."
+      />
 
-        <section style={{ display: 'flex', flexDirection: 'column', gap: spacing['2xl'] }}>
-          <SectionTitle>How a purchase is sized</SectionTitle>
-          <Para>
-            Each scheduled date is scored on five independent questions. Each one nudges the purchase up or down, and
-            the nudges are combined into a single multiplier on the base contribution. A hard ceiling on that
-            multiplier means no single date, however attractive it looks, can dominate the plan.
-          </Para>
-          <Para>
-            The signals are deliberately drawn from different families of evidence: short-term reversal, trend
-            distance, trend strength, drawdown depth and market fear. They are meant to disagree with each other
-            sometimes. A purchase is only sized up strongly when several of them point the same way.
-          </Para>
-        </section>
+      <section className="lp-section" style={{ paddingTop: '24px' }}>
+        <div className="lp-wrap lp-split">
+          <nav className="lp-toc" aria-label="On this page">
+            {SECTIONS.map(s => (
+              <a key={s.id} href={`#${s.id}`}>{s.label}</a>
+            ))}
+          </nav>
 
-        <section style={{ display: 'flex', flexDirection: 'column', gap: spacing['4xl'] }}>
-          <SectionTitle>The five ideas</SectionTitle>
-          {PRINCIPLES.map((p, i) => (
-            <Card key={p.title}>
-              <div>
-                <Label>Idea {i + 1}</Label>
-                <h3 style={{ fontSize: typography.fontSize['4xl'], fontWeight: 500, color: colors.text, margin: 0 }}>
-                  {p.title}
-                </h3>
-              </div>
-              <div>
-                <Label>What it does</Label>
-                <Para>{p.idea}</Para>
-              </div>
-              <div>
-                <Label>Why it is reasonable</Label>
-                <Para>{p.why}</Para>
-              </div>
-              <div>
-                <Label>Further reading</Label>
-                <RefList refs={p.refs} />
-              </div>
-            </Card>
-          ))}
-        </section>
+          <div className="lp-main">
+            <Reveal>
+              <section id="problem" className="lp-anchor lp-stack" style={{ gap: '18px' }}>
+                <Eyebrow>01 · Context</Eyebrow>
+                <h2 className="lp-h2">The problem it addresses</h2>
+                <p className="lp-body">
+                  Dollar-cost averaging (DCA) means investing on a fixed schedule regardless of price. It is simple, it
+                  removes the temptation to wait for a better moment, and it is easy to stick with. Its weakness is that it
+                  treats every purchase date as equal, even when some dates are plainly better than others for a long-term
+                  buyer.
+                </p>
+                <p className="lp-body">
+                  Enhanced DCA keeps what is good about the schedule and changes only the size of each purchase. It never
+                  tries to predict a crash or call a bottom. On every scheduled date, it asks a narrower question: given
+                  what this asset has just done, should this contribution be smaller, normal, or larger than usual?
+                </p>
+              </section>
+            </Reveal>
 
-        <section style={{ display: 'flex', flexDirection: 'column', gap: spacing['2xl'] }}>
-          <SectionTitle>Knowing when to take profit</SectionTitle>
-          <Para>
-            Buying is only half of the model. Each open position is also checked on later signal dates against a
-            separate exit assessment. It looks at the same kinds of evidence from the other side: is the asset
-            stretched, extended above its trend, no longer in a drawdown, and calm enough that fear is no longer
-            supporting the case? Positions exit when enough of those line up.
-          </Para>
-          <Para>
-            Alongside that, a volatility-based trailing stop is available as an alternative exit. It ratchets upward
-            as the price makes new highs and never moves back down, so it protects gains without trying to guess the
-            top. Wider settings tolerate more noise; tighter ones lock in profit sooner.
-          </Para>
-        </section>
+            <Reveal>
+              <section id="sizing" className="lp-anchor lp-stack" style={{ gap: '18px' }}>
+                <Eyebrow>02 · Mechanics</Eyebrow>
+                <h2 className="lp-h2">How a purchase is sized</h2>
+                <p className="lp-body">
+                  Each scheduled date is scored on five independent questions. Each one nudges the purchase up or down, and
+                  the nudges are combined into a single multiplier on the base contribution. A hard ceiling on that
+                  multiplier means no single date, however attractive it looks, can dominate the plan.
+                </p>
+                <p className="lp-body">
+                  The signals are deliberately drawn from different families of evidence: short-term reversal, trend
+                  distance, trend strength, drawdown depth and market fear. They are meant to disagree with each other
+                  sometimes. A purchase is only sized up strongly when several of them point the same way.
+                </p>
+              </section>
+            </Reveal>
 
-        <section style={{ display: 'flex', flexDirection: 'column', gap: spacing['2xl'] }}>
-          <SectionTitle>Different cadences, different settings</SectionTitle>
-          <Para>
-            Daily, weekly and monthly signals share the same logic, but the sensitivity of the underlying measures is
-            tuned for each cadence. A daily signal needs to react to short moves; a monthly one should look through
-            them. The settings are not published, and they are not interchangeable across cadences.
-          </Para>
-        </section>
+            <section id="ideas" className="lp-anchor lp-stack" style={{ gap: '18px' }}>
+              <Reveal>
+                <div className="lp-stack" style={{ gap: '18px' }}>
+                  <Eyebrow>03 · Evidence</Eyebrow>
+                  <h2 className="lp-h2">The five ideas</h2>
+                </div>
+              </Reveal>
+              {PRINCIPLES.map((p, i) => (
+                <Reveal key={p.title}>
+                  <article className="lp-panel lp-stack" style={{ gap: '22px' }}>
+                    <div style={{ display: 'flex', gap: '16px', alignItems: 'baseline' }}>
+                      <span className="lp-num">{String(i + 1).padStart(2, '0')}</span>
+                      <h3 className="lp-h3" style={{ fontSize: '19px' }}>{p.title}</h3>
+                    </div>
+                    <Labelled label="What it does">
+                      <p className="lp-body">{p.idea}</p>
+                    </Labelled>
+                    <Labelled label="Why it is reasonable">
+                      <p className="lp-body">{p.why}</p>
+                    </Labelled>
+                    <Labelled label="Further reading">
+                      <RefList refs={p.refs} />
+                    </Labelled>
+                  </article>
+                </Reveal>
+              ))}
+            </section>
 
-        <section style={{ display: 'flex', flexDirection: 'column', gap: spacing['2xl'] }}>
-          <SectionTitle>How results are measured</SectionTitle>
-          <ul
-            style={{
-              margin: 0,
-              paddingLeft: '20px',
-              display: 'flex',
-              flexDirection: 'column',
-              gap: spacing.lg,
-              fontSize: '14px',
-              lineHeight: 1.7,
-              color: colors.text2,
-            }}
-          >
-            <li>
-              <strong style={{ color: colors.text }}>Point-in-time.</strong> Every signal uses only information that
-              existed on its own date. Nothing is recomputed using later data, so history does not change when new
-              prices arrive.
-            </li>
-            <li>
-              <strong style={{ color: colors.text }}>Compared with plain DCA.</strong> Results are measured against a
-              standard fixed-amount schedule on the same asset and dates, so the difference reflects the sizing logic
-              rather than the market.
-            </li>
-            <li>
-              <strong style={{ color: colors.text }}>Trading friction included.</strong> A small allowance for
-              slippage is applied to every simulated trade.
-            </li>
-            <li>
-              <strong style={{ color: colors.text }}>End-of-day data.</strong> Signals update once per evening after
-              the market close. They are not intraday alerts.
-            </li>
-            <li>
-              <strong style={{ color: colors.text }}>Enough history first.</strong> No signal is produced until an
-              asset has a meaningful track record, so new listings stay blank rather than showing noisy output.
-            </li>
-          </ul>
-        </section>
+            <Reveal>
+              <section id="exits" className="lp-anchor lp-stack" style={{ gap: '18px' }}>
+                <Eyebrow>04 · Exits</Eyebrow>
+                <h2 className="lp-h2">Knowing when to take profit</h2>
+                <p className="lp-body">
+                  Buying is only half of the model. Each open position is also checked on later signal dates against a
+                  separate exit assessment. It looks at the same kinds of evidence from the other side: is the asset
+                  stretched, extended above its trend, no longer in a drawdown, and calm enough that fear is no longer
+                  supporting the case? Positions exit when enough of those line up.
+                </p>
+                <p className="lp-body">
+                  Alongside that, a volatility-based trailing stop is available as an alternative exit. It ratchets upward
+                  as the price makes new highs and never moves back down, so it protects gains without trying to guess the
+                  top. Wider settings tolerate more noise; tighter ones lock in profit sooner.
+                </p>
+              </section>
+            </Reveal>
 
-        <section style={{ display: 'flex', flexDirection: 'column', gap: spacing['2xl'] }}>
-          <SectionTitle>What it cannot tell you</SectionTitle>
-          <Para>
-            A backtest describes the past. The research above documents tendencies that are modest, uneven and have
-            weakened in some periods. Anyone who tests many variants on the same history will find some that look
-            excellent by chance, and we have no way to prove we are exempt from that risk. Treat past results as
-            evidence that the approach is sensible, not as a forecast.
-          </Para>
-          <Para>
-            Enhanced DCA also does not know your goals, tax position, time horizon or risk tolerance, and it does not
-            assess whether a company is sound. A cheap-looking asset can be cheap for good reason. Nothing on this
-            site is investment advice.
-          </Para>
-          <Card>
-            <Label>Context and cautions</Label>
-            <RefList refs={[...FOUNDATION_REFS, ...CAUTION_REFS]} />
-          </Card>
-        </section>
+            <Reveal>
+              <section id="cadence" className="lp-anchor lp-stack" style={{ gap: '18px' }}>
+                <Eyebrow>05 · Cadence</Eyebrow>
+                <h2 className="lp-h2">Different cadences, different settings</h2>
+                <p className="lp-body">
+                  Daily, weekly and monthly signals share the same logic, but the sensitivity of the underlying measures is
+                  tuned for each cadence. A daily signal needs to react to short moves; a monthly one should look through
+                  them. The settings are not published, and they are not interchangeable across cadences.
+                </p>
+              </section>
+            </Reveal>
 
-        <footer style={{ paddingTop: spacing['4xl'], borderTop: `1px solid ${colors.border}` }}>
-          <p style={{ fontSize: typography.fontSize.sm, color: colors.text3, margin: 0, lineHeight: 1.6 }}>
-            Citations are given as pointers to the underlying literature. They motivate the ideas above; they do not
-            validate this specific model.
-          </p>
-        </footer>
-      </div>
+            <Reveal>
+              <section id="measurement" className="lp-anchor lp-stack" style={{ gap: '18px' }}>
+                <Eyebrow>06 · Testing</Eyebrow>
+                <h2 className="lp-h2">How results are measured</h2>
+                <div className="lp-grid2">
+                  {MEASURES.map((m, i) => (
+                    <div key={m.title} className="lp-tile lp-tile-surface" style={{ gridColumn: i === MEASURES.length - 1 ? '1 / -1' : undefined }}>
+                      <div className="lp-num" style={{ marginBottom: '10px' }}>{String(i + 1).padStart(2, '0')}</div>
+                      <h3 className="lp-h3" style={{ marginBottom: '8px' }}>{m.title}</h3>
+                      <p className="lp-body" style={{ fontSize: '14px' }}>{m.body}</p>
+                    </div>
+                  ))}
+                </div>
+              </section>
+            </Reveal>
+
+            <Reveal>
+              <section id="limits" className="lp-anchor lp-stack" style={{ gap: '18px' }}>
+                <Eyebrow>07 · Limits</Eyebrow>
+                <h2 className="lp-h2">What it cannot tell you</h2>
+                <p className="lp-body">
+                  A backtest describes the past. The research above documents tendencies that are modest, uneven and have
+                  weakened in some periods. Anyone who tests many variants on the same history will find some that look
+                  excellent by chance, and we have no way to prove we are exempt from that risk. Treat past results as
+                  evidence that the approach is sensible, not as a forecast.
+                </p>
+                <p className="lp-body">
+                  Enhanced DCA also does not know your goals, tax position, time horizon or risk tolerance, and it does not
+                  assess whether a company is sound. A cheap-looking asset can be cheap for good reason. Nothing on this
+                  site is investment advice.
+                </p>
+                <div className="lp-panel lp-stack" style={{ gap: '16px', marginTop: '8px' }}>
+                  <div className="lp-eyebrow" style={{ margin: 0 }}>Context and cautions</div>
+                  <RefList refs={[...FOUNDATION_REFS, ...CAUTION_REFS]} />
+                </div>
+                <p className="lp-small">
+                  Citations are given as pointers to the underlying literature. They motivate the ideas above; they do not
+                  validate this specific model.
+                </p>
+              </section>
+            </Reveal>
+          </div>
+        </div>
+      </section>
+
+      <CtaBand
+        title="See the model on real assets"
+        body="Every asset page shows Enhanced DCA against standard DCA, and the score criteria explain how assets are ranked."
+        actions={[
+          { label: 'Score criteria', href: '/score-criteria', primary: true },
+          { label: 'See pricing', href: '/pricing' },
+        ]}
+      />
+
+      <MarketingFooter />
     </div>
   )
 }

@@ -1,6 +1,9 @@
 import { Metadata } from 'next';
-import { colors, spacing, typography } from '@/lib/designSystem';
+import Link from 'next/link';
+import { colors } from '@/lib/designSystem';
+import { Reveal } from '@/components/home/Motion';
 import { ContactForm } from '@/components/support/ContactForm';
+import { FaqList, MarketingFooter, MarketingStyles, PageHero } from '@/components/marketing/MarketingKit';
 
 export const metadata: Metadata = {
   title: 'Support | mlln.ai',
@@ -8,14 +11,6 @@ export const metadata: Metadata = {
 };
 
 export const dynamic = 'force-static';
-
-const listStyle = {
-  margin: 0,
-  paddingLeft: '20px',
-  display: 'flex',
-  flexDirection: 'column',
-  gap: spacing.md,
-} as const;
 
 interface FAQItem {
   q: string;
@@ -65,79 +60,84 @@ const FAQS: FAQItem[] = [
   },
 ];
 
+const TOPICS = [
+  {
+    title: 'How the model works',
+    desc: 'The ideas behind Enhanced DCA, the research it draws on, and its limits.',
+    href: '/methodology',
+    cta: 'Read the methodology',
+  },
+  {
+    title: 'Plans and billing',
+    desc: 'What each plan includes, how billing renews, and how to upgrade or cancel.',
+    href: '/pricing',
+    cta: 'Compare plans',
+  },
+  {
+    title: 'Something else?',
+    desc: 'If your question is not covered below, send us a message and we will reply by email.',
+    href: '#contact',
+    cta: 'Contact us',
+  },
+];
+
 export default function SupportPage() {
   return (
-    <div style={{ minHeight: '100vh', background: colors.bg }}>
-      <div
-        style={{
-          maxWidth: '820px',
-          marginLeft: 'auto',
-          marginRight: 'auto',
-          padding: `${spacing['5xl']} ${spacing['4xl']}`,
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '32px',
-        }}
-      >
-        <header style={{ display: 'flex', flexDirection: 'column', gap: spacing.lg }}>
-          <h1 style={{ fontSize: '32px', fontWeight: 500, color: colors.text, margin: 0 }}>Support</h1>
-          <p style={{ fontSize: typography.fontSize.lg, color: colors.text3, margin: 0 }}>
-            Answers to common questions and contact us
-          </p>
-        </header>
+    <div style={{ minHeight: '100vh', background: colors.bg, color: colors.text, fontFamily: 'var(--font-dm-sans), DM Sans, sans-serif' }}>
+      <MarketingStyles />
 
-        {/* FAQ Section */}
-        <section style={{ display: 'flex', flexDirection: 'column', gap: spacing.xl }}>
-          <h2 style={{ fontSize: typography.fontSize['5xl'], fontWeight: 500, color: colors.text, margin: 0 }}>
-            Frequently asked questions
-          </h2>
+      <PageHero eyebrow="Support" title="How can we help?" lead="Answers to common questions and contact us" />
 
-          <div
-            style={{
-              display: 'flex',
-              flexDirection: 'column',
-              gap: spacing.lg,
-              fontSize: '14px',
-              lineHeight: 1.7,
-              color: colors.text2,
-            }}
-          >
-            {FAQS.map((faq, idx) => (
-              <div key={idx}>
-                <div style={{ fontWeight: 600, color: colors.text, marginBottom: spacing.sm }}>
-                  {faq.q}
-                </div>
-                <div>{faq.a}</div>
-              </div>
-            ))}
-          </div>
-        </section>
+      {/* Topic shortcuts */}
+      <section className="lp-wrap" style={{ paddingTop: '24px', paddingBottom: '24px' }}>
+        <div className="lp-grid3">
+          {TOPICS.map((t, i) => (
+            <Reveal key={t.title} delay={i * 0.08}>
+              <Link href={t.href} className="lp-tile lp-card" style={{ display: 'flex', flexDirection: 'column', gap: '12px', textDecoration: 'none', color: 'inherit' }}>
+                <h2 className="lp-h3">{t.title}</h2>
+                <p className="lp-body" style={{ fontSize: '14px', flex: 1 }}>{t.desc}</p>
+                <span className="lp-text-link" style={{ marginTop: '6px' }}>{t.cta} →</span>
+              </Link>
+            </Reveal>
+          ))}
+        </div>
+      </section>
 
-        {/* Contact Form Section */}
-        <section style={{ display: 'flex', flexDirection: 'column', gap: spacing.xl }}>
-          <h2 style={{ fontSize: typography.fontSize['5xl'], fontWeight: 500, color: colors.text, margin: 0 }}>
-            Get in touch
-          </h2>
+      {/* FAQ */}
+      <section className="lp-section">
+        <div className="lp-wrap" style={{ maxWidth: '820px' }}>
+          <Reveal>
+            <div className="lp-eyebrow">Frequently asked questions</div>
+            <h2 className="lp-h2">Answers to common questions</h2>
+          </Reveal>
+          <Reveal delay={0.08}>
+            <div style={{ marginTop: '28px' }}>
+              <FaqList items={FAQS} />
+            </div>
+          </Reveal>
+        </div>
+      </section>
 
-          <div
-            style={{
-              background: 'var(--surface)',
-              border: '1px solid var(--border)',
-              borderRadius: '12px',
-              padding: spacing.lg,
-            }}
-          >
-            <ContactForm />
-          </div>
+      {/* Contact */}
+      <section id="contact" className="lp-section lp-section-band lp-anchor">
+        <div className="lp-wrap lp-two">
+          <Reveal>
+            <div className="lp-eyebrow">Get in touch</div>
+            <h2 className="lp-h2">Send us a message</h2>
+            <p className="lp-body" style={{ marginTop: '18px', fontSize: '15px' }}>
+              Tell us what you need and we will reply by email. You can also write to us directly at{' '}
+              <a href="mailto:support@mlln.ai" className="lp-text-link">support@mlln.ai</a>.
+            </p>
+          </Reveal>
+          <Reveal delay={0.1}>
+            <div className="lp-panel">
+              <ContactForm />
+            </div>
+          </Reveal>
+        </div>
+      </section>
 
-          <p style={{ fontSize: '13px', color: colors.text3, margin: 0 }}>
-            You can also reach us at{' '}
-            <a href="mailto:support@mlln.ai" style={{ color: 'var(--teal)', textDecoration: 'none' }}>
-              support@mlln.ai
-            </a>
-          </p>
-        </section>
-      </div>
+      <MarketingFooter />
     </div>
   );
 }
