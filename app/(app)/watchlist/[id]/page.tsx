@@ -11,8 +11,8 @@ export function generateStaticParams() {
   return WATCHLIST_CONFIGS.map(w => ({ id: w.id }))
 }
 
-export async function generateMetadata({ params }: { params: { id: string } }): Promise<Metadata> {
-  const config = getWatchlistConfig(params.id)
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
+  const config = getWatchlistConfig((await params).id)
   if (!config) return {}
   return {
     title: `${config.name} | mlln.ai`,
@@ -20,11 +20,12 @@ export async function generateMetadata({ params }: { params: { id: string } }): 
   }
 }
 
-export default async function WatchlistDetailPage({ params }: { params: { id: string } }) {
-  const config = getWatchlistConfig(params.id)
+export default async function WatchlistDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params
+  const config = getWatchlistConfig(id)
   if (!config) notFound()
 
-  const data = await getWatchlist(params.id)
-  const maxMonths = (params.id === 'ai' || params.id === 'etfs' || params.id === 'defence') ? 10 : undefined
+  const data = await getWatchlist(id)
+  const maxMonths = (id === 'ai' || id === 'etfs' || id === 'defence') ? 10 : undefined
   return <WatchlistView data={data} maxMonths={maxMonths} />
 }
