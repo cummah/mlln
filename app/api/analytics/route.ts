@@ -35,7 +35,7 @@ export async function POST(request: Request) {
       });
     }
 
-    const supabase = createClient();
+    const supabase = await createClient();
     let authUserId: string | undefined;
 
     if (!userId) {
@@ -48,15 +48,15 @@ export async function POST(request: Request) {
     }
 
     const cookieHeader = request.headers.get('cookie');
-    const hasConsent = getConsentFromCookie(cookieHeader);
+    const hasConsent = getConsentFromCookie(cookieHeader ?? undefined);
 
     if (authUserId || hasConsent) {
       const serviceClient = getSupabaseClient();
-      const { error } = await serviceClient.from('analytics_events').insert({
+      const { error } = await serviceClient.from('analytics_events').insert([{
         user_id: authUserId || null,
         event,
         properties: properties || {},
-      });
+      }]);
 
       if (error) {
         console.error('[analytics] Failed to insert event:', error);

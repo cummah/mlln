@@ -23,27 +23,12 @@ async function verifyTurnstile(token: string): Promise<boolean> {
   }
 }
 
+// supabase-js has no API for sending arbitrary email, so this always reports "not sent".
+// Messages are still saved to support_messages. Wire up SMTP or an edge function here to deliver them.
 async function sendEmail(email: string, subject: string, message: string): Promise<boolean> {
   const supportEmail = process.env.SUPPORT_EMAIL || 'support@mlln.ai';
-
-  try {
-    const supabase = getSupabaseClient();
-    await supabase.auth.admin.sendEmail({
-      email: supportEmail,
-      subject: `Support: ${subject}`,
-      html: `
-        <p><strong>From:</strong> ${email}</p>
-        <p><strong>Subject:</strong> ${subject}</p>
-        <hr />
-        <p>${message.replace(/\n/g, '<br />')}</p>
-      `,
-    });
-
-    return true;
-  } catch (err) {
-    console.error('[support] Email send failed:', err);
-    return false;
-  }
+  console.warn('[support] Email delivery is not configured; message saved only.', { supportEmail, email, subject, message: message.slice(0, 200) });
+  return false;
 }
 
 export async function POST(request: Request) {
@@ -88,11 +73,11 @@ export async function POST(request: Request) {
     }
 
     const supabase = getSupabaseClient();
-    const { error } = await supabase.from('support_messages').insert({
+    const { error } = await supabase.from('support_messages').insert([{
       email,
       subject,
       message,
-    });
+    }]);
 
     if (error) {
       console.error('[support] Database insert failed:', error);
