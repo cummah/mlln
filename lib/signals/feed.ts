@@ -19,6 +19,19 @@ const DAILY_COLS = BASE_COLS + ',weekly_align_days,monthly_align_days,atr_breach
 const r2 = (v: any): number | null => (v === null || v === undefined ? null : Math.round(Number(v) * 100) / 100)
 const r4 = (v: any): number | null => (v === null || v === undefined ? null : Math.round(Number(v) * 10000) / 10000)
 
+/**
+ * Retries a read that fails with a transient error (Supabase statement timeouts happen when several
+ * pages build at once). Still returns the last error after the final attempt, so a failed read is never cached as data.
+ */
+async function withRetry<T>(run: () => PromiseLike<{ data: T; error: any }>, attempts = 3): Promise<{ data: T; error: any }> {
+  let result = await run()
+  for (let i = 1; result.error && i < attempts; i++) {
+    await new Promise(resolve => setTimeout(resolve, 1000 * 2 ** i))
+    result = await run()
+  }
+  return result
+}
+
 async function readAll<T>(label: string, build: (from: number, to: number) => PromiseLike<{ data: any; error: any }>): Promise<T[]> {
   const out: T[] = []
   for (let page = 0; ; page++) {
@@ -71,10 +84,10 @@ export async function getFeed(freq: Freq): Promise<FeedPayload> {
       slices.slice(start, start + PARALLEL).map(async ([from, to]) => {
         const out: any[] = []
         for (let page = 0; ; page++) {
-          const { data, error } = await db.from('signal_feed').select(cols)
+          const { data, error } = await withRetry(() => db.from('signal_feed').select(cols)
             .eq('freq', freq).gte('signal_date', from).lte('signal_date', to).gte('mult', cfg.minMult)
             .order('signal_date', { ascending: false }).order('ticker')
-            .range(page * PAGE, page * PAGE + PAGE - 1)
+            .range(page * PAGE, page * PAGE + PAGE - 1))
           if (error) throw new Error(`signal_feed ${from}..${to}: ${error.message}`)
           for (const row of data ?? []) out.push(row)
           if (!data || data.length < PAGE) break
