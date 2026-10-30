@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import type { UserTier } from '@/types'
+import { AddToWatchlistButton } from './AddToWatchlistButton'
 
 interface EnhancedDCACtaProps {
   ticker: string
@@ -19,6 +20,7 @@ export function EnhancedDCACTA({ ticker, name, monthlyAlpha5y, dca_suitability_s
 
   const isFree = tier === 0
   const isBasic = tier === 1
+  const canAddToWatchlist = tier >= 2
 
   // High-quality asset where eDCA underperformed
   if (isHighQuality && !edcaWins) {
@@ -51,34 +53,38 @@ export function EnhancedDCACTA({ ticker, name, monthlyAlpha5y, dca_suitability_s
             {ticker} scores high for DCA suitability, but Enhanced DCA lagged standard over the past 5 years. Markets are cyclical — volatility strategies don't always win.
           </p>
 
-          <Link
-            href={isFree ? '/signup' : isBasic ? '/pricing' : '/portfolio'}
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              padding: '12px 22px',
-              borderRadius: '10px',
-              fontSize: '14px',
-              fontWeight: '600',
-              textDecoration: 'none',
-              background: 'var(--teal)',
-              color: 'var(--bg)',
-              transition: 'background 0.2s, box-shadow 0.2s, transform 0.2s',
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.background = 'var(--teal-strong)'
-              e.currentTarget.style.boxShadow = 'var(--shadow-glow-teal)'
-              e.currentTarget.style.transform = 'translateY(-2px)'
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.background = 'var(--teal)'
-              e.currentTarget.style.boxShadow = 'none'
-              e.currentTarget.style.transform = 'translateY(0)'
-            }}
-          >
-            {isFree ? 'Get Started' : isBasic ? 'Explore More Assets' : 'View Your Watchlist'}
-          </Link>
+          {canAddToWatchlist ? (
+            <AddToWatchlistButton ticker={ticker} />
+          ) : (
+            <Link
+              href={isFree ? '/signup' : isBasic ? '/pricing' : '/portfolio'}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                padding: '12px 22px',
+                borderRadius: '10px',
+                fontSize: '14px',
+                fontWeight: '600',
+                textDecoration: 'none',
+                background: 'var(--teal)',
+                color: 'var(--bg)',
+                transition: 'background 0.2s, box-shadow 0.2s, transform 0.2s',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = 'var(--teal-strong)'
+                e.currentTarget.style.boxShadow = 'var(--shadow-glow-teal)'
+                e.currentTarget.style.transform = 'translateY(-2px)'
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = 'var(--teal)'
+                e.currentTarget.style.boxShadow = 'none'
+                e.currentTarget.style.transform = 'translateY(0)'
+              }}
+            >
+              {isFree ? 'Get Started' : isBasic ? 'Explore More Assets' : 'View Your Watchlist'}
+            </Link>
+          )}
         </div>
       </div>
     )
@@ -121,34 +127,38 @@ export function EnhancedDCACTA({ ticker, name, monthlyAlpha5y, dca_suitability_s
             )}
           </p>
 
-          <Link
-            href={isFree ? '/signup' : isBasic ? '/pricing' : '/portfolio'}
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              padding: '12px 22px',
-              borderRadius: '10px',
-              fontSize: '14px',
-              fontWeight: '600',
-              textDecoration: 'none',
-              background: 'var(--teal)',
-              color: 'var(--bg)',
-              transition: 'background 0.2s, box-shadow 0.2s, transform 0.2s',
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.background = 'var(--teal-strong)'
-              e.currentTarget.style.boxShadow = 'var(--shadow-glow-teal)'
-              e.currentTarget.style.transform = 'translateY(-2px)'
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.background = 'var(--teal)'
-              e.currentTarget.style.boxShadow = 'none'
-              e.currentTarget.style.transform = 'translateY(0)'
-            }}
-          >
-            Enhance your DCA now »
-          </Link>
+          {canAddToWatchlist ? (
+            <AddToWatchlistButton ticker={ticker} />
+          ) : (
+            <Link
+              href={isFree ? '/signup' : isBasic ? '/pricing' : '/portfolio'}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                padding: '12px 22px',
+                borderRadius: '10px',
+                fontSize: '14px',
+                fontWeight: '600',
+                textDecoration: 'none',
+                background: 'var(--teal)',
+                color: 'var(--bg)',
+                transition: 'background 0.2s, box-shadow 0.2s, transform 0.2s',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = 'var(--teal-strong)'
+                e.currentTarget.style.boxShadow = 'var(--shadow-glow-teal)'
+                e.currentTarget.style.transform = 'translateY(-2px)'
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = 'var(--teal)'
+                e.currentTarget.style.boxShadow = 'none'
+                e.currentTarget.style.transform = 'translateY(0)'
+              }}
+            >
+              Enhance your DCA now »
+            </Link>
+          )}
         </div>
       </div>
     )
