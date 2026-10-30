@@ -1,9 +1,10 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, type ReactNode } from 'react'
 import { ATR_MULTIPLIERS, RANGES, type FreqSettings } from '@/lib/signals/config'
 import type { Filters, Strategy } from '@/lib/signals/types'
 import { Card, Chip, Label, RangeRow } from './ui'
+import { actionButton } from './PresetBar'
 
 interface Props {
   settings: FreqSettings
@@ -18,19 +19,16 @@ interface Props {
   strategy: Strategy
   setStrategy: (s: Strategy) => void
   onReset: () => void
-  onSave?: () => void
-  onUpgrade?: () => void
-  isSaving?: boolean
-  userTier?: number
-  saveMessage?: string
+  presetBar: ReactNode
 }
 
 const NA_NOTE = 'Signals with no value for this indicator are hidden only while this is narrowed.'
 
-export function FilterRail({ settings, filters, setFilters, base, setBase, datePreset, setDatePreset, sectors, years, strategy, setStrategy, onReset, onSave, onUpgrade, isSaving, userTier = 0, saveMessage }: Props) {
+export function FilterRail({ settings, filters, setFilters, base, setBase, datePreset, setDatePreset, sectors, years, strategy, setStrategy, onReset, presetBar }: Props) {
   const [sectorsOpen, setSectorsOpen] = useState(false)
   const [moreOpen, setMoreOpen] = useState(false)
   const [sellRulesOpen, setSellRulesOpen] = useState(false)
+  const [savedOpen, setSavedOpen] = useState(true)
   const set = (patch: Partial<Filters>) => setFilters({ ...filters, ...patch })
   const setStrat = (patch: Partial<Strategy>) => setStrategy({ ...strategy, ...patch })
   const toggleSector = (s: string) => set({ sectors: filters.sectors.includes(s) ? filters.sectors.filter(x => x !== s) : [...filters.sectors, s] })
@@ -77,7 +75,7 @@ export function FilterRail({ settings, filters, setFilters, base, setBase, dateP
           onClick={() => setMoreOpen(!moreOpen)}
           style={{ display: 'flex', justifyContent: 'space-between', width: '100%', padding: '12px 14px', background: 'transparent', border: 'none', cursor: 'pointer', fontFamily: 'inherit' }}
         >
-          <span style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', color: 'var(--text-2)' }}>More filters</span>
+          <span style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', color: 'var(--text-2)' }}>Additional</span>
           <span style={{ fontSize: '10px', color: 'var(--text-2)', transform: moreOpen ? 'rotate(180deg)' : 'none' }}>▼</span>
         </button>
         {moreOpen && (
@@ -207,67 +205,26 @@ export function FilterRail({ settings, filters, setFilters, base, setBase, dateP
         )}
       </Card>
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+      <Card pad={0} style={{ overflow: 'hidden' }}>
         <button
-          onClick={onReset}
-          style={{ padding: '8px 10px', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '6px', fontSize: '12px', fontWeight: 600, color: 'var(--text-2)', cursor: 'pointer' }}
+          onClick={() => setSavedOpen(!savedOpen)}
+          style={{ display: 'flex', justifyContent: 'space-between', width: '100%', padding: '12px 14px', background: 'transparent', border: 'none', cursor: 'pointer', fontFamily: 'inherit' }}
         >
-          Reset filters
+          <span style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', color: 'var(--text-2)' }}>My filters</span>
+          <span style={{ fontSize: '10px', color: 'var(--text-2)', transform: savedOpen ? 'rotate(180deg)' : 'none' }}>▼</span>
         </button>
-
-        {userTier >= 2 && onSave ? (
-          <button
-            onClick={onSave}
-            disabled={isSaving}
-            style={{
-              padding: '7px 10px',
-              background: 'var(--teal)',
-              border: '1px solid var(--teal)',
-              borderRadius: '8px',
-              fontSize: '12px',
-              fontWeight: 600,
-              color: '#000',
-              cursor: isSaving ? 'not-allowed' : 'pointer',
-              opacity: isSaving ? 0.7 : 1,
-              transition: 'all 0.15s',
-            }}
-          >
-            {isSaving ? 'Saving...' : 'Save filters'}
-          </button>
-        ) : onUpgrade && userTier < 2 ? (
-          <button
-            onClick={onUpgrade}
-            style={{
-              padding: '7px 10px',
-              background: 'var(--teal)',
-              border: '1px solid var(--teal)',
-              borderRadius: '8px',
-              fontSize: '12px',
-              fontWeight: 600,
-              color: '#000',
-              cursor: 'pointer',
-              transition: 'all 0.15s',
-            }}
-          >
-            Upgrade to save
-          </button>
-        ) : null}
-
-        {saveMessage && (
-          <div style={{
-            padding: '6px 8px',
-            background: 'rgba(0, 196, 167, 0.12)',
-            border: '1px solid var(--teal)',
-            borderRadius: '6px',
-            fontSize: '11px',
-            fontWeight: 600,
-            color: 'var(--teal)',
-            textAlign: 'center',
-          }}>
-            {saveMessage}
+        {savedOpen && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', padding: '0 14px 14px' }}>
+            {presetBar}
+            <button
+              onClick={onReset}
+              style={actionButton}
+            >
+              Reset filters
+            </button>
           </div>
         )}
-      </div>
+      </Card>
     </div>
   )
 }

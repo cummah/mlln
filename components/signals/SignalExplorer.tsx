@@ -1,18 +1,20 @@
 'use client'
 
 import Link from 'next/link'
-import { useDeferredValue, useEffect, useMemo, useState } from 'react'
-import { createClient } from '@/lib/supabase/browser'
+import { useCallback, useDeferredValue, useEffect, useMemo, useState } from 'react'
 import { DEFAULT_FILTERS, DEFAULT_STRATEGY, FREQ_SETTINGS } from '@/lib/signals/config'
 import { daysAgo, dateShort, timeAgo } from '@/lib/signals/format'
 import { applyFilters, cohorts, computeStats, effective, makeSpy } from '@/lib/signals/model'
+import type { PresetState } from '@/lib/signals/presets'
 import type { FeedPayload, Filters, Freq, SigRow, Strategy } from '@/lib/signals/types'
 import { FilterRail } from './FilterRail'
+import { PresetBar } from './PresetBar'
 import { SignalDrawer } from './SignalDrawer'
 import { SignalTable } from './SignalTable'
 import { CohortChart, Results } from './Summary'
 import { sliderCss } from './ui'
 import type { Entitlement } from '@/types'
+import { usePresets } from './usePresets'
 
 const getTabs = (freq: Freq): { key: Freq; label: string }[] => {
   const tabs: { key: Freq; label: string }[] = [
@@ -40,8 +42,6 @@ export function SignalExplorer({ data }: { data: FeedPayload }) {
   const [selected, setSelected] = useState<SigRow | null>(null)
   const [now, setNow] = useState<number | null>(null)
   const [entitlement, setEntitlement] = useState<Entitlement>({ tier: 0, assets: new Set() })
-  const [isSaving, setIsSaving] = useState(false)
-  const [saveMessage, setSaveMessage] = useState('')
 
   useEffect(() => setNow(Date.now()), [])
 
@@ -59,31 +59,6 @@ export function SignalExplorer({ data }: { data: FeedPayload }) {
         setEntitlement({ tier: 0, assets: new Set() })
       })
   }, [])
-
-  // Load saved preferences on mount
-  useEffect(() => {
-    const loadPreferences = async () => {
-      try {
-        const supabase = createClient()
-        const { data: { session } } = await supabase.auth.getSession()
-
-        if (!session?.access_token) return
-
-        const res = await fetch(`/api/user/signal-preferences?freq=${freq}`, {
-          headers: { 'Authorization': `Bearer ${session.access_token}` },
-        })
-        const data = await res.json()
-        if (data.filters && data.strategy) {
-          setFilters(data.filters)
-          setStrategy(data.strategy)
-          setBase(data.strategy.base ?? settings.baseAmount)
-        }
-      } catch (err) {
-        console.error('Failed to load preferences:', err)
-      }
-    }
-    loadPreferences()
-  }, [freq, settings.baseAmount])
 
   const sectors = useMemo(() => Array.from(new Set(data.tickers.map(t => t.sector))).sort(), [data.tickers])
   const years = useMemo(() => Array.from(new Set(data.rows.map(r => Number(r.d.slice(0, 4))))).sort((a, b) => b - a), [data.rows])
@@ -116,47 +91,14 @@ export function SignalExplorer({ data }: { data: FeedPayload }) {
 
   const reset = () => { setFilters(DEFAULT_FILTERS); setDatePreset(null); setBase(settings.baseAmount); setStrategy(DEFAULT_STRATEGY) }
 
-  const savePreferences = async () => {
-    if (entitlement.tier < 2) return
-    setIsSaving(true)
-    setSaveMessage('')
-    try {
-      const supabase = createClient()
-      const { data: { session } } = await supabase.auth.getSession()
-
-      if (!session?.access_token) {
-        console.error('No session token available')
-        setSaveMessage('Failed to save filters')
-        setTimeout(() => setSaveMessage(''), 3000)
-        setIsSaving(false)
-        return
-      }
-
-      const res = await fetch('/api/user/signal-preferences', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${session.access_token}`,
-        },
-        body: JSON.stringify({ freq, filters, strategy: { ...strategy, base } }),
-      })
-      const data = await res.json()
-      if (res.ok) {
-        setSaveMessage('Filters saved')
-        setTimeout(() => setSaveMessage(''), 3000)
-      } else {
-        console.error('Save failed:', res.status, data)
-        setSaveMessage('Failed to save filters')
-        setTimeout(() => setSaveMessage(''), 3000)
-      }
-    } catch (err) {
-      console.error('Failed to save preferences:', err)
-      setSaveMessage('Error saving filters')
-      setTimeout(() => setSaveMessage(''), 3000)
-    } finally {
-      setIsSaving(false)
-    }
-  }
+  const current: PresetState = { filters, strategy, base, datePreset }
+  const applyPreset = useCallback((s: PresetState) => {
+    setFilters(s.filters)
+    setStrategy(s.strategy)
+    setBase(s.base)
+    setDatePreset(s.datePreset)
+  }, [])
+  const presetsApi = usePresets({ freq, current, apply: applyPreset })
 
   const handleUpgradeClick = () => {
     window.location.href = '/#pricing'
@@ -210,7 +152,7 @@ export function SignalExplorer({ data }: { data: FeedPayload }) {
           datePreset={datePreset} setDatePreset={setDatePreset} sectors={sectors} years={years}
           strategy={strategy} setStrategy={setStrategy}
           onReset={reset}
-          onSave={savePreferences} onUpgrade={handleUpgradeClick} isSaving={isSaving} userTier={entitlement.tier} saveMessage={saveMessage}
+          presetBar={freq === 'daily' ? null : <PresetBar api={presetsApi} onUpgrade={handleUpgradeClick} />}
         />
 
         <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr)', gap: '12px', minWidth: 0 }}>
